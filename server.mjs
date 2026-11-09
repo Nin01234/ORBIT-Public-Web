@@ -1,4 +1,4 @@
-import http from "node:http";
+﻿import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -139,6 +139,7 @@ async function api(req,res,url) {
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||"/","http://localhost");
   if(url.pathname==="/healthz"){res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
+  if(url.pathname==="/download"||url.pathname==="/download/windows"){res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Public-Web/releases/latest/download/ORBIT-Setup-1.1.3-x64.exe","Cache-Control":"no-store"}).end();return;}
   const ip=(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").toString().split(",")[0].trim();
   const now=Date.now(),entry=rate.get(ip)||{start:now,count:0};
   if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;rate.set(ip,entry);
@@ -157,3 +158,4 @@ const server=http.createServer(async(req,res)=>{
 });
 const host=process.env.RENDER?"0.0.0.0":"127.0.0.1";
 server.listen(port,host,()=>console.log("ORBIT public-web server listening on "+host+":"+port));
+

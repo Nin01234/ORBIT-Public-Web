@@ -21,3 +21,10 @@
 .discover-submenu .nav-link{min-height:42px!important;height:42px!important;display:flex!important;flex-direction:row!important;justify-content:flex-start!important;padding:8px 12px!important;font-size:12px!important;overflow:visible}
 .search-submit{flex-basis:32px;width:32px;height:32px}
 }
+
+/* Desktop installer download actions */
+.orbit-download-top{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border:1px solid rgba(139,180,255,.34);border-radius:999px;color:#dceaff;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap;background:rgba(54,112,190,.16)}
+.orbit-download-top:hover,.orbit-download-cta:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.orbit-download-cta{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid rgba(255,255,255,.34);color:#fff;background:rgba(255,255,255,.08)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+@media(max-width:800px){.orbit-download-top{display:none}.orbit-download-cta{font-size:12px;padding:10px 12px}}

@@ -954,7 +954,7 @@ function setupEvents(){
     if(e.altKey&&e.key==="ArrowRight"){e.preventDefault();$("#app-forward")?.click();}
   });
   syncAppHistoryButtons();
-  $(".nav-link[data-view]").forEach(b=>b.addEventListener("click",()=>{showView(b.dataset.view);$("#nav-discover-group")?.classList.remove("is-open");$("#discover-submenu-toggle")?.setAttribute("aria-expanded","false");}));
+  $$(".nav-link[data-view]").forEach(b=>b.addEventListener("click",()=>{showView(b.dataset.view);$("#nav-discover-group")?.classList.remove("is-open");$("#discover-submenu-toggle")?.setAttribute("aria-expanded","false");}));
   const discoverGroup=$("#nav-discover-group"),discoverToggle=$("#discover-submenu-toggle");
   discoverToggle?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();const open=discoverGroup.classList.toggle("is-open");discoverToggle.setAttribute("aria-expanded",String(open));});
   document.addEventListener("click",e=>{if(discoverGroup&&!discoverGroup.contains(e.target)){discoverGroup.classList.remove("is-open");discoverToggle?.setAttribute("aria-expanded","false");}});
@@ -1091,4 +1091,6 @@ if('serviceWorker' in navigator && location.protocol==='http:' && location.hostn
  const motion=document.getElementById('setting-motion');if(motion)motion.addEventListener('change',start);
  show(0);start();
 })();
+
+
 
