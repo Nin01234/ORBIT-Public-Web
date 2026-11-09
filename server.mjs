@@ -139,7 +139,14 @@ async function api(req,res,url) {
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||"/","http://localhost");
   if(url.pathname==="/healthz"){res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
-  if(url.pathname==="/download"||url.pathname==="/download/windows"){res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Public-Web/releases/latest/download/ORBIT-Setup-1.1.3-x64.exe","Cache-Control":"no-store"}).end();return;}
+  if(url.pathname==="/download"||url.pathname==="/download/windows"){
+    try{
+      const rr=await fetch("https://api.github.com/repos/Nin01234/ORBIT-Public-Web/releases/latest",{headers:{"Accept":"application/vnd.github+json","User-Agent":"ORBIT-Public-Web"},signal:AbortSignal.timeout(7000)});
+      if(rr.ok){const release=await rr.json();const asset=(release.assets||[]).find(a=>a.name==="ORBIT-Setup-1.1.3-x64.exe");if(asset){res.writeHead(302,{"Location":asset.browser_download_url,"Cache-Control":"no-store"}).end();return;}}
+    }catch(error){console.warn("ORBIT desktop installer lookup:",error.message);}
+    res.writeHead(503,{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store","Retry-After":"300"}).end("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>ORBIT installer</title><body style=\"font:16px system-ui;background:#0b1117;color:#eef4ff;padding:48px;max-width:620px;margin:auto\"><h1>ORBIT for Windows</h1><p>The desktop installer is being prepared for download. Please try again shortly.</p><p><a style=\"color:#9fc4ff\" href=\"/\">Return to ORBIT</a></p></body></html>");
+    return;
+  }
   const ip=(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").toString().split(",")[0].trim();
   const now=Date.now(),entry=rate.get(ip)||{start:now,count:0};
   if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;rate.set(ip,entry);
@@ -158,4 +165,5 @@ const server=http.createServer(async(req,res)=>{
 });
 const host=process.env.RENDER?"0.0.0.0":"127.0.0.1";
 server.listen(port,host,()=>console.log("ORBIT public-web server listening on "+host+":"+port));
+
 
