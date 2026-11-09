@@ -62,9 +62,22 @@ async function api(req,res,url) {
     const key="audius:"+query.toLowerCase(),old=cached(key);if(old)return send(res,200,old,"public, max-age=120");
     const u=new URL("https://api.audius.co/v1/"+(trending?"tracks/trending":"tracks/search"));u.searchParams.set("limit","30");u.searchParams.set("app_name","ORBIT");if(!trending)u.searchParams.set("query",query);
     const payload=await getJson(u,20000);
-    const tracks=(payload.data||[]).filter(t=>t&&t.track_id&&t.is_streamable===true&&t.is_available!==false&&t.is_stream_gated!==true&&t.is_unlisted!==true&&t.is_delete!==true&&t.access?.stream!==false).map(t=>({id:"audius:"+t.track_id,providerId:String(t.track_id),source:"Audius",title:t.title||"Untitled track",artist:t.user?.name||t.user?.handle||"Independent artist",duration:Number(t.duration)||0,genre:t.genre||"",artwork:t.artwork?.["480x480"]||t.artwork?.["150x150"]||"",permalink:t.permalink||"",playbackUrl:"",previewOnly:false,canDownload:false}));
+    const tracks=(payload.data||[]).filter(t=>t&&t.track_id&&t.is_streamable===true&&t.is_available!==false&&t.is_stream_gated!==true&&t.is_unlisted!==true&&t.is_delete!==true&&t.access?.stream!==false).map(t=>({id:"audius:"+t.track_id,providerId:String(t.track_id),source:"Audius",title:t.title||"Untitled track",artist:t.user?.name||t.user?.handle||"Independent artist",duration:Number(t.duration)||0,genre:t.genre||"",artwork:t.artwork?.["480x480"]||t.artwork?.["150x150"]||"",permalink:t.permalink||"",playbackUrl:"",previewOnly:false,canDownload:t.is_downloadable===true&&t.access?.download!==false}));
     const result=p==="/api/music-search"?{tracks,providers:{audius:true,jamendo:false,spotify:false,soundcloud:false,audiomack:false}}:tracks;
     return send(res,200,store(key,result,TTL.music),"public, max-age=120");
+  }
+  if(p==="/api/audius-download") {
+    const id=safeText(url.searchParams.get("id"),16);
+    if(!/^\d{1,16}$/.test(id))return send(res,400,{error:"Invalid track ID"});
+    const meta=await getJson("https://api.audius.co/v1/tracks/"+id+"?app_name=ORBIT",15000);
+    const track=meta.data;
+    if(!track||track.is_downloadable!==true||track.access?.download===false||track.is_download_gated===true)return send(res,403,{error:"The artist has not enabled downloads for this track."});
+    const upstream=await fetch("https://api.audius.co/v1/tracks/"+id+"/download?app_name=ORBIT",{redirect:"follow",headers:{"User-Agent":"ORBIT Public Web/1.0"},signal:AbortSignal.timeout(30000)});
+    if(!upstream.ok||!upstream.body)throw new Error("Audius download unavailable");
+    const target=new URL(upstream.url);if(target.protocol!=="https:")throw new Error("Unsafe download redirect");
+    const filename=(String(track.title||"ORBIT-audio").replace(/[<>:"/\|?*\x00-\x1f]/g," ").trim().slice(0,100)||"ORBIT-audio")+".mp3";
+    res.writeHead(200,{"Content-Type":upstream.headers.get("content-type")||"audio/mpeg","Content-Disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(filename),"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"});
+    const {Readable}=await import("node:stream");Readable.fromWeb(upstream.body).pipe(res);return;
   }
   if(p==="/api/audius-stream") {
     const id=safeText(url.searchParams.get("id"),16);if(!/^\d{1,16}$/.test(id))return send(res,400,{error:"Invalid track ID"});

@@ -428,26 +428,8 @@ function playAudioTrack(id){
     $("#player-fav").classList.toggle("saved",isMusicFav(track.id));
   }).catch(()=>notify("This track could not be streamed. Try another track."));
 }
-async function refreshOfflineMusicQueue(){
-  const response=await fetch("/api/offline-list",{cache:"no-store"});
-  if(!response.ok)throw new Error("Downloads are unavailable.");
-  const items=await response.json();
-  offlineMusicQueue=(Array.isArray(items)?items:[]).filter(x=>String(x.kind||"").toLowerCase()==="audio");
-  return offlineMusicQueue;
-}
-async function playOfflineMusicAt(index){
-  if(!offlineMusicQueue.length){notify("No downloaded music is available.");return;}
-  if(index<0||index>=offlineMusicQueue.length){notify("There are no more downloaded music tracks.");return;}
-  const item=offlineMusicQueue[index];
-  currentOfflineAudioId=String(item.id);currentMusicTrack=null;currentStation=null;currentYoutubeId=null;
-  clearYoutubePlayer();audio.src="/api/offline-file?id="+encodeURIComponent(item.id);
-  try{
-    await audio.play();setPlayer(item.title||"Downloaded music","Saved on this device","Offline music");
-    const art=item.artwork||"";$("#player-art").textContent=art?"":"♫";
-    $("#player-art").style.backgroundImage=art?"url("+JSON.stringify(art)+")":"";
-    $("#player-art").style.backgroundSize="cover";$("#player-fav").textContent="♡";$("#player-fav").classList.remove("saved");
-  }catch{notify("This downloaded music file could not be played.");}
-}
+async function refreshOfflineMusicQueue(){offlineMusicQueue=(await getOfflineItems()).filter(x=>String(x.kind||"").toLowerCase()==="audio").sort((a,b)=>a.savedAt-b.savedAt);return offlineMusicQueue;}
+async function playOfflineMusicAt(index){if(!offlineMusicQueue.length){notify("No downloaded music is available.");return;}if(index<0||index>=offlineMusicQueue.length){notify("There are no more downloaded music tracks.");return;}const item=offlineMusicQueue[index];await playOffline(item.id,"audio",item.title);}
 async function stepMusic(direction){
   if(currentOfflineAudioId || direction>0){
     try{await refreshOfflineMusicQueue();}catch(error){if(currentOfflineAudioId){notify("Could not load your downloaded music list.");return;}}
@@ -646,47 +628,14 @@ function playPodcastEpisode(id){
   clearYoutubePlayer();currentStation=null;currentOfflineAudioId=null;currentMusicTrack=null;audio.src=ep.audio;
   audio.play().then(()=>setPlayer(ep.title,"Podcast episode","Podcast")).catch(()=>notify("This podcast host blocked playback in ORBIT."));
 }
-async function downloadOffline(url,title,kind,artwork,button){
- if(!window.orbitDesktop?.downloadMedia){notify("Offline downloads are available in the ORBIT desktop app.");return false;}
- const original=button?.textContent||"Download";
- if(button){button.disabled=true;button.classList.add("is-downloading");button.setAttribute("aria-busy","true");button.textContent="Downloading…";}
- notify("Downloading "+(title||"media")+"…");
- try{
-  await window.orbitDesktop.downloadMedia({url,title,kind,artwork:artwork||""});
-  notify("Download complete: "+(title||"media"));
-  if(button)button.textContent="Downloaded";
-  return true;
- }catch(error){
-  notify(error?.message||"Download failed. This source may restrict downloads.");
-  if(button)button.textContent=original;
-  return false;
- }finally{
-  if(button){button.disabled=false;button.classList.remove("is-downloading");button.removeAttribute("aria-busy");if(button.textContent==="Downloaded")setTimeout(()=>{if(button.isConnected)button.textContent=original;},2600);}
- }
-}
-async function loadOfflineLibrary(){
-  const host=$("#offline-results");host.innerHTML='<div class="loading-card">Loading saved media…</div>';
-  try{
-    const r=await fetch("/api/offline-list");if(!r.ok)throw new Error();
-    const items=await r.json();
-    host.innerHTML=items.length?items.map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3 title="'+esc(x.title)+'">'+esc(x.title)+'</h3><p>'+esc(x.kind.toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Use the download arrow on supported music, podcast episodes and public-domain films.</div>';
-  }catch{host.innerHTML='<div class="empty-state">Your offline library could not be opened.</div>';}
-}
-function playOffline(id,kind,title){
-  const src="/api/offline-file?id="+encodeURIComponent(id);
-  if(kind==="film"||kind==="video"){
-    const panel=$("#film-player-panel");showView("movies");
-    panel.innerHTML='<video class="offline-video" src="'+src+'" controls autoplay playsinline></video>';
-    panel.scrollIntoView({behavior:"smooth",block:"nearest"});setPlayer(title,"Saved on this device","Offline video");return;
-  }
-  if(String(kind).toLowerCase()==="audio"){
-    currentOfflineAudioId=String(id);clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;
-    refreshOfflineMusicQueue().catch(()=>{});
-    audio.play().then(()=>setPlayer(title,"Saved on this device","Offline music")).catch(()=>notify("This offline file could not be played."));return;
-  }
-  currentOfflineAudioId=null;clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;
-  audio.play().then(()=>setPlayer(title,"Saved on this device","Offline audio")).catch(()=>notify("This offline file could not be played."));
-}
+const ORBIT_OFFLINE_DB="orbit-public-offline",ORBIT_OFFLINE_STORE="media";
+function openOrbitOfflineDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(ORBIT_OFFLINE_DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(ORBIT_OFFLINE_STORE))r.result.createObjectStore(ORBIT_OFFLINE_STORE,{keyPath:"id"});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+async function offlineDBRequest(mode,fn){const db=await openOrbitOfflineDB();return new Promise((resolve,reject)=>{const tx=db.transaction(ORBIT_OFFLINE_STORE,mode),req=fn(tx.objectStore(ORBIT_OFFLINE_STORE));if(req){req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);}tx.oncomplete=()=>{db.close();if(!req)resolve(true);};tx.onerror=()=>{db.close();reject(tx.error);};});}
+async function getOfflineItems(){return (await offlineDBRequest("readonly",s=>s.getAll()))||[];}
+async function getOfflineItem(id){return offlineDBRequest("readonly",s=>s.get(String(id)));}
+async function downloadOffline(url,title,kind,artwork,button){const original=button?.textContent||"Download";if(button){button.disabled=true;button.textContent="Downloading…";}notify("Downloading "+(title||"media")+" to this device.");try{const r=await fetch(url,{mode:"cors",credentials:"omit",cache:"no-store"});if(!r.ok)throw new Error("The source did not allow this download ("+r.status+").");const blob=await r.blob();if(!blob.size)throw new Error("The downloaded file was empty.");const id="offline-"+Date.now()+"-"+Math.random().toString(36).slice(2,9),k=String(kind||"audio").toLowerCase()==="podcast"?"audio":String(kind||"audio").toLowerCase();await offlineDBRequest("readwrite",s=>s.put({id,title:title||"Downloaded media",kind:k,artwork:artwork||"",savedAt:Date.now(),bytes:blob.size,mime:blob.type||"application/octet-stream",blob}));notify("Saved for offline playback: "+(title||"media"));if(button)button.textContent="Downloaded";loadOfflineLibrary();return true;}catch(e){notify(e?.message||"Download failed. This source may block browser downloads.");if(button)button.textContent=original;return false;}finally{if(button){button.disabled=false;if(button.textContent==="Downloaded")setTimeout(()=>{if(button.isConnected)button.textContent=original;},2500);}}}
+async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
+async function playOffline(id,kind,title){try{const item=await getOfflineItem(id);if(!item?.blob)throw Error();const src=URL.createObjectURL(item.blob);if(kind==="film"||kind==="video"){const panel=$("#film-player-panel");showView("movies");panel.innerHTML='<video class="offline-video" src="'+src+'" controls autoplay playsinline></video>';panel.scrollIntoView({behavior:"smooth",block:"nearest"});setPlayer(title,"Saved on this device","Offline video");return;}currentOfflineAudioId=String(id);clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;refreshOfflineMusicQueue().catch(()=>{});await audio.play();setPlayer(title,"Saved on this device","Offline music");}catch{notify("This offline file could not be found or played.");}}
 async function loadBooks(term=""){
   const host=$("#book-results");host.innerHTML='<div class="loading-card">Searching the LibriVox catalogue…</div>';
   try{
@@ -988,11 +937,11 @@ function setupEvents(){
     const yt=e.target.closest("[data-youtube]");if(yt){playYouTubeVideo(yt.dataset.youtube,yt.dataset.title,yt.dataset.artist);return;}
     const podcast=e.target.closest("[data-podcast]");if(podcast){loadPodcastEpisodes(podcast.dataset.podcast,podcast.dataset.title);return;}
     const podcastPlay=e.target.closest("[data-podcast-play]");if(podcastPlay){playPodcastEpisode(podcastPlay.dataset.podcastPlay);return;}
-    const downloadTrack=e.target.closest("[data-download-track]");if(downloadTrack){const track=musicTrackCache.get(String(downloadTrack.dataset.downloadTrack));if(track&&track.source==="Audius")downloadOffline("https://api.audius.co/v1/tracks/"+encodeURIComponent(track.providerId||track.id.replace(/^audius:/,""))+"/stream?app_name=ORBIT",track.title,"audio",track.artwork,downloadTrack);else notify("Offline download is not enabled by this provider.");return;}
+    const downloadTrack=e.target.closest("[data-download-track]");if(downloadTrack){const track=musicTrackCache.get(String(downloadTrack.dataset.downloadTrack));if(track&&track.source==="Audius"&&track.canDownload){const id=encodeURIComponent(track.providerId||track.id.replace(/^audius:/,""));downloadOffline("/api/audius-download?id="+id,track.title,"audio",track.artwork,downloadTrack);}else notify("The artist has not enabled downloads for this track.");return;}
     const downloadUrl=e.target.closest("[data-download-url]");if(downloadUrl){downloadOffline(downloadUrl.dataset.downloadUrl,downloadUrl.dataset.downloadTitle,downloadUrl.dataset.downloadKind,"",downloadUrl);return;}
     const downloadFilm=e.target.closest("[data-download-film]");if(downloadFilm){fetch("/api/film-download-url?id="+encodeURIComponent(downloadFilm.dataset.downloadFilm)).then(r=>{if(!r.ok)throw new Error("No downloadable file listed");return r.json();}).then(x=>downloadOffline(x.url,x.title,"film","",downloadFilm)).catch(()=>notify("This archive item has no downloadable film file."));return;}
     const offlinePlay=e.target.closest("[data-offline-play]");if(offlinePlay){playOffline(offlinePlay.dataset.offlinePlay,offlinePlay.dataset.offlineKind,offlinePlay.dataset.offlineTitle);return;}
-    const offlineDelete=e.target.closest("[data-offline-delete]");if(offlineDelete){window.orbitDesktop?.deleteOffline(offlineDelete.dataset.offlineDelete).then(loadOfflineLibrary).catch(()=>notify("Could not remove this download."));return;}
+    const offlineDelete=e.target.closest("[data-offline-delete]");if(offlineDelete){if(window.orbitDesktop?.deleteOffline){window.orbitDesktop.deleteOffline(offlineDelete.dataset.offlineDelete).then(loadOfflineLibrary).catch(()=>notify("Could not remove this download."));}else{offlineDBRequest("readwrite",s=>s.delete(String(offlineDelete.dataset.offlineDelete))).then(loadOfflineLibrary).catch(()=>notify("Could not remove this download."));}return;}
     const prev=e.target.closest("[data-preview]");if(prev){radioPlayToken++;radioPlayback=null;currentStation=null;audio.src=prev.dataset.preview;audio.play().then(()=>setPlayer(prev.dataset.title,"Music preview / iTunes","Preview")).catch(()=>notify("Preview unavailable."));return;}
     const video=e.target.closest("[data-video]");if(video){window.open(video.dataset.video,"_blank","noopener");return;}
     const open=e.target.closest("[data-open]");if(open){window.open(open.dataset.open,"_blank","noopener");return;}
