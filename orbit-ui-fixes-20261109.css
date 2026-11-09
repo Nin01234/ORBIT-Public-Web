@@ -1,0 +1,43 @@
+
+/* Accessible video actions in both themes */
+  appearance:none;border:1px solid #486258;background:#263b34;color:#f5c58d;
+  border-radius:8px;padding:11px 16px;font-weight:650;font-size:12px;line-height:1.25;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);transition:background .18s,border-color .18s,transform .18s;
+}
+.globe-controls{position:absolute;z-index:4;top:14px;right:14px;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 28px)}
+.globe-controls button{appearance:none;min-width:34px;min-height:34px;padding:7px 10px;border:1px solid #547166;border-radius:8px;background:rgba(15,29,29,.92);color:#f3d2a8;font-size:11px;font-weight:650;cursor:pointer;backdrop-filter:blur(8px)}
+.globe-controls button:hover{background:#345447;border-color:#a4c3b1;color:#fff}
+.globe-controls button[aria-pressed=true]{background:#456c54;border-color:#c2d8c7;color:#fff}
+.globe-controls button:focus-visible{outline:3px solid #e5ad69;outline-offset:3px}
+.globe-stage{touch-action:pan-y}
+#globeViz canvas{display:block;touch-action:pan-y}
+.globe-hint{z-index:3;pointer-events:none;text-shadow:0 1px 4px #000}
+@media(max-width:520px){.globe-controls{top:9px;right:9px;gap:5px}.globe-controls button{min-height:32px;padding:6px 8px;font-size:10px}.globe-hint{max-width:75%;font-size:10px}}
+
+/* Strong dark-theme override for the Downloads page video actions */
+  background:#263b34!important;
+  background-color:#263b34!important;
+  color:#ffe0ad!important;
+  border:1px solid #83a994!important;
+  text-shadow:none!important;
+  opacity:1!important;
+}
+  background:#3b604f!important;
+  background-color:#3b604f!important;
+  color:#ffffff!important;
+  border-color:#c0d9c8!important;
+}
+  background:#263b34!important;color:#c7d7ce!important;opacity:.72!important;
+}
+/* Radio globe: show only the map, without overlays or control buttons */
+.globe-map-only{display:block;width:100%;margin:0;padding:0}
+.globe-map-only .globe-stage{display:block;width:100%;min-height:490px;height:490px;margin:0;border-radius:10px;overflow:hidden}
+.globe-map-only #globeViz{width:100%;height:490px}
+.globe-map-only .globe-controls,.globe-map-only .globe-hint{display:none!important}
+@media(max-width:800px){.globe-map-only .globe-stage{min-height:420px;height:420px}.globe-map-only #globeViz{height:420px}}
+
+/* Unified music provider controls */
+.music-provider-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;align-items:center}
+#music-provider-status{max-width:100%;font-size:12px;line-height:1.5;text-align:right}
+.music-audio-card .media-actions>small{display:inline-flex;align-items:center;gap:5px;min-height:20px}
+@media(max-width:700px){#music-provider-status{display:block;text-align:left;margin-top:8px}.music-provider-row{gap:6px}}

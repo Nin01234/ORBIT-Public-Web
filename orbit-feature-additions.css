@@ -1,0 +1,423 @@
+.player-center{display:flex;flex-direction:column;gap:5px;min-width:0}.track-progress{display:flex;align-items:center;gap:8px;font-size:9px;color:var(--muted)}.track-progress input{width:100%;accent-color:var(--lime)}.global-subnav,.live-links{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.global-subnav button,.live-links a{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);text-decoration:none;font-size:12px}.profile-backdrop{display:none;position:fixed;inset:0;z-index:100;background:#000b;place-items:center;padding:20px}.profile-backdrop.visible{display:grid}.profile-dialog{position:relative;width:min(440px,100%);padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}.profile-dialog label{display:block;margin:14px 0;font-size:12px}.profile-dialog input,.profile-dialog textarea{display:block;width:100%;margin-top:7px;padding:10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px}.profile-dialog textarea{min-height:70px}.profile-close{float:right}.profile-image{width:82px;height:82px;object-fit:cover;border-radius:50%;display:none}.page-footer{display:none!important}@media(max-width:850px){.track-progress{display:none}.player-center{grid-column:2}.player-controls{gap:5px}}
+/* Discover refresh */
+#view-discover .hero{position:relative;overflow:hidden;border:1px solid rgba(196,240,106,.18);border-radius:20px;background:radial-gradient(circle at 78% 35%,rgba(85,151,121,.24),transparent 38%),linear-gradient(125deg,#14251f 0%,#101820 55%,#17242b 100%);box-shadow:0 24px 70px rgba(0,0,0,.22)}
+#view-discover .hero:after{content:"";position:absolute;inset:auto -10% -65% 30%;height:90%;background:radial-gradient(ellipse,rgba(196,240,106,.12),transparent 65%);pointer-events:none}
+#view-discover .hero h1{letter-spacing:-.055em;text-wrap:balance}
+#view-discover .hero p{max-width:440px;line-height:1.8;color:#b9c9c1}
+#view-discover .hero .button{border-radius:999px;padding:13px 20px;box-shadow:0 8px 28px rgba(196,240,106,.16)}
+#view-discover .station-card,#view-discover .media-card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+#view-discover .station-card:hover,#view-discover .media-card:hover{transform:translateY(-5px);border-color:rgba(196,240,106,.42);box-shadow:0 16px 36px rgba(0,0,0,.22)}
+#view-discover .section-heading{display:flex;align-items:center;justify-content:space-between;margin:34px 0 16px}
+#view-discover .section-heading h2{font-size:clamp(20px,2vw,26px);letter-spacing:-.03em}
+#view-discover .station-art{box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+/* In-app movie trailer shelf */
+.orbit-trailer-section{margin:22px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.orbit-trailer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.orbit-trailer-card{overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.orbit-trailer-card>img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#080b10}
+.orbit-trailer-card>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px}
+.orbit-trailer-card strong{font-size:12px;line-height:1.4}
+.orbit-trailer-card button{flex-shrink:0;padding:8px 11px;border:0;border-radius:8px;background:var(--lime);color:#101510;font-weight:700;font-size:11px;cursor:pointer}
+.orbit-trailer-player{width:100%;max-width:900px;margin:16px auto 0;aspect-ratio:16/9;background:#05070a;border-radius:12px;overflow:hidden}
+.orbit-trailer-player:empty{display:none}
+.orbit-trailer-player iframe{display:block;width:100%;height:100%;border:0}
+@media(max-width:600px){.orbit-trailer-card>div{align-items:flex-start;flex-direction:column}.orbit-trailer-card button{width:100%}}
+@keyframes orbitGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(196,240,106,.12))}50%{filter:drop-shadow(0 0 25px rgba(196,240,106,.32))}}
+#view-discover .planet{animation:orbitGlow 5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#view-discover .planet{animation:none}#view-discover .station-card,#view-discover .media-card{transition:none}}
+
+.global-live-nav[hidden]{display:none!important}
+.global-tv-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,220px) minmax(140px,190px);gap:10px;margin:18px 0}
+.global-tv-toolbar input,.global-tv-toolbar select{min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
+.global-tv-layout{display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:18px;align-items:start}
+.global-tv-results{display:grid;gap:8px;max-height:620px;overflow:auto;padding-right:4px}
+.global-tv-channel{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);text-align:left;cursor:pointer}
+.global-tv-channel:hover,.global-tv-channel.active{border-color:var(--lime);background:var(--panel-2)}
+.global-tv-channel img{width:46px;height:34px;object-fit:contain;border-radius:5px;background:#fff}
+.global-tv-channel span{display:grid;gap:3px;min-width:0}.global-tv-channel b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.global-tv-channel small{font-size:10px;color:var(--muted)}
+.global-tv-screen{position:sticky;top:16px;min-width:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#05080b}
+.global-tv-screen video{display:block;width:100%;max-height:65vh;aspect-ratio:16/9;background:#000}
+.global-tv-status{padding:12px 14px;color:#cbd5d0;font-size:12px}
+@media(max-width:850px){.global-tv-toolbar{grid-template-columns:1fr}.global-tv-layout{grid-template-columns:1fr}.global-tv-screen{position:static;grid-row:1}}
+
+/* ORBIT accessible light theme and transport polish */
+html[data-theme="light"]{
+ --bg:#f5f7f6;--panel:#ffffff;--panel2:#e9efec;--line:#cbd6d0;
+ --ink:#17231d;--muted:#53635b;--shadow:#c5d0c9;
+}
+html[data-theme="light"] body,html[data-theme="light"] .main-area{color:var(--ink)}
+html[data-theme="light"] .page-intro h1,html[data-theme="light"] h1,html[data-theme="light"] h2,html[data-theme="light"] h3,
+html[data-theme="light"] .media-card h3,html[data-theme="light"] .station-card h3,
+html[data-theme="light"] .setting-row b,html[data-theme="light"] .track-meta b{color:#17231d}
+html[data-theme="light"] p,html[data-theme="light"] small,html[data-theme="light"] .media-card p,
+html[data-theme="light"] .station-card p,html[data-theme="light"] .setting-row small{color:#53635b}
+html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea{
+ background:#fff!important;color:#17231d!important;border-color:#bdcbc3!important;
+}
+html[data-theme="light"] input::placeholder,html[data-theme="light"] textarea::placeholder{color:#66766e!important;opacity:1}
+html[data-theme="light"] .station-card,html[data-theme="light"] .media-card,html[data-theme="light"] .settings-card,
+html[data-theme="light"] .station-panel,html[data-theme="light"] .global-tv-channel{background:#fff;border-color:#d2ddd6;color:#17231d}
+html[data-theme="light"] .nav-link{color:#42534a}
+html[data-theme="light"] .nav-link.active{color:#18251d}
+html[data-theme="light"] .control-button{color:#33463b}
+html[data-theme="light"] .track-progress{color:#53635b}
+html[data-theme="light"] .global-tv-channel small{color:#53635b}
+#track-seek{cursor:pointer;min-width:80px;accent-color:var(--lime)}
+.player-controls .control-button{min-width:30px;padding:6px 4px;font-size:12px;font-weight:650}
+.player-controls #seek-back,.player-controls #seek-forward{font-size:10px;white-space:nowrap}
+@media(max-width:850px){.player-controls .control-button{min-width:25px;padding:4px 2px}.player-controls #seek-back,.player-controls #seek-forward{font-size:9px}}
+
+.global-tv-channel:disabled{opacity:.58;cursor:not-allowed;border-style:dashed}
+
+/* Compact, balanced transport layout */
+.player-bar{grid-template-columns:minmax(0,1fr) 270px minmax(0,1fr)}
+.player-controls{gap:6px}
+.player-controls .control-button{min-width:28px;padding:5px 2px;font-size:10px}
+.player-controls #seek-back,.player-controls #seek-forward{min-width:30px;font-size:10px}
+@media(max-width:850px){
+ .player-bar{grid-template-columns:minmax(0,1fr) 220px}
+ .player-center{grid-column:2}
+ .player-controls{gap:3px}
+ .player-controls .control-button{min-width:23px;padding:3px 1px;font-size:9px}
+ .player-controls #seek-back,.player-controls #seek-forward{min-width:24px;font-size:8px}
+ .track-progress{display:none}
+}
+
+/* ORBIT accessibility and search polish */
+html[data-theme="light"] .hero,html[data-theme="light"] .hero-copy,html[data-theme="light"] .hero h1,html[data-theme="light"] .hero-copy p{color:#17231f!important}
+html[data-theme="light"] .hero:before{background:linear-gradient(105deg,#e8eeeb 0%,#e8eeeb 50%,rgba(232,238,235,.88) 70%,rgba(232,238,235,.2) 100%)}
+html[data-theme="light"] .hero-copy p{color:#40534a!important}
+html[data-theme="light"] .global-tv-toolbar input,html[data-theme="light"] .global-tv-toolbar select{background:#fff;color:#17231f;border-color:#c4d0c9}
+html[data-theme="light"] .global-tv-channel,html[data-theme="light"] .global-tv-status{color:#17231f}
+html[data-theme="dark"] #global-tv-retry{background:#e5ad69;color:#17231f;border:1px solid #e5ad69}
+html[data-theme="light"] #global-tv-retry{background:#243d32;color:#fff;border:1px solid #243d32}
+#global-tv-retry{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:12px}
+.search-result-section{margin:26px 0 38px}
+.search-result-heading{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px}
+.search-result-heading h2{font-size:20px}
+.global-search-results{padding-bottom:24px}
+.is-downloading{position:relative;opacity:.85!important;cursor:progress!important;padding-left:28px!important}
+.is-downloading:before{content:"";position:absolute;left:10px;top:50%;width:11px;height:11px;margin-top:-7px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:orbit-download-spin .75s linear infinite}
+@keyframes orbit-download-spin{to{transform:rotate(360deg)}}
+.global-tv-channel small{display:block}
+html[data-theme="light"] .global-tv-channel small{color:#53645b}
+html[data-theme="light"] .media-card p,html[data-theme="light"] .station-card p{color:#4f5e56}
+html[data-theme="light"] .loading-card,html[data-theme="light"] .empty-state{color:#4d5d54;border-color:#aabbb0}
+html[data-theme="light"] .page-intro p{color:#4b5c53}
+
+#global-tv-retry{background:var(--lime);color:#17231f;border:1px solid var(--lime)}
+html[data-theme=light] .global-tv-status{background:#fff;color:#17231f}
+html[data-theme=dark] .global-tv-status{background:#101820;color:#dce5df}
+
+
+/* TMDB catalogue detail panel */
+.film-detail{display:grid;grid-template-columns:minmax(180px,32%) minmax(0,1fr);gap:22px;align-items:center;width:100%;min-height:100%;padding:18px;text-align:left}.film-detail-backdrop{display:block;width:100%;max-height:330px;aspect-ratio:16/10;object-fit:cover;border-radius:8px;background:var(--panel2)}.film-detail-copy{min-width:0}.film-detail-copy h2{font:600 26px var(--display);letter-spacing:-.5px;margin:0 0 12px;color:var(--ink)}.film-detail-copy p{font-size:12px;line-height:1.7;color:var(--muted);margin:0 0 10px}.film-detail-copy .button{display:inline-flex;align-items:center;text-decoration:none;margin-top:8px}.tmdb-film-card .media-cover{aspect-ratio:2/3;object-fit:cover}.tmdb-film-card .media-actions{align-items:flex-start;flex-direction:column}.tmdb-film-card .media-actions small{min-height:22px}.station-catalogue-note{margin-top:14px}@media(max-width:650px){.film-detail{grid-template-columns:1fr;gap:14px}.film-detail-backdrop{max-height:220px;aspect-ratio:16/9}.film-detail-copy h2{font-size:22px}}
+
+/* OmniSave embedded third-party browser */
+.omnisave-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0}
+.omnisave-status{font-size:12px;color:var(--muted);flex:1;min-width:220px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow-wrap:anywhere}.omnisave-status[data-state="progress"]{color:var(--ink)}.omnisave-status[data-state="error"]{color:#d65b5b;border-color:#d65b5b}.omnisave-status[data-state="completed"]{color:#27966a;border-color:#27966a}
+.omnisave-actions{display:flex;gap:8px;flex-wrap:wrap}
+.omnisave-actions button{padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);cursor:pointer}
+.omnisave-frame-wrap{height:calc(100vh - 190px);height:calc(100dvh - 190px);min-height:520px;max-height:900px;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 12px 34px rgba(0,0,0,.14)}
+#view-omnisave{min-width:0}
+#view-omnisave .omnisave-toolbar{justify-content:space-between;margin:0 0 10px}
+#omnisave-webview{display:flex;width:100%;height:100%;border:0;background:#fff}
+@media(max-width:650px){.omnisave-frame-wrap{height:calc(100dvh - 190px);min-height:380px;max-height:none}.omnisave-toolbar{align-items:flex-start;flex-direction:row}}
+
+/* ORBIT unified, low-colour light theme */
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f7f8f7;
+  --panel:#ffffff;
+  --panel2:#eef1ee;
+  --line:#d9dfda;
+  --ink:#202923;
+  --muted:#657168;
+  --lime:#b8874b;
+  --orange:#b8874b;
+  --blue:#71877c;
+  --shadow:#e1e6e1;
+}
+html[data-theme="light"] body,
+html[data-theme="light"] .app-shell,
+html[data-theme="light"] .main-area,
+html[data-theme="light"] .view,
+html[data-theme="light"] .topbar,
+html[data-theme="light"] .sidebar,
+html[data-theme="light"] .player-bar{
+  background-color:var(--bg)!important;color:var(--ink)!important;
+}
+html[data-theme="light"] .sidebar,
+html[data-theme="light"] .topbar,
+html[data-theme="light"] .player-bar,
+html[data-theme="light"] .page-footer{border-color:var(--line)!important}
+html[data-theme="light"] .status-card,
+html[data-theme="light"] .search-box,
+html[data-theme="light"] .station-card,
+html[data-theme="light"] .media-card,
+html[data-theme="light"] .station-panel,
+html[data-theme="light"] .settings-card,
+html[data-theme="light"] .settings-section,
+html[data-theme="light"] .podcast-player-panel,
+html[data-theme="light"] .profile-dialog,
+html[data-theme="light"] .global-subnav button,
+html[data-theme="light"] .live-links a,
+html[data-theme="light"] .global-tv-channel,
+html[data-theme="light"] .omnisave-status,
+html[data-theme="light"] .orbit-trailer-section,
+html[data-theme="light"] .orbit-trailer-card,
+html[data-theme="light"] .film-player-panel,
+html[data-theme="light"] .loading-card,
+html[data-theme="light"] .empty-state,
+html[data-theme="light"] .search-result-section,
+html[data-theme="light"] .search-result-heading{
+  background:#fff!important;color:var(--ink)!important;border-color:var(--line)!important;
+  box-shadow:none!important;
+}
+html[data-theme="light"] .hero,
+html[data-theme="light"] #view-discover .hero{
+  background:#edf1ed!important;border:1px solid var(--line)!important;box-shadow:none!important;
+}
+html[data-theme="light"] .hero:before,
+html[data-theme="light"] #view-discover .hero:after{background:none!important;opacity:0!important}
+html[data-theme="light"] .hero h1,
+html[data-theme="light"] .hero-copy,
+html[data-theme="light"] .hero-copy p,
+html[data-theme="light"] #view-discover .hero p{color:var(--ink)!important}
+html[data-theme="light"] .explore-card,
+html[data-theme="light"] .podcast-card,
+html[data-theme="light"] .book-card,
+html[data-theme="light"] .music-card{
+  background:#fff!important;color:var(--ink)!important;border:1px solid var(--line)!important;
+  box-shadow:none!important;
+}
+html[data-theme="light"] .station-art,
+html[data-theme="light"] .station-card:nth-child(3n+2) .station-art,
+html[data-theme="light"] .station-card:nth-child(3n) .station-art,
+html[data-theme="light"] .station-card:nth-child(4n) .station-art{
+  background:#eee9df!important;color:#66543d!important;box-shadow:none!important;
+}
+html[data-theme="light"] .mini-play,
+html[data-theme="light"] .station-row button,
+html[data-theme="light"] .media-actions button,
+html[data-theme="light"] .episode-actions button,
+html[data-theme="light"] .music-card-actions button,
+html[data-theme="light"] #view-downloads .media-actions button,
+html[data-theme="light"] .global-tv-channel.active,
+html[data-theme="light"] .global-tv-channel:hover{
+  background:#eee9df!important;color:#59472f!important;border:1px solid #d9cbb7!important;
+}
+html[data-theme="light"] .button-light,
+html[data-theme="light"] .orbit-trailer-card button,
+html[data-theme="light"] .play-button,
+html[data-theme="light"] #global-tv-retry{
+  background:#b8874b!important;color:#fff!important;border-color:#b8874b!important;
+}
+html[data-theme="light"] .nav-link,
+html[data-theme="light"] .nav-link>span,
+html[data-theme="light"] .control-button,
+html[data-theme="light"] .player-extra,
+html[data-theme="light"] .track-progress,
+html[data-theme="light"] .station-card-bottom small,
+html[data-theme="light"] .media-actions small,
+html[data-theme="light"] .breadcrumb,
+html[data-theme="light"] .eyebrow,
+html[data-theme="light"] .side-label,
+html[data-theme="light"] .globe-stat span,
+html[data-theme="light"] .globe-hint{color:var(--muted)!important}
+html[data-theme="light"] .nav-link.active,
+html[data-theme="light"] .nav-link.active>span{background:#eee9df!important;color:#59472f!important}
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] b,
+html[data-theme="light"] strong,
+html[data-theme="light"] .track-meta b,
+html[data-theme="light"] .film-detail-copy h2{color:var(--ink)}
+html[data-theme="light"] p,
+html[data-theme="light"] small,
+html[data-theme="light"] label,
+html[data-theme="light"] .film-detail-copy p,
+html[data-theme="light"] .podcast-episode-meta small,
+html[data-theme="light"] .station-row-main small{color:var(--muted)}
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea,
+html[data-theme="light"] .inline-search,
+html[data-theme="light"] .station-search,
+html[data-theme="light"] .global-tv-toolbar input,
+html[data-theme="light"] .global-tv-toolbar select{
+  background:#fff!important;color:var(--ink)!important;border-color:var(--line)!important;
+}
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder{color:#7a857d!important}
+html[data-theme="light"] .pill{
+  background:#fff!important;color:#5d685f!important;border-color:var(--line)!important;
+}
+html[data-theme="light"] .pill.active,
+html[data-theme="light"] .pill:hover{background:#eee9df!important;color:#59472f!important;border-color:#d9cbb7!important}
+html[data-theme="light"] .globe-stage{
+  background:radial-gradient(ellipse at center,#edf2ee 0%,#e5ebe6 72%)!important;border-color:var(--line)!important;
+}
+html[data-theme="light"] .globe-fallback{color:#59665e!important}
+html[data-theme="light"] .globe-core{color:#8b9d91!important;text-shadow:none!important}
+html[data-theme="light"] .global-tv-status{background:#fff!important;color:var(--muted)!important}
+html[data-theme="light"] .omnisave-frame-wrap{background:#fff!important;box-shadow:none!important}
+html[data-theme="light"] .toast{background:#b8874b!important;color:#fff!important}
+html[data-theme="light"] .orbit-trailer-card>img,
+html[data-theme="light"] .orbit-trailer-player,
+html[data-theme="light"] .global-tv-screen,
+html[data-theme="light"] .global-tv-screen video,
+html[data-theme="light"] .offline-video{background:#111!important}
+html[data-theme="light"] .film-player-panel,
+html[data-theme="light"] #film-player-panel{color:var(--ink)!important}
+html[data-theme="light"] .hero-index,
+html[data-theme="light"] .globe-stat b{color:#8b6538!important}
+html[data-theme="light"] .sidebar-foot{color:var(--muted)!important}
+html[data-theme="light"] .status-card{border-color:var(--line)!important}
+html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!important}
+
+/* Desktop movie trailer picker stays tucked inside the playback frame */
+@media (min-width: 761px) {
+  #movie-trailer-player { position:relative; isolation:isolate; }
+  #movie-trailer-player .trailer-picker-toggle {
+    position:absolute; z-index:5; right:14px; top:14px;
+    display:flex; align-items:center; gap:12px; padding:10px 14px;
+    border:1px solid rgba(255,255,255,.3); border-radius:9px;
+    background:rgba(8,13,18,.88); color:#fff; font-size:12px;
+    font-weight:700; cursor:pointer; backdrop-filter:blur(10px);
+  }
+  #movie-trailer-player .trailer-picker-toggle span { font-size:16px; line-height:1; }
+  #movie-trailer-player .orbit-trailer-picker {
+    position:absolute; z-index:6; left:0; right:0; bottom:0;
+    max-height:58%; padding:12px 14px 14px;
+    background:linear-gradient(180deg,rgba(5,8,12,.88),rgba(5,8,12,.98));
+    border-top:1px solid rgba(255,255,255,.18);
+    overflow-y:auto; overscroll-behavior:contain;
+    scrollbar-width:thin; scrollbar-color:#a7b4ad #17211d;
+  }
+  #movie-trailer-player .orbit-trailer-picker[hidden] { display:none!important; }
+  #movie-trailer-player .orbit-trailer-picker-head {
+    display:flex; align-items:center; justify-content:space-between;
+    color:#fff; font-size:12px; margin-bottom:10px;
+  }
+  #movie-trailer-player .orbit-trailer-picker-head button {
+    border:0; background:transparent; color:#fff; font-size:23px; cursor:pointer;
+  }
+  #movie-trailer-player .orbit-trailer-grid {
+    display:flex; gap:10px; overflow-x:auto; overflow-y:hidden;
+    padding:0 0 8px; scroll-snap-type:x mandatory;
+  }
+  #movie-trailer-player .orbit-trailer-card {
+    display:grid; grid-template-columns:112px minmax(130px,1fr);
+    flex:0 0 300px; min-width:0; scroll-snap-align:start;
+    border:1px solid rgba(255,255,255,.2); border-radius:8px;
+    background:#111a20; color:#fff;
+  }
+  #movie-trailer-player .orbit-trailer-card>img {
+    width:112px; height:100%; min-height:86px; aspect-ratio:16/9;
+    object-fit:cover; border-radius:7px 0 0 7px;
+  }
+  #movie-trailer-player .orbit-trailer-card>div {
+    display:flex; flex-direction:column; align-items:flex-start;
+    justify-content:center; gap:6px; padding:8px; min-width:0;
+  }
+  #movie-trailer-player .orbit-trailer-card strong {
+    color:#fff; font-size:11px; line-height:1.35;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  #movie-trailer-player .orbit-trailer-card small { color:#c4d0ca; font-size:9px; }
+  #movie-trailer-player .orbit-trailer-card button { padding:6px 9px; font-size:10px; }
+}
+
+
+
+/* Desktop movie trailer: use the full available player width */
+@media (min-width: 761px) {
+  #view-movies .orbit-trailer-section {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+  #view-movies .orbit-trailer-player {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+    margin: 16px 0 10px !important;
+  }
+  #view-movies .orbit-trailer-player iframe {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0 !important;
+  }
+}
+
+
+/* Desktop trailer: larger but contained so movie details remain visible */
+@media (min-width: 761px) {
+  #view-movies .orbit-trailer-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+  #view-movies .orbit-trailer-player {
+    position: relative !important;
+    display: block !important;
+    width: min(100%, 760px) !important;
+    max-width: 760px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: 428px !important;
+    aspect-ratio: 16 / 9 !important;
+    margin: 14px auto 18px !important;
+    overflow: hidden !important;
+  }
+  #view-movies .orbit-trailer-player iframe {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    border: 0 !important;
+  }
+}
+
+
+
+/* WEB-ONLY OmniSave browser frame. Deliberately inactive in Electron and narrow/mobile layouts. */
+@media (min-width: 801px) {
+  html.orbit-web-omnisave #view-omnisave .omnisave-frame-wrap { position:relative; display:flex; flex-direction:column; min-height:520px; }
+  html.orbit-web-omnisave #view-omnisave #omnisave-webview { display:none !important; }
+  html.orbit-web-omnisave #view-omnisave #omnisave-browser-frame { display:block; flex:1 1 auto; width:100%; height:auto; min-height:0; border:0; background:#fff; }
+  html.orbit-web-omnisave #view-omnisave .omnisave-browser-help { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:7px; padding:8px 12px; color:#4b5563; background:#f5f7f8; border-top:1px solid #d9dfda; font-size:12px; }
+  html.orbit-web-omnisave #view-omnisave .omnisave-browser-help a { color:#1769aa; font-weight:600; text-decoration:underline; }
+}
+@media (max-width: 800px) {
+  #view-omnisave #omnisave-browser-frame, #view-omnisave .omnisave-browser-help { display:none !important; }
+}
+
+/* ORBIT web readability: consistent public-facing type scale on desktop browsers. */
+@media (min-width: 801px) {
+  body, button, input, select, textarea { font-family: "Figtree", "Instrument Sans", Arial, sans-serif !important; }
+  body { font-size: 15px; line-height: 1.5; }
+  .view p, .page-intro p, .section-description, .empty-state, .loading-card,
+  .setting-row small, .settings-card p, .catalogue-note, .media-card p,
+  .station-card p, .offline-card > p, .station-row-main small { font-size: 14px; line-height: 1.55; }
+  .media-card h3, .station-card h3, .music-audio-card > h3, .offline-card > h3,
+  .station-row-main b { font-size: 15px; line-height: 1.35; }
+  .media-actions button, .music-card-actions button, .button, .pill,
+  .filter-pills button, .global-subnav button { font-size: 13px; line-height: 1.35; }
+  input, select, textarea { font-size: 14px; line-height: 1.45; }
+  .track-meta b { font-size: 15px; }
+  .track-meta small, .player-extra, .track-progress span { font-size: 13px; }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "orbit-public-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ORBIT public web deployment staging copy",
+  "type": "module",
+  "scripts": { "start": "node server.mjs" },
+  "engines": { "node": ">=20" }
+}
