@@ -17,11 +17,16 @@
       <a class="brand" href="#" aria-label="Orbit home"><span class="brand-mark">◉</span><span>ORBIT</span></a>
       <div class="side-label">Your space</div>
       <nav class="main-nav" aria-label="Main navigation">
-        <button class="nav-link active" data-view="discover"><span>⌂</span> Discover</button>
+        <div class="nav-discover-group" id="nav-discover-group">
+          <button class="nav-link active" data-view="discover" aria-haspopup="true" aria-expanded="false"><span>⌂</span> Discover</button>
+          <button class="discover-submenu-toggle" id="discover-submenu-toggle" type="button" aria-label="Show Discover submenu" aria-expanded="false">⌄</button>
+          <div class="discover-submenu" id="discover-submenu" aria-label="Discover pages">
+            <button class="nav-link" data-view="global-live"><span>▣</span> Global Live</button>
+            <button class="nav-link" data-view="audiobooks"><span>▤</span> Audiobooks</button>
+          </div>
+        </div>
         <button class="nav-link" data-view="globe"><span>◎</span> Radio globe</button>
         <button class="nav-link" data-view="podcasts"><span>◖</span> Podcasts</button>
-        <button class="nav-link" data-view="audiobooks"><span>▤</span> Audiobooks</button>
-        <button class="nav-link global-live-nav" data-view="global-live" id="global-live-nav" hidden><span>▣</span> Global Live</button>
         <button class="nav-link" data-view="music"><span>♫</span> Music</button>
         <button class="nav-link" data-view="music-video"><span>&#9835;</span> Music Video</button>
         <button class="nav-link" data-view="movies"><span>▣</span> Screen</button>
@@ -41,7 +46,7 @@
       <header class="topbar">
         <div class="topbar-left"><button class="chrome-toggle nav-toggle-left" id="nav-toggle" type="button" aria-label="Hide navigation" title="Hide navigation">☰</button><div class="app-history-controls"><button class="chrome-toggle" id="app-back" type="button" aria-label="Go back" title="Go back" disabled>←</button><button class="chrome-toggle" id="app-forward" type="button" aria-label="Go forward" title="Go forward" disabled>→</button></div><div class="breadcrumb"><span>ORBIT</span><i>/</i><b id="page-label">Discover</b></div></div>
         <div class="top-actions"><button class="chrome-toggle" id="fullscreen-toggle" type="button" aria-label="Enter full screen" title="Enter full screen">⛶</button>
-          <label class="search-box"><span>⌕</span><input id="global-search" type="search" placeholder="Find a station, show, artist…" autocomplete="off"><kbd>↵</kbd></label>
+          <div class="search-box" role="search"><span aria-hidden="true">⌕</span><input id="global-search" type="search" placeholder="Find a station, show, artist…" autocomplete="off" aria-label="Search ORBIT"><button class="search-submit" id="global-search-submit" type="button" aria-label="Search ORBIT" title="Search">⌕</button><kbd>↵</kbd></div>
           <button class="avatar" id="profile-open" title="Edit profile">G</button>
         </div>
       </header>
@@ -192,7 +197,7 @@
 </section><div class="settings-grid">
 <section class="settings-card"><h2>Appearance</h2><label class="setting-row"><span><b>Theme</b><small>Choose the look of ORBIT.</small></span><select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option><option value="system">Follow system</option></select></label><label class="setting-row"><span><b>Reduce motion</b><small>Reduce page and navigation animations.</small></span><input id="setting-motion" type="checkbox"></label></section>
 <section class="settings-card"><h2>Playback</h2><label class="setting-row setting-volume"><span><b>Default volume</b><small>Set the player volume for this device.</small></span><input id="setting-volume" type="range" min="0" max="100" value="80"><output id="setting-volume-value">80%</output></label><label class="setting-row"><span><b>Remember volume</b><small>Keep your volume choice next time you open ORBIT.</small></span><input id="setting-remember-volume" type="checkbox" checked></label></section>
-<section class="settings-card"><h2>Language & sound</h2><label class="setting-row"><span><b>Preferred language</b><small>Choose your interface language.</small></span><select id="setting-language"><option value="en">English</option><option value="fr">French</option><option value="es">Spanish</option><option value="pt">Portuguese</option><option value="ar">Arabic</option></select></label><label class="setting-row"><span><b>Default sound</b><small>Choose the default playback profile.</small></span><select id="setting-sound"><option value="normal">Normal volume</option><option value="gentle">Gentle volume</option><option value="quiet">Quiet volume</option></select></label></section><section class="settings-card"><h2>Global Live</h2><label class="setting-row"><span><b>Enable Global Live page</b><small>Show the searchable global TV and sports channel page in navigation.</small></span><input id="enable-global-live" type="checkbox"></label></section><section class="settings-card"><h2>Audiobooks</h2><label class="setting-row"><span><b>Enable Audiobooks page</b><small>Show Audiobooks in the navigation and allow access to its library.</small></span><input id="enable-audiobooks" type="checkbox"></label></section><section class="settings-card"><h2>Navigation</h2><label class="setting-row"><span><b>Start with navigation visible</b><small>Keep the page menu open when ORBIT starts.</small></span><input id="setting-nav-visible" type="checkbox" checked></label><button class="button button-light settings-reset" id="settings-reset" type="button">Reset settings</button></section>
+<section class="settings-card"><h2>Language & sound</h2><label class="setting-row"><span><b>Preferred language</b><small>Choose your interface language.</small></span><select id="setting-language"><option value="en">English</option><option value="fr">French</option><option value="es">Spanish</option><option value="pt">Portuguese</option><option value="ar">Arabic</option></select></label><label class="setting-row"><span><b>Default sound</b><small>Choose the default playback profile.</small></span><select id="setting-sound"><option value="normal">Normal volume</option><option value="gentle">Gentle volume</option><option value="quiet">Quiet volume</option></select></label></section><section class="settings-card"><h2>Navigation</h2><label class="setting-row"><span><b>Start with navigation visible</b><small>Keep the page menu open when ORBIT starts.</small></span><input id="setting-nav-visible" type="checkbox" checked></label><button class="button button-light settings-reset" id="settings-reset" type="button">Reset settings</button></section>
 <section class="settings-card orbit-legal-card">
   <h2>About ORBIT</h2>
   <p class="orbit-legal-intro">Created by <strong>Nino Brown</strong>. Thank you for using ORBIT.</p>

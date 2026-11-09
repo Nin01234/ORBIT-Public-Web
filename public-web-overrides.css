@@ -1,2 +1,23 @@
 /* Public-web-only presentation changes. Does not touch desktop/mobile app source. */
 .orbit-mobile-install { display: none !important; }
+/* Discover hover submenu: Global Live and Audiobooks */
+.nav-discover-group{position:relative;display:block;min-width:0}
+.nav-discover-group>.nav-link{width:100%}
+.discover-submenu{position:absolute;z-index:1200;left:calc(100% + 8px);top:0;display:grid;gap:4px;min-width:190px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px #0008;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-5px);transition:opacity .16s ease,transform .16s ease,visibility .16s}
+.nav-discover-group:hover .discover-submenu,.nav-discover-group:focus-within .discover-submenu,.nav-discover-group.is-open .discover-submenu{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0)}
+.discover-submenu .nav-link{width:100%;height:40px;white-space:nowrap}
+.discover-submenu-toggle{display:none}
+.search-box{gap:8px}
+.search-submit{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:0;border-radius:6px;background:var(--panel2);color:var(--ink);font-size:19px;line-height:1}
+.search-submit:hover{background:var(--lime);color:#152018}
+.search-box input{flex:1}
+@media(max-width:760px){
+.nav-discover-group{position:relative;display:flex;align-items:center;justify-content:center;min-width:0}
+.nav-discover-group>.nav-link{width:100%;height:100%;padding-right:15px!important}
+.discover-submenu-toggle{display:grid;place-items:center;position:absolute;right:1px;top:2px;z-index:2;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:var(--panel2);color:var(--ink);font-size:13px;line-height:1}
+.discover-submenu{left:0;top:auto;bottom:calc(100% + 9px);min-width:180px;transform:translateY(5px)}
+.nav-discover-group:hover .discover-submenu{opacity:0;visibility:hidden;pointer-events:none}
+.nav-discover-group.is-open .discover-submenu,.nav-discover-group:focus-within .discover-submenu{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.discover-submenu .nav-link{min-height:42px!important;height:42px!important;display:flex!important;flex-direction:row!important;justify-content:flex-start!important;padding:8px 12px!important;font-size:12px!important;overflow:visible}
+.search-submit{flex-basis:32px;width:32px;height:32px}
+}

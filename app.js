@@ -201,7 +201,6 @@ function syncAppHistoryButtons(){
   if(forward)forward.disabled=orbitViewHistoryIndex>=orbitViewHistory.length-1;
 }
 function showView(name){
-  if(name==="audiobooks"&&localStorage.getItem("orbit-audiobooks")!=="1"){name="discover";}
   if(!orbitHistoryTraversal&&orbitViewHistory[orbitViewHistoryIndex]!==name){
     orbitViewHistory=orbitViewHistory.slice(0,orbitViewHistoryIndex+1);
     orbitViewHistory.push(name);
@@ -705,7 +704,7 @@ async function playBook(rss,title){
   try{const feedUrl=window.orbitDesktop?.isDesktop?"/api/rss?url="+encodeURIComponent(rss):rss;const r=await fetch(feedUrl);if(!r.ok)throw new Error();const xml=new DOMParser().parseFromString(await r.text(),"text/xml");const item=xml.querySelector("item");const enclosure=item?.querySelector("enclosure");const src=enclosure?.getAttribute("url");if(!src)throw new Error();audio.src=src;await audio.play();setPlayer(title,"LibriVox / public-domain audiobook","Audiobook");}
   catch{window.open(rss,"_blank","noopener");notify("Opened the audiobook feed in a new tab.");}
 }
-function searchGlobal(term){searchEverything(term);}
+function searchGlobal(term){return searchEverything(term);}
 async function searchEverything(term){
  const q=(term||"").trim();if(!q)return;
  showView("search");
@@ -736,7 +735,7 @@ async function searchEverything(term){
  if(movieMatches.length)blocks.push(section("Movies · TMDB",movieMatches.slice(0,8).map(tmdbMovieCard).join("")));
  if(tv&&Array.isArray(tv.channels)&&tv.channels.length){
   tv.channels.forEach(c=>{if(!orbitLiveChannels.some(x=>x.id===c.id))orbitLiveChannels.push(c);});
-  tv.streams.forEach(st=>{if(!orbitLiveStreams.some(x=>x.url===st.url))orbitLiveStreams.push(st);});
+  (Array.isArray(tv.streams)?tv.streams:[]).forEach(st=>{if(!orbitLiveStreams.some(x=>x.url===st.url))orbitLiveStreams.push(st);});
   blocks.push(section("Global TV channels",tv.channels.slice(0,8).map(c=>'<article class="media-card"><div class="media-cover book-cover">TV</div><h3>'+esc(c.name)+'</h3><p>'+esc(c.country||"Global")+'</p><div class="media-actions"><small>Global Live</small><button data-search-tv="'+esc(c.id)+'">Open channel</button></div></article>').join("")));
  }else if(orbitLiveChannels.length){
   const matches=orbitLiveChannels.filter(c=>[c.name,c.country,c.network,...(c.alt_names||[])].join(" ").toLowerCase().includes(q.toLowerCase())).slice(0,8);
@@ -765,7 +764,7 @@ function setupSettings(){
   volume.addEventListener("input",()=>{orbitBaseVolume=Number(volume.value)/100;applyOrbitSound(orbitSoundMode);volumeValue.textContent=volume.value+"%";if(remember.checked)localStorage.setItem("orbit-volume",volume.value);});
   remember.addEventListener("change",()=>{localStorage.setItem("orbit-remember-volume",remember.checked?"1":"0");if(!remember.checked)localStorage.removeItem("orbit-volume");});
   nav.addEventListener("change",()=>{document.body.classList.toggle("nav-hidden",!nav.checked);localStorage.setItem("orbit-nav-hidden",nav.checked?"0":"1");$("#nav-toggle").title=nav.checked?"Hide navigation":"Show navigation";});
-  $("#settings-reset").addEventListener("click",()=>{["orbit-theme","orbit-reduce-motion","orbit-volume","orbit-remember-volume","orbit-nav-hidden","orbit-sound","orbit-audiobooks"].forEach(k=>localStorage.removeItem(k));theme.value="dark";motion.checked=false;remember.checked=true;nav.checked=true;const booksToggle=$("#enable-audiobooks");if(booksToggle){booksToggle.checked=false;booksToggle.dispatchEvent(new Event("change"));}volume.value="80";volumeValue.textContent="80%";orbitBaseVolume=.8;audio.volume=.8;const soundSelect=$("#setting-sound");if(soundSelect)soundSelect.value="normal";orbitSoundMode="normal";document.documentElement.classList.remove("reduce-motion");applyOrbitSound("normal");applyOrbitTheme("dark");document.body.classList.remove("nav-hidden");$("#nav-toggle").title="Hide navigation";notify("Settings restored to defaults.");});
+  $("#settings-reset").addEventListener("click",()=>{["orbit-theme","orbit-reduce-motion","orbit-volume","orbit-remember-volume","orbit-nav-hidden","orbit-sound","orbit-audiobooks","orbit-global-live"].forEach(k=>localStorage.removeItem(k));theme.value="dark";motion.checked=false;remember.checked=true;nav.checked=true;volume.value="80";volumeValue.textContent="80%";orbitBaseVolume=.8;audio.volume=.8;const soundSelect=$("#setting-sound");if(soundSelect)soundSelect.value="normal";orbitSoundMode="normal";document.documentElement.classList.remove("reduce-motion");applyOrbitSound("normal");applyOrbitTheme("dark");document.body.classList.remove("nav-hidden");$("#nav-toggle").title="Hide navigation";notify("Settings restored to defaults.");});
 }
 
 
@@ -784,12 +783,10 @@ function setupOrbitProfile(){
 let orbitLiveChannels=[],orbitLiveStreams=[],orbitLiveCountries=[];
 let orbitLiveHls=null,orbitLiveLoaded=false,orbitLivePlayToken=0,orbitLiveDirectoryToken=0;
 function setupOrbitPreferences(){
- const lang=$("#setting-language"),sound=$("#setting-sound"),enable=$("#enable-global-live"),nav=$("#global-live-nav");
- const enableBooks=$("#enable-audiobooks"),booksNav=$(".nav-link[data-view=\"audiobooks\"]");
+ const lang=$("#setting-language"),sound=$("#setting-sound");
  if(lang){lang.value=localStorage.getItem("orbit-language")||"en";lang.addEventListener("change",()=>{localStorage.setItem("orbit-language",lang.value);document.documentElement.lang=lang.value;document.documentElement.dir=lang.value==="ar"?"rtl":"ltr";notify("Language preference saved.");});}
  if(sound){sound.value=localStorage.getItem("orbit-sound")||"normal";orbitSoundMode=sound.value;sound.addEventListener("change",()=>{orbitSoundMode=sound.value;localStorage.setItem("orbit-sound",sound.value);applyOrbitSound(sound.value);notify("Sound preference saved.");});applyOrbitSound(sound.value);}
- if(enable){enable.checked=localStorage.getItem("orbit-global-live")==="1";const sync=()=>{const on=enable.checked;localStorage.setItem("orbit-global-live",on?"1":"0");nav.hidden=!on;if(!on&&$("#view-global-live").classList.contains("active"))showView("discover");};enable.addEventListener("change",sync);sync();}
- if(enableBooks&&booksNav){enableBooks.checked=localStorage.getItem("orbit-audiobooks")==="1";const syncBooks=()=>{const on=enableBooks.checked;localStorage.setItem("orbit-audiobooks",on?"1":"0");booksNav.hidden=!on;if(!on&&$("#view-audiobooks").classList.contains("active"))showView("discover");};enableBooks.addEventListener("change",syncBooks);syncBooks();}
+
 }
 function applyOrbitSound(mode){orbitSoundMode=mode;audio.muted=false;audio.playbackRate=1;const factor=mode==="gentle"?0.72:mode==="quiet"?0.48:1;audio.volume=Math.max(0,Math.min(1,orbitBaseVolume*factor));const b=$("#volume-button");if(b){b.textContent="Mute";b.title="Mute audio";}}
 async function loadGlobalLiveDirectory(countryCode=""){
@@ -957,7 +954,10 @@ function setupEvents(){
     if(e.altKey&&e.key==="ArrowRight"){e.preventDefault();$("#app-forward")?.click();}
   });
   syncAppHistoryButtons();
-  $$("[data-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+  $(".nav-link[data-view]").forEach(b=>b.addEventListener("click",()=>{showView(b.dataset.view);$("#nav-discover-group")?.classList.remove("is-open");$("#discover-submenu-toggle")?.setAttribute("aria-expanded","false");}));
+  const discoverGroup=$("#nav-discover-group"),discoverToggle=$("#discover-submenu-toggle");
+  discoverToggle?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();const open=discoverGroup.classList.toggle("is-open");discoverToggle.setAttribute("aria-expanded",String(open));});
+  document.addEventListener("click",e=>{if(discoverGroup&&!discoverGroup.contains(e.target)){discoverGroup.classList.remove("is-open");discoverToggle?.setAttribute("aria-expanded","false");}});
   window.orbitDesktop?.onOfflineUpdated?.(data=>{loadOfflineLibrary();});
   window.orbitDesktop?.onOmniDownload?.(data=>{const status=$("#omnisave-status");if(status){status.textContent=data?.message||"OmniSave download update.";status.dataset.state=data?.state||"info";}if(data?.state==="completed")notify("Saved to ORBIT Downloads: "+(data?.title||"video"));else if(data?.state==="error")notify(data.message||"Download failed.");});
   const omni=$("#omnisave-webview"),omniStatus=$("#omnisave-status");
@@ -1006,8 +1006,11 @@ function setupEvents(){
   $("#player-fav").addEventListener("click",()=>{if(currentMusicTrack)toggleMusicFav(currentMusicTrack);else if(currentStation)toggleFav(currentStation.stationuuid);});
   $("#country-filter").addEventListener("change",loadStationList);
   let stationTimer;$("#station-search").addEventListener("input",()=>{clearTimeout(stationTimer);stationTimer=setTimeout(loadStationList,350);});
-  $("#global-search").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchGlobal(e.target.value.trim());}});
-  $("#global-search").addEventListener("search",e=>{if(e.target.value.trim())searchGlobal(e.target.value.trim());});
+  const globalSearch=$("#global-search"),globalSearchButton=$("#global-search-submit");
+  const runGlobalSearch=()=>{const term=globalSearch.value.trim();if(!term){globalSearch.focus();notify("Type something to search across ORBIT.");return;}searchGlobal(term).catch(()=>{const host=$("#global-search-results");if(host)host.innerHTML='<div class="empty-state">Search is temporarily unavailable. Please try again.</div>';notify("Search could not be completed. Please try again.");});};
+  globalSearchButton?.addEventListener("click",runGlobalSearch);
+  globalSearch.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runGlobalSearch();}});
+  globalSearch.addEventListener("search",runGlobalSearch);
   $("#podcast-search").addEventListener("keydown",e=>{if(e.key==="Enter")loadItunes("podcasts",e.target.value.trim()).catch(()=>notify("Podcast search unavailable."));});
   $("#music-video-search").addEventListener("keydown",e=>{if(e.key==="Enter")loadYouTubeMusic(e.target.value.trim()).catch(()=>notify("Music video search unavailable."));});
   $("#audio-music-search").addEventListener("keydown",e=>{if(e.key==="Enter"){$("#audio-music-results").dataset.loaded="";loadAudioMusic(e.target.value.trim()).then(()=>$("#audio-music-results").dataset.loaded="1").catch(()=>notify("Music search unavailable."));}});
