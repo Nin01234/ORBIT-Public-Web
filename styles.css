@@ -105,7 +105,7 @@ body.player-hidden .player-reveal{display:grid}
 .orbit-legal-details summary{cursor:pointer;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .orbit-legal-details summary::-webkit-details-marker{display:none}
 .orbit-legal-details summary:after{content:"ï¼‹";color:var(--accent,#8bd6c8);font-size:18px}
-.orbit-legal-details[open] summary:after{content:"âˆ’"}
+.orbit-legal-details[open] summary:after{content:"−"}
 .orbit-legal-copy{padding:12px 2px 2px;color:var(--muted,#aab6c4);font-size:14px;line-height:1.7}
 .orbit-legal-copy h3{margin:16px 0 5px;color:var(--text,#eef4f8);font-size:15px}
 .orbit-legal-copy p{margin:7px 0}
