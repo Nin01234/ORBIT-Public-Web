@@ -1,0 +1,21 @@
+﻿{
+  "appId": "com.orbit.radio",
+  "productName": "ORBIT",
+  "directories": { "output": "dist" },
+  "asar": true,
+  "files": ["**/*", "!node_modules/.cache/**", "!dist/**"],
+  "win": {
+    "target": [{ "target": "nsis", "arch": ["x64"] }],
+    "icon": "orbit.ico",
+    "artifactName": "ORBIT-Setup-1.1.3-x64.exe"
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "ORBIT",
+    "deleteAppDataOnUninstall": false
+  }
+}

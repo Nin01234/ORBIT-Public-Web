@@ -1,0 +1,41 @@
+﻿name: Build ORBIT Windows installer
+on:
+  workflow_dispatch:
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out ORBIT
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Extract desktop app archive
+        shell: pwsh
+        run: |
+          npx --yes @electron/asar extract desktop-app/orbit-app.asar desktop-app/source
+          $packagePath = "desktop-app/source/package.json"
+          $package = Get-Content $packagePath -Raw | ConvertFrom-Json
+          $package.version = "1.1.3"
+          $package | ConvertTo-Json -Depth 100 | Set-Content $packagePath -Encoding utf8
+      - name: Install Windows packaging tools
+        working-directory: desktop-app/source
+        run: npm install --save-dev electron@44.9.3 electron-builder@26.18.0
+      - name: Build one-click Windows installer
+        working-directory: desktop-app/source
+        run: npx electron-builder --win nsis --x64 --config ../electron-builder.json
+      - name: Publish installer release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.3
+          name: ORBIT Desktop 1.1.3 for Windows
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: desktop-app/source/dist/ORBIT-Setup-1.1.3-x64.exe
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
