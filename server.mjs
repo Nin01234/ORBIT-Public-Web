@@ -129,7 +129,87 @@ async function api(req,res,url) {
     const data=await getJson("https://spinnradio.com/api/movies",30000);if(!data||!Array.isArray(data.rows))throw new Error("Movie catalogue invalid");
     return send(res,200,store(key,data,TTL.movies),"public, max-age=1800");
   }
-  if(p==="/api/movie-trailers") return send(res,200,{title:"",trailers:[],message:"Trailer search is not enabled on the public service yet."});
+  if(p==="/api/movie-trailers") {
+    try {
+      const title=safeText(url.searchParams.get("title"),100);
+      const year=safeText(url.searchParams.get("year"),4).replace(/[^0-9]/g,"");
+      if(title.length<2)return send(res,400,{error:"A movie title is required"});
+      const cleanTitle=title.replace(/[<>]/g," ").replace(/\s+/g," ").trim();
+      const headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9"};
+      const parseSearch=async query=>{
+        const upstream=await fetch("https://www.youtube.com/results?search_query="+encodeURIComponent(query),{headers,signal:AbortSignal.timeout(18000)});
+        if(!upstream.ok)return [];
+        const html=await upstream.text();
+        const match=html.match(/ytInitialData\s*=\s*(\{.*?\})\s*;\s*<\/script>/s);
+        if(!match)return [];
+        const data=JSON.parse(match[1]),found=[];
+        const walk=value=>{
+          if(!value||typeof value!=="object"||found.length>=35)return;
+          if(value.videoRenderer){
+            const v=value.videoRenderer;
+            const videoTitle=v.title?.runs?.map(x=>x.text||"").join("")||v.title?.simpleText||"";
+            const author=v.ownerText?.runs?.map(x=>x.text||"").join("")||v.shortBylineText?.runs?.map(x=>x.text||"").join("")||"YouTube";
+            const thumbnails=v.thumbnail?.thumbnails||[],length=v.lengthText?.simpleText||"";
+            const seconds=length.split(":").reduce((n,part)=>n*60+(Number(part)||0),0);
+            if(v.videoId&&/^[A-Za-z0-9_-]{11}$/.test(v.videoId)&&seconds>=45&&/\b(trailer|teaser)\b/i.test(videoTitle)&&!/reaction|review|explained|recap|fan.?made|parody|compilation/i.test(videoTitle))
+              found.push({videoId:v.videoId,title:videoTitle.slice(0,180),author:author.slice(0,100),length,thumbnail:thumbnails.at(-1)?.url||""});
+            return;
+          }
+          if(Array.isArray(value))for(const item of value)walk(item);
+          else for(const item of Object.values(value))walk(item);
+        };
+        walk(data);return found;
+      };
+      const yearPart=year?" "+year:"";
+      const netflixResults=await parseSearch('"'+cleanTitle+'"'+yearPart+" official trailer Netflix");
+      const netflixOnly=netflixResults.filter(v=>/^Netflix(?:\s|$|:)/i.test(v.author)||/^Netflix\b/i.test(v.author));
+      let otherResults=[];
+      if(netflixOnly.length<3)otherResults=await parseSearch('"'+cleanTitle+'"'+yearPart+" official trailer");
+      const seen=new Set();
+      const trailers=[...netflixOnly.map(v=>({...v,source:"Netflix channel"})),...otherResults.map(v=>({...v,source:"YouTube result"}))]
+        .filter(v=>{
+          if(seen.has(v.videoId))return false;seen.add(v.videoId);
+          const lower=v.title.toLowerCase(),clean=cleanTitle.toLowerCase();
+          return lower.includes(clean)||clean.split(/\s+/).filter(w=>w.length>3).some(w=>lower.includes(w));
+        }).slice(0,8).map(v=>({youtubeId:v.videoId,title:v.title,thumbnail:v.thumbnail,channel:v.author,source:v.source}));
+      return send(res,200,{title:cleanTitle,trailers},"public, max-age=1800");
+    } catch {
+      return send(res,200,{title:"",trailers:[],message:"Trailer search is temporarily unavailable."});
+    }
+  }
+  if(p==="/api/youtube-search") {
+    try {
+      const query=safeText(url.searchParams.get("q"),120);
+      if(!query)return send(res,400,{error:"A search term is required"});
+      const upstream=await fetch("https://www.youtube.com/results?search_query="+encodeURIComponent(query),{
+        headers:{"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9"},
+        signal:AbortSignal.timeout(20000)
+      });
+      if(!upstream.ok)return send(res,upstream.status,{error:"YouTube search unavailable"});
+      const html=await upstream.text();
+      const match=html.match(/ytInitialData\s*=\s*(\{.*?\})\s*;\s*<\/script>/s);
+      if(!match)return send(res,502,{error:"YouTube did not return searchable results"});
+      const data=JSON.parse(match[1]),found=[];
+      const walk=value=>{
+        if(!value||typeof value!=="object"||found.length>=30)return;
+        if(value.videoRenderer){
+          const v=value.videoRenderer;
+          const title=v.title?.runs?.map(x=>x.text||"").join("")||v.title?.simpleText||"";
+          const author=v.ownerText?.runs?.map(x=>x.text||"").join("")||v.shortBylineText?.runs?.map(x=>x.text||"").join("")||"YouTube";
+          const thumbnails=v.thumbnail?.thumbnails||[],length=v.lengthText?.simpleText||"";
+          const seconds=length.split(":").reduce((n,part)=>n*60+(Number(part)||0),0);
+          if(v.videoId&&title&&seconds>=60)found.push({videoId:v.videoId,title,author,length,thumbnail:thumbnails.at(-1)?.url||""});
+          return;
+        }
+        if(Array.isArray(value))for(const item of value)walk(item);
+        else for(const item of Object.values(value))walk(item);
+      };
+      walk(data);
+      return send(res,200,found.slice(0,24),"public, max-age=120");
+    } catch {
+      return send(res,502,{error:"Could not retrieve YouTube search results"});
+    }
+  }
   if(p==="/api/offline-list") return send(res,200,[]);
   if(p==="/api/offline-file") return send(res,404,{error:"Downloads are stored on each visitor's own device in the public web version."});
   if(p==="/api/mobile-info"||p==="/api/mobile-qr"||p==="/api/token") return send(res,404,{error:"This endpoint is only available in the desktop/mobile test app."});
