@@ -385,7 +385,7 @@ function renderMusicResults(){
 function musicCard(track){
   const saved=isMusicFav(track.id);
   const playLabel=track.previewOnly?"Play preview":"Play full track";
-  const download=track.canDownload?'<button data-download-track="'+esc(track.id)+'" title="Download for offline">Download</button>':"";
+  const download='<button data-download-track="'+esc(track.id)+'" title="'+(track.canDownload?"Download for offline":"This artist has not enabled downloads")+'"'+(track.canDownload?"":" disabled")+'>'+(track.canDownload?"↓ Download":"↓ Unavailable")+'</button>';
   return '<article class="media-card music-audio-card"><img class="media-cover" src="'+esc(track.artwork||"") + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><h3 title="'+esc(track.title)+'">'+esc(track.title)+'</h3><p>'+esc(track.artist||"Independent artist")+'  -  '+musicDuration(track.duration)+'</p><div class="media-actions"><small>'+esc(track.source||track.genre||"Audio track")+(track.previewOnly?" · Preview":"")+'</small><div class="music-card-actions"><button data-audio-play="'+esc(track.id)+'">'+playLabel+'</button>'+download+'<button class="heart-button '+(saved?"saved":"")+'" data-audio-fav="'+esc(track.id)+'" title="Save favourite">'+(saved?"\u{1F496}":"\u{1F90D}")+'</button></div></div></article>';
 }
 async function loadAudioMusic(term="afrobeats"){
