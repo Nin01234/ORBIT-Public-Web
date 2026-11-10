@@ -687,6 +687,61 @@ async function downloadOffline(url,title,kind,artwork,button){
   }
 }
 
+async function setupUniversalDownloader(){
+  const panel=$("#orbit-universal-downloader");
+  if(!panel)return;
+  try{
+    const response=await fetch("/api/features",{cache:"no-store",signal:AbortSignal.timeout(8000)});
+    if(!response.ok)throw new Error("Feature settings unavailable");
+    const flags=await response.json();
+    if(flags?.universalDownloader!==true)return;
+    panel.hidden=false;
+  }catch{return;}
+  const form=$("#orbit-direct-download-form"),input=$("#orbit-direct-download-url"),button=$("#orbit-direct-download-button"),status=$("#orbit-downloader-status"),progress=$("#orbit-downloader-progress"),label=$("#orbit-downloader-progress-label");
+  if(!form||form.dataset.ready==="1")return;
+  form.dataset.ready="1";
+  const setStatus=(message,state="info")=>{if(status){status.textContent=message;status.dataset.state=state;}};
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();
+    if(button?.disabled)return;
+    let target;
+    try{target=new URL(input.value.trim());}catch{setStatus("Enter a valid direct media-file URL.","error");return;}
+    if(target.protocol!=="https:"||target.username||target.password){setStatus("For safety, use a public HTTPS link without embedded login details.","error");return;}
+    const host=target.hostname.toLowerCase().replace(/^www\./,"");
+    const blockedHosts=["localhost","127.0.0.1","0.0.0.0","::1"];
+    if(blockedHosts.includes(host)||/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host)){setStatus("Private and local network addresses cannot be downloaded here.","error");return;}
+    const platformHosts=["youtube.com","youtu.be","tiktok.com","instagram.com","facebook.com","fb.watch","x.com","twitter.com"];
+    if(platformHosts.some(domain=>host===domain||host.endsWith("."+domain))){setStatus("That is a platform page, not a direct media file. ORBIT cannot extract or bypass platform restrictions. Use an official download option or a direct file link you are authorised to save.","error");return;}
+    button.disabled=true;button.textContent="Downloading…";if(progress)progress.hidden=false;if(label)label.textContent="Connecting to media host…";
+    try{
+      const controller=AbortSignal.timeout(120000);
+      const response=await fetch(target.href,{mode:"cors",credentials:"omit",cache:"no-store",signal:controller});
+      if(!response.ok)throw new Error(response.status===403?"The host denied access to this file.":("The host returned HTTP "+response.status+"."));
+      const mime=(response.headers.get("content-type")||"").split(";")[0].trim().toLowerCase();
+      const length=Number(response.headers.get("content-length")||0);
+      if(length>500*1024*1024)throw new Error("This file is larger than ORBIT's 500 MB browser-download limit.");
+      if(!mime.startsWith("audio/")&&!mime.startsWith("video/")&&!/\.(mp3|m4a|aac|ogg|opus|wav|flac|mp4|m4v|mov|webm|mkv|avi)(?:$|\?)/i.test(target.pathname+target.search))throw new Error("The link did not identify an audio or video file.");
+      if(label)label.textContent="Receiving media file…";
+      const blob=await response.blob();
+      if(!blob.size)throw new Error("The media file was empty.");
+      if(blob.size>500*1024*1024)throw new Error("This file is larger than ORBIT's 500 MB browser-download limit.");
+      if(!blob.type.startsWith("audio/")&&!blob.type.startsWith("video/")&&!mime.startsWith("audio/")&&!mime.startsWith("video/"))throw new Error("The host did not return an audio or video file.");
+      const filename=offlineDownloadName(decodeURIComponent(target.pathname.split("/").pop()||"ORBIT-media"),blob.type||mime);
+      const id="direct-"+Date.now()+"-"+Math.random().toString(36).slice(2,9);
+      const objectUrl=URL.createObjectURL(blob);
+      const anchor=document.createElement("a");anchor.href=objectUrl;anchor.download=filename;anchor.style.display="none";document.body.appendChild(anchor);anchor.click();anchor.remove();
+      try{
+        await offlineDBRequest("readwrite",store=>store.put({id,title:filename.replace(/\.[^.]+$/,""),kind:blob.type.startsWith("video/")||/\.(mp4|m4v|mov|webm|mkv|avi)$/i.test(filename)?"video":"audio",artwork:"",savedAt:Date.now(),bytes:blob.size,mime:blob.type||mime,filename,blob}));
+        setStatus("Downloaded "+filename+" and added it to your ORBIT offline library.","success");notify("Saved to your device and ORBIT Downloads.");loadOfflineLibrary();
+      }catch(storageError){setStatus("The file was downloaded to your device, but browser storage could not save an offline copy. Check available storage.","warning");notify("Downloaded to your device; offline library save failed.");}
+      setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+      if(label)label.textContent="Download complete";
+    }catch(error){
+      const message=error?.name==="TimeoutError"?"The download timed out. Try a smaller file or another host.":error?.message||"The host blocked this download. It may not allow cross-origin browser access.";
+      setStatus(message+" ORBIT does not relay arbitrary URLs through its server.","error");if(label)label.textContent="Download unavailable";
+    }finally{button.disabled=false;button.textContent="Download media";if(progress)setTimeout(()=>{progress.hidden=true;},1800);}
+  });
+}
 async function importOmniVideo(){
   const input=$("#omnisave-import-file"),status=$("#omnisave-import-status"),button=$("#omnisave-import-button"),file=input?.files?.[0];
   if(!file){notify("Choose a movie file from your device first.");return;}
@@ -1171,6 +1226,7 @@ function setupEvents(){
 }
 async function boot(){
   setupEvents();
+  setupUniversalDownloader();
   $("#connection-status").textContent="Spinn Radio catalogue ready";
   await loadFeatured();
   loadItunes("podcasts","top podcasts").catch(()=>$("#podcast-results").innerHTML='<div class="empty-state">Podcast catalogue unavailable.</div>');
