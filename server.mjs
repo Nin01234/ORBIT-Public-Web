@@ -32,6 +32,7 @@ async function loadTvCatalog() {
 }
 async function api(req,res,url) {
   const p=url.pathname;
+  if(p==="/api/features") return send(res,200,{universalDownloader:process.env.ORBIT_UNIVERSAL_DOWNLOADER_ENABLED!=="false"},"no-store");
   if(p==="/api/radio-stations") {
     const allowedParams=new Set(["name","tag","countrycode","language","limit","offset","order","reverse","hidebroken"]);
     const q=new URLSearchParams();
