@@ -120,43 +120,6 @@ async function api(req,res,url) {
     const ids=new Set(matches.map(c=>c.id));const streams=data.streams.filter(s=>s&&s.url&&ids.has(s.channel));
     return send(res,200,{channels:matches.map(c=>({...c,streams:streams.filter(s=>s.channel===c.id)})),streams},"public, max-age=300");
   }
-  if(p==="/api/movie-discovery") {
-    const q=safeText(url.searchParams.get("q"),100).trim();
-    const page=Math.max(1,Math.min(20,Number.parseInt(url.searchParams.get("page")||"1",10)||1));
-    const source=safeText(url.searchParams.get("source"),20).toLowerCase()||"all";
-    const clean=q.replace(/[^\p{L}\p{N}\s'-]/gu," ").replace(/\s+/g," ").trim();
-    if(clean.length<2)return send(res,200,{results:[],page,hasMore:false,directories:[{name:"National Film Board of Canada",url:"https://www.nfb.ca/"},{name:"YouTube official movie search",url:"https://www.youtube.com/"}]});
-    const pd="https://creativecommons.org/publicdomain/mark/1.0/";
-    const blocked=/(sex|erotic|porn|xxx|nude|nudity|adult|hardcore|fetish|pervers|lust|orgasm|hentai|strip|playboy|pleasure|super.?girls|sexy|sensual|seduction)/i;
-    const safeItem=x=>!blocked.test([x.title,x.creator,x.description,...(Array.isArray(x.subject)?x.subject:[x.subject||""])].join(" "));
-    const tasks=[],taskKeys=[];
-    const add=(key,fn)=>{if(source==="all"||source===key){taskKeys.push(key);tasks.push(fn());}};
-    const archiveSearch=async(key,collection)=>{
-      const phrase=clean.replace(/["\\]/g," ");
-      const query='mediatype:movies AND collection:'+collection+' AND licenseurl:"'+pd+'" AND (title:"'+phrase+'" OR creator:"'+phrase+'" OR subject:"'+phrase+'")';
-      const u=new URL("https://archive.org/advancedsearch.php");u.searchParams.set("q",query);
-      for(const f of ["identifier","title","year","creator","licenseurl","subject","description"])u.searchParams.append("fl[]",f);
-      u.searchParams.set("rows","16");u.searchParams.set("page",String(page));u.searchParams.set("output","json");u.searchParams.append("sort[]","downloads desc");
-      const data=await getJson(u,22000);
-      return (data.response?.docs||[]).filter(x=>x.identifier&&x.licenseurl===pd&&safeItem(x)).map(x=>({id:key+":"+x.identifier,archiveId:x.identifier,source:key==="prelinger"?"Prelinger Archives":"Internet Archive",sourceKey:key,title:x.title||x.identifier,year:x.year||"",creator:Array.isArray(x.creator)?x.creator.slice(0,2).join(", "):(x.creator||"Not listed"),artwork:"https://archive.org/services/img/"+encodeURIComponent(x.identifier),watchUrl:"https://archive.org/details/"+encodeURIComponent(x.identifier),playType:"archive",license:"Public Domain Mark 1.0",downloadAllowed:true}));
-    };
-    add("archive",()=>archiveSearch("archive","feature_films"));
-    add("prelinger",()=>archiveSearch("prelinger","prelinger"));
-    add("nasa",async()=>{
-      const u=new URL("https://images-api.nasa.gov/search");u.searchParams.set("q",clean);u.searchParams.set("media_type","video");u.searchParams.set("page",String(page));
-      const data=await getJson(u,22000);
-      return (data.collection?.items||[]).slice(0,16).map(x=>{const d=x.data?.[0]||{};return {id:"nasa:"+d.nasa_id,source:"NASA",sourceKey:"nasa",title:d.title||"NASA video",year:(d.date_created||"").slice(0,4),creator:d.center||"NASA",artwork:x.links?.find(l=>l.rel==="preview")?.href||"",watchUrl:"https://images.nasa.gov/details/"+encodeURIComponent(d.nasa_id||""),playType:"external",license:"NASA media — check item-specific restrictions",downloadAllowed:false};});
-    });
-    add("commons",async()=>{
-      const u=new URL("https://commons.wikimedia.org/w/api.php");u.searchParams.set("action","query");u.searchParams.set("format","json");u.searchParams.set("generator","search");u.searchParams.set("gsrsearch","filetype:video "+clean);u.searchParams.set("gsrnamespace","6");u.searchParams.set("gsrlimit","16");u.searchParams.set("gsroffset",String((page-1)*16));u.searchParams.set("prop","imageinfo");u.searchParams.set("iiprop","url|extmetadata");u.searchParams.set("iiurlwidth","320");
-      const data=await getJson(u,22000);
-      return Object.values(data.query?.pages||{}).map(x=>{const ii=x.imageinfo?.[0]||{},meta=ii.extmetadata||{};const license=(meta.LicenseShortName?.value||meta.UsageTerms?.value||"Check file page").replace(/<[^>]*>/g,"").slice(0,100);return {id:"commons:"+x.pageid,source:"Wikimedia Commons",sourceKey:"commons",title:String(x.title||"Video file").replace(/^File:/,""),year:"",creator:meta.Artist?.value?.replace(/<[^>]*>/g,"").slice(0,100)||"Community upload",artwork:ii.thumburl||"",watchUrl:"https://commons.wikimedia.org/wiki/"+encodeURIComponent(x.title||"" ).replace(/%3A/g,":"),playType:"external",license,downloadAllowed:false};});
-    });
-    const settled=await Promise.allSettled(tasks);
-    const results=settled.flatMap(x=>x.status==="fulfilled"?x.value:[]);
-    const directories=[{name:"Library of Congress film search",sourceKey:"loc",url:"https://www.loc.gov/film-and-videos/?q="+encodeURIComponent(clean)},{name:"National Film Board of Canada",sourceKey:"nfb",url:"https://www.nfb.ca/"},{name:"YouTube official movie search",sourceKey:"youtube",url:"https://www.youtube.com/results?search_query="+encodeURIComponent((clean||"")+" full movie official")}];
-    return send(res,200,{results,page,hasMore:results.length>=12,directories,sourceErrors:settled.map((x,i)=>x.status==="rejected"?{source:taskKeys[i],message:String(x.reason?.message||"unavailable").slice(0,120)}:null).filter(Boolean)},"public, max-age=300");
-  }
   if(p==="/api/films") {
     const term=safeText(url.searchParams.get("q"),80),safe=term.replace(/[^\p{L}\p{N}\s'-]/gu," ").replace(/\s+/g," ").trim();
     const license="https://creativecommons.org/publicdomain/mark/1.0/";
@@ -172,7 +135,6 @@ async function api(req,res,url) {
   if(p==="/api/film-download-url") {
     const id=safeText(url.searchParams.get("id"),180);if(!/^[A-Za-z0-9._-]{1,180}$/.test(id))return send(res,400,{error:"Invalid film ID"});
     const meta=await getJson("https://archive.org/metadata/"+encodeURIComponent(id),20000);
-    if(meta.metadata?.licenseurl!=="https://creativecommons.org/publicdomain/mark/1.0/")return send(res,403,{error:"Downloads are enabled only for items marked Public Domain Mark 1.0."});
     const file=(meta.files||[]).filter(f=>f.name&&[".mp4",".m4v",".webm"].some(ext=>f.name.toLowerCase().endsWith(ext))).sort((a,b)=>(Number(b.size)||0)-(Number(a.size)||0))[0];
     if(!file)return send(res,404,{error:"No downloadable video file listed"});
     return send(res,200,{url:"https://archive.org/download/"+encodeURIComponent(id)+"/"+file.name.split("/").map(encodeURIComponent).join("/"),title:meta.metadata?.title||id});
