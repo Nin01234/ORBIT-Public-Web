@@ -218,7 +218,15 @@ function showView(name){
   if(name==="movies"&&!$("#movie-results").dataset.loaded){loadArchiveFilms("trending").then(()=>$("#movie-results").dataset.loaded="1").catch(()=>$("#movie-results").innerHTML='<div class="empty-state">TMDB movie catalogue is temporarily unavailable.</div>');}
   if(name==="favorites")refreshFavViews();
   if(name==="downloads")loadOfflineLibrary();
-  if(name==="omnisave")loadOmniEmbeddedSite();
+  if(name==="omnisave"){
+    const embedded=$("#omnisave-frame");
+    if(embedded&&embedded.dataset.loaded!=="1"){
+      const status=$("#omnisave-status");
+      if(status)status.textContent="Connecting to VideoDownloader.site inside ORBIT…";
+      embedded.src=embedded.dataset.src||"https://videodownloader.site/";
+      embedded.dataset.loaded="1";
+    }
+  }
   if(name==="audiobooks"&&!$("#book-results")?.dataset.loaded)loadBooks();
   window.scrollTo({top:0,behavior:"smooth"});
 }
