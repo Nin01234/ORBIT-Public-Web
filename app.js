@@ -218,6 +218,7 @@ function showView(name){
   if(name==="movies"&&!$("#movie-results").dataset.loaded){loadArchiveFilms("trending").then(()=>$("#movie-results").dataset.loaded="1").catch(()=>$("#movie-results").innerHTML='<div class="empty-state">TMDB movie catalogue is temporarily unavailable.</div>');}
   if(name==="favorites")refreshFavViews();
   if(name==="downloads")loadOfflineLibrary();
+  if(name==="omnisave"&&!$("#omnisave-results")?.dataset.loaded){loadOmniMovies("popular").then(()=>$("#omnisave-results").dataset.loaded="1");}
   if(name==="audiobooks"&&!$("#book-results")?.dataset.loaded)loadBooks();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -699,7 +700,21 @@ async function importOmniVideo(){
     notify("Movie added to ORBIT Downloads on this device.");loadOfflineLibrary();input.value="";
   }catch(err){if(status)status.textContent="Could not save this file. Browser storage may be full or unavailable.";notify("Could not add movie: "+(err?.message||"storage error"));}
   finally{if(button){button.disabled=false;button.textContent="Add to ORBIT Downloads";}}
-}async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
+}
+async function loadOmniMovies(term="popular"){
+  const host=$("#omnisave-results"),status=$("#omnisave-status");if(!host)return;
+  const q=String(term||"popular").trim();host.innerHTML='<div class="loading-card">Searching free public-domain movies…</div>';
+  if(status)status.textContent=q.toLowerCase()==="popular"?"Popular public-domain full films · Internet Archive":"Searching public-domain titles for “"+q+"”…";
+  try{
+    const r=await fetch("/api/films?q="+encodeURIComponent(q),{signal:AbortSignal.timeout(30000),cache:"no-store"});
+    if(!r.ok)throw Error("Movie catalogue request failed ("+r.status+")");
+    const films=await r.json();
+    if(!Array.isArray(films))throw Error("Invalid movie catalogue response");
+    host.innerHTML=films.length?films.map(f=>'<article class="media-card film-card"><img class="media-cover film-cover" src="'+esc(f.artwork||"")+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><h3 title="'+esc(f.title||"Film")+'">'+esc(f.title||"Film")+'</h3><p>'+esc(f.year||"Year not listed")+' · '+esc(f.creator||"Not listed")+'</p><div class="media-actions"><small>Public domain</small><div class="music-card-actions"><button data-film-play="'+esc(f.id)+'" data-title="'+esc(f.title||"Film")+'">Watch in ORBIT</button><button data-download-film="'+esc(f.id)+'" data-title="'+esc(f.title||"Film")+'">Download</button></div></div></article>').join(""):'<div class="empty-state">No public-domain movie matches found. Try a shorter or different title.</div>';
+    if(status)status.textContent=films.length+" public-domain movies found. Download saves a file to your device and adds it to ORBIT Downloads.";
+  }catch(e){host.innerHTML='<div class="empty-state">Movie search could not connect. Check your connection and try again.</div>';if(status)status.textContent="Search failed: "+(e?.message||"catalogue unavailable");}
+}
+async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
 async function playOffline(id,kind,title){try{const item=await getOfflineItem(id);if(!item?.blob)throw Error();const src=URL.createObjectURL(item.blob);if(kind==="film"||kind==="video"){const panel=$("#film-player-panel");showView("movies");panel.innerHTML='<video class="offline-video" src="'+src+'" controls autoplay playsinline></video>';panel.scrollIntoView({behavior:"smooth",block:"nearest"});setPlayer(title,"Saved on this device","Offline video");return;}currentOfflineAudioId=String(id);clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;refreshOfflineMusicQueue().catch(()=>{});await audio.play();setPlayer(title,"Saved on this device","Offline music");}catch{notify("This offline file could not be found or played.");}}
 function bookCard(b){
   const author=Array.isArray(b.authors)?b.authors.map(a=>a.first_name+" "+a.last_name).join(", "):"Public domain";
@@ -1066,6 +1081,7 @@ function setupEvents(){
     omni.addEventListener("dom-ready",applyOmniCleanView);omni.addEventListener("did-finish-load",applyOmniCleanView);
   }
   $("#omnisave-import-button")?.addEventListener("click",importOmniVideo);
+  $("#omnisave-search-form")?.addEventListener("submit",e=>{e.preventDefault();const q=$("#omnisave-query")?.value.trim();if(!q){notify("Enter a movie title to search.");return;}$("#omnisave-results").dataset.loaded="0";loadOmniMovies(q).then(()=>$("#omnisave-results").dataset.loaded="1");});
   $("#omnisave-forward")?.addEventListener("click",()=>{if(omni?.canGoForward())omni.goForward();});
   $("#omnisave-reload")?.addEventListener("click",()=>omni?.reload());
   $("#omnisave-open-external")?.addEventListener("click",()=>window.open("https://videodownloader.site/","_blank"));
