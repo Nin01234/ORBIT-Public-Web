@@ -12,11 +12,28 @@ const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf
 const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
 const cache = new Map();
 const rate = new Map();
+const rateCleanup = setInterval(() => {
+  const cutoff = Date.now() - 120000;
+  for (const [ip, entry] of rate) if ((entry.lastSeen || entry.start || 0) < cutoff) rate.delete(ip);
+  while (rate.size > 50000) rate.delete(rate.keys().next().value);
+}, 60000);
+rateCleanup.unref?.();
 const TTL = { radio: 120000, music: 180000, podcast: 300000, countries: 86400000, channels: 21600000, films: 3600000, movies: 3600000 };
 let tvCatalog = null, tvCatalogAt = 0, countryList = null, countryListAt = 0;
 
+function securityHeaders(res) {
+  res.setHeader("X-Content-Type-Options","nosniff");
+  res.setHeader("X-Frame-Options","SAMEORIGIN");
+  res.setHeader("Referrer-Policy","strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy","camera=(self), microphone=(self), geolocation=()");
+  res.setHeader("X-DNS-Prefetch-Control","off");
+  res.setHeader("X-Permitted-Cross-Domain-Policies","none");
+  res.setHeader("Cross-Origin-Opener-Policy","same-origin");
+  if(process.env.RENDER) res.setHeader("Strict-Transport-Security","max-age=31536000; includeSubDomains");
+}
 function send(res,status,data,cacheControl="no-store") {
-  res.writeHead(status,{"Content-Type":"application/json; charset=utf-8","Cache-Control":cacheControl,"X-Content-Type-Options":"nosniff"});
+  securityHeaders(res);
+  res.writeHead(status,{"Content-Type":"application/json; charset=utf-8","Cache-Control":cacheControl});
   res.end(JSON.stringify(data));
 }
 function cached(key) { const x=cache.get(key); return x && Date.now()-x.at < x.ttl ? x.data : null; }
@@ -235,15 +252,16 @@ async function api(req,res,url) {
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||"/","http://localhost");
-  if(url.pathname==="/healthz"){res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
+  if(url.pathname==="/healthz"){securityHeaders(res);res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
   if(url.pathname==="/download"||url.pathname==="/download/windows"){
-    res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.4/ORBIT-Setup-1.1.4-x64.exe","Cache-Control":"no-store"}).end();
+    securityHeaders(res);res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.6/ORBIT-Setup-1.1.6-x64.exe","Cache-Control":"no-store"}).end();
     return;
   }
   if(url.pathname.startsWith("/api/")){
     const ip=(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").toString().split(",")[0].trim();
-    const now=Date.now(),entry=rate.get(ip)||{start:now,count:0};
-    if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;rate.set(ip,entry);
+    const now=Date.now(),entry=rate.get(ip)||{start:now,count:0,lastSeen:now};
+    if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;entry.lastSeen=now;rate.set(ip,entry);
+    if(rate.size>50000){for(let i=0;i<10000;i++){const first=rate.keys().next().value;if(first===undefined)break;rate.delete(first);}}
     if(entry.count>150){res.writeHead(429,{"Retry-After":"60","Content-Type":"application/json"}).end('{"error":"Too many requests. Please wait a minute."}');return;}
     if(req.method!=="GET"&&req.method!=="HEAD"){res.writeHead(405,{"Allow":"GET, HEAD"}).end("Method not allowed");return;}
     try{return await api(req,res,url);}catch(error){console.error("ORBIT public API:",url.pathname,error.message);if(!res.headersSent)send(res,502,{error:"The requested service is temporarily unavailable."});else res.destroy();return;}
@@ -254,7 +272,7 @@ const server=http.createServer(async(req,res)=>{
   const icon=/^icons\/[A-Za-z0-9._-]+\.png$/i.test(name);
   if(!allowed.has(name)&&!icon){res.writeHead(404).end("Not found");return;}
   const target=path.resolve(root,name);if(!target.startsWith(root+path.sep)){res.writeHead(403).end("Forbidden");return;}
-  fs.readFile(target,(err,data)=>{if(err){res.writeHead(404).end("Not found");return;}res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","X-Content-Type-Options":"nosniff","Referrer-Policy":"strict-origin-when-cross-origin","X-Frame-Options":"SAMEORIGIN","Permissions-Policy":"camera=(), microphone=(self), geolocation=()","Cache-Control":name==="index.html"?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
+  fs.readFile(target,(err,data)=>{if(err){securityHeaders(res);res.writeHead(404).end("Not found");return;}securityHeaders(res);res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","Cache-Control":name==="index.html"?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
 });
 const liveRooms=new Map();
 const liveWss=new WebSocketServer({noServer:true,maxPayload:8192});
