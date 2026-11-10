@@ -218,7 +218,7 @@ function showView(name){
   if(name==="movies"&&!$("#movie-results").dataset.loaded){loadArchiveFilms("trending").then(()=>$("#movie-results").dataset.loaded="1").catch(()=>$("#movie-results").innerHTML='<div class="empty-state">TMDB movie catalogue is temporarily unavailable.</div>');}
   if(name==="favorites")refreshFavViews();
   if(name==="downloads")loadOfflineLibrary();
-  if(name==="omnisave"&&!$("#omnisave-results")?.dataset.loaded){loadOmniMovies("popular").then(()=>$("#omnisave-results").dataset.loaded="1");}
+  if(name==="omnisave")loadOmniEmbeddedSite();
   if(name==="audiobooks"&&!$("#book-results")?.dataset.loaded)loadBooks();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -1071,20 +1071,30 @@ function setupEvents(){
   document.addEventListener("click",e=>{if(discoverGroup&&!discoverGroup.contains(e.target)){discoverGroup.classList.remove("is-open");discoverToggle?.setAttribute("aria-expanded","false");}});
   window.orbitDesktop?.onOfflineUpdated?.(data=>{loadOfflineLibrary();});
   window.orbitDesktop?.onOmniDownload?.(data=>{const status=$("#omnisave-status");if(status){status.textContent=data?.message||"OmniSave download update.";status.dataset.state=data?.state||"info";}if(data?.state==="completed")notify("Saved to ORBIT Downloads: "+(data?.title||"video"));else if(data?.state==="error")notify(data.message||"Download failed.");});
-  const omni=$("#omnisave-webview"),omniStatus=$("#omnisave-status");
-  if(omni){
-    omni.addEventListener("did-start-loading",()=>{if(omniStatus)omniStatus.textContent="Connecting to videodownloader.site?";});
-    omni.addEventListener("dom-ready",()=>{if(omniStatus)omniStatus.textContent="OmniSave loaded inside ORBIT. Use the website search and controls.";});
-    omni.addEventListener("did-fail-load",e=>{if(e.errorCode!==-3&&omniStatus)omniStatus.textContent="The site could not be embedded or reached. Try Reload or Open website.";});
-    omni.addEventListener("did-navigate",e=>{if(omniStatus){try{omniStatus.textContent="Connected: "+new URL(e.url).hostname;}catch{}}});
-    const applyOmniCleanView=()=>{try{omni.executeJavaScript("(()=>{const main=document.querySelector('main')||document.body;const apply=()=>{document.querySelector('header')?.remove();document.querySelector('footer')?.remove();document.querySelectorAll('[id^=div-gpt-ad],[data-ad]').forEach(e=>e.remove());for(const e of [...main.querySelectorAll('*')]){if(e.children.length===0&&/omnisave/i.test(e.textContent||'')&&!e.closest('form')){const p=e.closest('a,button,[role=button],section,nav')||e;p.style.setProperty('display','none','important');}}document.body.style.margin='0';document.body.style.background='#0b1117';main.style.maxWidth='1100px';main.style.margin='0 auto';main.style.padding='20px 24px 36px';};apply();if(!window.__orbitCleanViewObserver){window.__orbitCleanViewObserver=new MutationObserver(()=>{clearTimeout(window.__orbitCleanViewTimer);window.__orbitCleanViewTimer=setTimeout(apply,120);});window.__orbitCleanViewObserver.observe(main,{childList:true,subtree:true});}let n=0;const retry=setInterval(()=>{apply();if(++n>=20)clearInterval(retry);},500);})()");}catch(e){}};
-    omni.addEventListener("dom-ready",applyOmniCleanView);omni.addEventListener("did-finish-load",applyOmniCleanView);
+  const omniFrame=$("#omnisave-frame"),omniStatus=$("#omnisave-status");
+  function loadOmniEmbeddedSite(){
+    if(!omniFrame||omniFrame.dataset.loaded==="1")return;
+    if(omniStatus)omniStatus.textContent="Connecting to VideoDownloader.site inside ORBIT…";
+    omniFrame.src=omniFrame.dataset.src||"https://videodownloader.site/";
+    omniFrame.dataset.loaded="1";
   }
+  omniFrame?.addEventListener("load",()=>{
+    if(omniStatus)omniStatus.textContent="VideoDownloader.site loaded inside ORBIT. Use its search, quality and download controls below.";
+  });
+  $("#omnisave-reload")?.addEventListener("click",()=>{
+    if(!omniFrame)return;
+    if(omniFrame.dataset.loaded!=="1"){loadOmniEmbeddedSite();return;}
+    if(omniStatus)omniStatus.textContent="Reloading VideoDownloader.site…";
+    omniFrame.src=omniFrame.src;
+  });
+  $("#omnisave-fullscreen")?.addEventListener("click",async()=>{
+    if(!omniFrame)return;
+    try{
+      if(document.fullscreenElement)await document.exitFullscreen();
+      else await omniFrame.requestFullscreen();
+    }catch{notify("Full screen is not available in this browser.");}
+  });
   $("#omnisave-import-button")?.addEventListener("click",importOmniVideo);
-  $("#omnisave-search-form")?.addEventListener("submit",e=>{e.preventDefault();const q=$("#omnisave-query")?.value.trim();if(!q){notify("Enter a movie title to search.");return;}$("#omnisave-results").dataset.loaded="0";loadOmniMovies(q).then(()=>$("#omnisave-results").dataset.loaded="1");});
-  $("#omnisave-forward")?.addEventListener("click",()=>{if(omni?.canGoForward())omni.goForward();});
-  $("#omnisave-reload")?.addEventListener("click",()=>omni?.reload());
-  $("#omnisave-open-external")?.addEventListener("click",()=>window.open("https://videodownloader.site/","_blank"));
   $$("[data-go]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.go)));
   document.addEventListener("click",e=>{
     const play=e.target.closest("[data-play]");if(play){playStation(play.dataset.play);return;}
