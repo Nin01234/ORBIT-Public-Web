@@ -633,7 +633,50 @@ function openOrbitOfflineDB(){return new Promise((resolve,reject)=>{const r=inde
 async function offlineDBRequest(mode,fn){const db=await openOrbitOfflineDB();return new Promise((resolve,reject)=>{const tx=db.transaction(ORBIT_OFFLINE_STORE,mode),req=fn(tx.objectStore(ORBIT_OFFLINE_STORE));if(req){req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);}tx.oncomplete=()=>{db.close();if(!req)resolve(true);};tx.onerror=()=>{db.close();reject(tx.error);};});}
 async function getOfflineItems(){return (await offlineDBRequest("readonly",s=>s.getAll()))||[];}
 async function getOfflineItem(id){return offlineDBRequest("readonly",s=>s.get(String(id)));}
-async function downloadOffline(url,title,kind,artwork,button){const original=button?.textContent||"Download";if(button){button.disabled=true;button.textContent="Downloading…";}notify("Downloading "+(title||"media")+" to this device.");try{const r=await fetch(url,{mode:"cors",credentials:"omit",cache:"no-store"});if(!r.ok)throw new Error("The source did not allow this download ("+r.status+").");const blob=await r.blob();if(!blob.size)throw new Error("The downloaded file was empty.");const id="offline-"+Date.now()+"-"+Math.random().toString(36).slice(2,9),k=String(kind||"audio").toLowerCase()==="podcast"?"audio":String(kind||"audio").toLowerCase();await offlineDBRequest("readwrite",s=>s.put({id,title:title||"Downloaded media",kind:k,artwork:artwork||"",savedAt:Date.now(),bytes:blob.size,mime:blob.type||"application/octet-stream",blob}));notify("Saved for offline playback: "+(title||"media"));if(button)button.textContent="Downloaded";loadOfflineLibrary();return true;}catch(e){notify(e?.message||"Download failed. This source may block browser downloads.");if(button)button.textContent=original;return false;}finally{if(button){button.disabled=false;if(button.textContent==="Downloaded")setTimeout(()=>{if(button.isConnected)button.textContent=original;},2500);}}}
+function offlineDownloadName(title,kind,mime){
+  const safe=String(title||'ORBIT download').replace(/[<>:"/\\|?*\x00-\x1f]/g,' ').replace(/\s+/g,' ').trim().slice(0,100)||'ORBIT download';
+  const type=String(mime||'').toLowerCase();
+  let ext=type.includes('mpeg')||type.includes('mp3')?'.mp3':type.includes('audio/mp4')||type.includes('m4a')?'.m4a':type.includes('video/mp4')?'.mp4':type.includes('mp4')?'.mp4':type.includes('ogg')?'.ogg':type.includes('wav')?'.wav':type.includes('webm')?'.webm':type.includes('flac')?'.flac':type.includes('aac')?'.aac':type.includes('m4a')?'.m4a':(String(kind).toLowerCase()==='film'||String(kind).toLowerCase()==='video'?'.mp4':'.mp3');
+  return safe.replace(/\.(mp3|mp4|m4a|ogg|wav|webm|flac|aac|audio)$/i,'')+ext;
+}
+async function downloadOffline(url,title,kind,artwork,button){
+  const original=button?.textContent||'Download';
+  if(button){button.disabled=true;button.textContent='Downloading…';}
+  notify('Downloading '+(title||'media')+' to your device…');
+  let blobUrl='';
+  try{
+    const r=await fetch(url,{mode:'cors',credentials:'omit',cache:'no-store'});
+    if(!r.ok)throw new Error(r.status===403?'The artist has not enabled downloads for this track.':'The source did not allow this download ('+r.status+').');
+    const blob=await r.blob();
+    if(!blob.size)throw new Error('The downloaded file was empty.');
+    const id='offline-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);
+    const k=String(kind||'audio').toLowerCase()==='podcast'?'audio':String(kind||'audio').toLowerCase();
+    const filename=offlineDownloadName(title,k,blob.type);
+    // Save a browser-managed file to the visitor's normal Downloads folder.
+    blobUrl=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=blobUrl;link.download=filename;link.style.display='none';
+    document.body.appendChild(link);link.click();link.remove();
+    // Keep a second copy in IndexedDB so ORBIT's Downloads page can play it offline.
+    try{
+      await offlineDBRequest('readwrite',s=>s.put({id,title:title||'Downloaded media',kind:k,artwork:artwork||'',savedAt:Date.now(),bytes:blob.size,mime:blob.type||'application/octet-stream',filename,blob}));
+      notify('Downloaded to your PC and saved in ORBIT for offline playback: '+(title||'media'));
+      if(button)button.textContent='Downloaded';
+      loadOfflineLibrary();
+    }catch(storageError){
+      notify('The file was sent to your Downloads folder, but browser storage is full or unavailable, so it was not added to ORBIT offline playback.');
+      if(button)button.textContent='Downloaded to PC';
+    }
+    return true;
+  }catch(e){
+    notify(e?.message||'Download failed. This source may block browser downloads.');
+    if(button)button.textContent=original;
+    return false;
+  }finally{
+    if(blobUrl)setTimeout(()=>URL.revokeObjectURL(blobUrl),600000);
+    if(button){button.disabled=false;if(button.textContent==='Downloaded'||button.textContent==='Downloaded to PC')setTimeout(()=>{if(button.isConnected)button.textContent=original;},3000);}
+  }
+}
+
 async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
 async function playOffline(id,kind,title){try{const item=await getOfflineItem(id);if(!item?.blob)throw Error();const src=URL.createObjectURL(item.blob);if(kind==="film"||kind==="video"){const panel=$("#film-player-panel");showView("movies");panel.innerHTML='<video class="offline-video" src="'+src+'" controls autoplay playsinline></video>';panel.scrollIntoView({behavior:"smooth",block:"nearest"});setPlayer(title,"Saved on this device","Offline video");return;}currentOfflineAudioId=String(id);clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;refreshOfflineMusicQueue().catch(()=>{});await audio.play();setPlayer(title,"Saved on this device","Offline music");}catch{notify("This offline file could not be found or played.");}}
 async function loadBooks(term=""){
