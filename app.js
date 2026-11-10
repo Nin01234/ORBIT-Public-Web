@@ -726,7 +726,8 @@ async function setupUniversalDownloader(){
       if(!blob.size)throw new Error("The media file was empty.");
       if(blob.size>500*1024*1024)throw new Error("This file is larger than ORBIT's 500 MB browser-download limit.");
       if(!blob.type.startsWith("audio/")&&!blob.type.startsWith("video/")&&!mime.startsWith("audio/")&&!mime.startsWith("video/"))throw new Error("The host did not return an audio or video file.");
-      const filename=offlineDownloadName(decodeURIComponent(target.pathname.split("/").pop()||"ORBIT-media"),blob.type||mime);
+      let suggestedName="ORBIT-media";try{suggestedName=decodeURIComponent(target.pathname.split("/").pop()||"ORBIT-media");}catch{}
+      const filename=offlineDownloadName(suggestedName,blob.type.startsWith("video/")?"video":"audio",blob.type||mime);
       const id="direct-"+Date.now()+"-"+Math.random().toString(36).slice(2,9);
       const objectUrl=URL.createObjectURL(blob);
       const anchor=document.createElement("a");anchor.href=objectUrl;anchor.download=filename;anchor.style.display="none";document.body.appendChild(anchor);anchor.click();anchor.remove();
