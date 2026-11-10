@@ -1,5 +1,5 @@
 /* Public-web-only presentation changes. Does not touch desktop/mobile app source. */
-.orbit-mobile-install { display: none !important; }
+.orbit-mobile-install { display: block !important; }
 /* Discover hover submenu: Global Live and Audiobooks */
 .nav-discover-group{position:relative;display:block;min-width:0}
 .nav-discover-group>.nav-link{width:100%}
@@ -28,3 +28,134 @@
 .orbit-download-cta{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid rgba(255,255,255,.34);color:#fff;background:rgba(255,255,255,.08)}
 .hero-actions{display:flex;flex-wrap:wrap;gap:10px}
 @media(max-width:800px){.orbit-download-top{display:none}.orbit-download-cta{font-size:12px;padding:10px 12px}}
+
+/* ==========================================================================
+   Light Mode Accessibility & Contrast Fixes
+   ========================================================================== */
+
+/* 1. Header & Hero Download CTAs in Light Mode */
+html[data-theme="light"] .orbit-download-top{color:#1a4f8b!important;background:rgba(54,112,190,.12)!important;border-color:rgba(54,112,190,.32)!important}
+html[data-theme="light"] .orbit-download-top:hover{background:rgba(54,112,190,.22)!important}
+html[data-theme="light"] .orbit-download-cta{color:var(--ink,#202923)!important;border-color:var(--line,#d9dfda)!important;background:#fff!important;box-shadow:0 1px 4px rgba(0,0,0,.08)!important}
+html[data-theme="light"] .orbit-download-cta:hover{background:var(--panel2,#eef1ee)!important}
+
+/* 2. YouTube Music Video Player & Placeholder */
+html[data-theme="light"] .youtube-player-panel,
+html[data-theme="light"] #youtube-player-panel{background:#fff!important;border-color:var(--line,#d9dfda)!important}
+html[data-theme="light"] .youtube-placeholder{color:var(--muted,#657168)!important}
+html[data-theme="light"] .youtube-placeholder b{color:var(--ink,#202923)!important}
+html[data-theme="light"] .youtube-placeholder small{color:var(--muted,#657168)!important}
+html[data-theme="light"] .youtube-placeholder span{color:var(--lime,#b8874b)!important}
+
+/* 3. Music Page Status Banner & Icon Mark */
+html[data-theme="light"] .music-player-status{background:#fff!important;border-color:var(--line,#d9dfda)!important}
+html[data-theme="light"] .music-status-mark{background:#eee9df!important;color:#59472f!important}
+html[data-theme="light"] .music-player-status b{color:var(--ink,#202923)!important}
+html[data-theme="light"] .music-player-status small{color:var(--muted,#657168)!important}
+
+/* 4. Heart / Favourite Buttons */
+html[data-theme="light"] .heart-button{border-color:var(--line,#d9dfda)!important;background:none!important}
+html[data-theme="light"] .search-box kbd{border-color:var(--line,#d9dfda)!important;color:var(--muted,#657168)!important}
+
+/* 5. Mobile Connect Section ("Bring ORBIT to your phone" on Discover) */
+html[data-theme="light"] .orbit-platform-choice{border-top-color:var(--line,#d9dfda)!important}
+html[data-theme="light"] .orbit-platform-choice b{color:var(--ink,#202923)!important}
+html[data-theme="light"] .orbit-platform-choice small{color:var(--muted,#657168)!important}
+html[data-theme="light"] .orbit-platform-symbol{background:#eee9df!important;color:#59472f!important}
+html[data-theme="light"] .orbit-soon{color:#59472f!important;border-color:#d9cbb7!important;background:#eee9df!important}
+html[data-theme="light"] .orbit-qr-row b{color:var(--ink,#202923)!important}
+html[data-theme="light"] .orbit-qr-row a{color:#1a4f8b!important}
+html[data-theme="light"] .orbit-qr-row small{color:var(--muted,#657168)!important}
+html[data-theme="light"] .orbit-mobile-copy{background:#b8874b!important;color:#fff!important}
+html[data-theme="light"] .orbit-mobile-server{border-top-color:var(--line,#d9dfda)!important}
+html[data-theme="light"] .orbit-mobile-server label b{color:var(--ink,#202923)!important}
+html[data-theme="light"] .orbit-mobile-server label small,html[data-theme="light"] .orbit-mobile-server>small{color:var(--muted,#657168)!important}
+html[data-theme="light"] .orbit-mobile-server input{background:#fff!important;color:var(--ink,#202923)!important;border-color:var(--line,#d9dfda)!important}
+html[data-theme="light"] .orbit-mobile-server button{background:#b8874b!important;color:#fff!important}
+html[data-theme="light"] .orbit-mobile-footnote{border-top-color:var(--line,#d9dfda)!important;color:var(--muted,#657168)!important}
+
+
+/* 6. Brand Mark & Accent Variables in Light Mode */
+html[data-theme="light"] {
+  --lime: #b8874b !important;
+  --accent: #b8874b !important;
+}
+html[data-theme="light"] .brand-mark,
+html[data-theme="light"] .brand-dot {
+  border-color: #b8874b !important;
+  color: #b8874b !important;
+}
+
+/* 7. Action Buttons & Navigation in Light Mode */
+html[data-theme="light"] .button,
+html[data-theme="light"] button.primary,
+html[data-theme="light"] a.button {
+  background: #b8874b !important;
+  color: #fff !important;
+}
+html[data-theme="light"] .search-submit:hover {
+  background: #b8874b !important;
+  color: #fff !important;
+}
+html[data-theme="light"] .discover-submenu {
+  box-shadow: 0 10px 30px rgba(0,0,0,.12) !important;
+}
+html[data-theme="light"] .discover-submenu .nav-link:hover {
+  background: var(--panel2, #eef1ee) !important;
+  color: var(--ink, #202923) !important;
+}
+
+/* 8. Sliders & Scrubber in Light Mode */
+html[data-theme="light"] #track-seek,
+html[data-theme="light"] input[type="range"] {
+  accent-color: #b8874b !important;
+}
+html[data-theme="light"] input[type="checkbox"] {
+  accent-color: #b8874b !important;
+}
+
+/* 9. Film & Podcast Placeholders in Light Mode */
+html[data-theme="light"] .film-player-panel,
+html[data-theme="light"] #film-player-panel,
+html[data-theme="light"] .podcast-player-panel {
+  background: #fff !important;
+  border-color: var(--line, #d9dfda) !important;
+}
+html[data-theme="light"] .film-placeholder span {
+  color: #b8874b !important;
+}
+html[data-theme="light"] .film-placeholder b {
+  color: var(--ink, #202923) !important;
+}
+html[data-theme="light"] .film-placeholder small {
+  color: var(--muted, #657168) !important;
+}
+
+/* 10. Empty Media Cover & Offline Badges in Light Mode */
+html[data-theme="light"] .media-cover:empty,
+html[data-theme="light"] .media-cover.offline-placeholder {
+  background: var(--panel2, #e8eeeb) !important;
+  color: #59472f !important;
+}
+html[data-theme="light"] button[data-offline-delete] {
+  color: #a83232 !important;
+  border-color: #e0b2b2 !important;
+  background: #fff5f5 !important;
+}
+html[data-theme="light"] button[data-offline-delete]:hover {
+  background: #fee2e2 !important;
+}
+
+/* 11. Profile Modal Dialog in Light Mode */
+html[data-theme="light"] .profile-dialog {
+  background: #fff !important;
+  color: var(--ink, #202923) !important;
+  border-color: var(--line, #d9dfda) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.15) !important;
+}
+html[data-theme="light"] .profile-dialog input,
+html[data-theme="light"] .profile-dialog textarea {
+  background: #fff !important;
+  color: var(--ink, #202923) !important;
+  border-color: var(--line, #d9dfda) !important;
+}

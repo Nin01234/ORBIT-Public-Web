@@ -32,7 +32,7 @@ async function radioSearch(params={}){
 }
 async function loadFeatured(){
   const host=$("#featured-stations");if(!host)return;
-  host.innerHTML='<div class="loading-card">Finding live stations around the worldï¿½</div>';
+  host.innerHTML='<div class="loading-card">Finding live stations around the world…</div>';
   try{
     const q=new URLSearchParams({limit:"8",hidebroken:"true",order:"clickcount",reverse:"true"});
     const response=await fetch(SPINN_RADIO_API+"?"+q.toString(),{cache:"no-store",signal:AbortSignal.timeout(12000)});
@@ -218,6 +218,7 @@ function showView(name){
   if(name==="movies"&&!$("#movie-results").dataset.loaded){loadArchiveFilms("trending").then(()=>$("#movie-results").dataset.loaded="1").catch(()=>$("#movie-results").innerHTML='<div class="empty-state">TMDB movie catalogue is temporarily unavailable.</div>');}
   if(name==="favorites")refreshFavViews();
   if(name==="downloads")loadOfflineLibrary();
+  if(name==="audiobooks"&&!$("#book-results")?.dataset.loaded)loadBooks();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 function initGlobe(){
@@ -359,16 +360,22 @@ function spotifyRenderSaved(){
  host.innerHTML=list.length?list.map((v,i)=>'<article class="media-card spotify-track-card"><h3>'+esc(v.title)+'</h3><p>Spotify '+esc(v.type)+'</p><div class="media-actions"><button type="button" data-spotify-saved-play="'+i+'">Play</button><button type="button" data-spotify-saved-remove="'+i+'">Remove</button></div></article>').join(""):'<div class="empty-state">Save a Spotify track, album or playlist to keep it here.</div>';
 }
 function spotifyEmbed(item){
- const host=$("#spotify-orbit-player"),now=$("#spotify-orbit-now");host.innerHTML="";
+ const host=$("#spotify-orbit-player"),now=$("#spotify-orbit-now");
+ if(!host)return;
+ host.innerHTML="";
  const frame=document.createElement("iframe");frame.title="Spotify official embedded player";frame.loading="eager";frame.allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";frame.setAttribute("allowfullscreen","");
  frame.src="https://open.spotify.com/embed/"+item.type+"/"+encodeURIComponent(item.id)+"?utm_source=generator&theme="+(document.documentElement.dataset.theme==="light"?"1":"0");
- frame.style.cssText="display:block;width:100%;height:"+(item.type==="track"?"152px":"352px")+";border:0;border-radius:12px;background:#121212";host.appendChild(frame);now.hidden=false;
- $("#spotify-orbit-now-title").textContent=item.title||("Spotify "+item.type);spotifySetStatus("Official Spotify "+item.type+" player loaded.");
+ frame.style.cssText="display:block;width:100%;height:"+(item.type==="track"?"152px":"352px")+";border:0;border-radius:12px;background:#121212";host.appendChild(frame);
+ if(now)now.hidden=false;
+ const nowTitle=$("#spotify-orbit-now-title");if(nowTitle)nowTitle.textContent=item.title||("Spotify "+item.type);
+ spotifySetStatus("Official Spotify "+item.type+" player loaded.");
 }
 function spotifyLoadLink(value){
  const item=spotifyParseLink(value);if(!item){notify("Enter a valid Spotify track, album or playlist link.");return;}
- item.title="Spotify "+item.type;spotifyEmbed(item);window.orbitCurrentSpotifyItem=item;$("#spotify-orbit-link").value=item.url;
- $("#spotify-orbit-results").innerHTML='<article class="media-card spotify-track-card"><h3>'+esc(item.title)+'</h3><p>Spotify '+esc(item.type)+'</p><div class="media-actions"><button type="button" data-spotify-save="1">Save to ORBIT</button><a class="spotify-track-link" href="'+esc(item.url)+'" target="_blank" rel="noopener noreferrer">Open on Spotify ↗</a></div></article>';
+ item.title="Spotify "+item.type;spotifyEmbed(item);window.orbitCurrentSpotifyItem=item;
+ const linkEl=$("#spotify-orbit-link");if(linkEl)linkEl.value=item.url;
+ const resultsEl=$("#spotify-orbit-results");
+ if(resultsEl)resultsEl.innerHTML='<article class="media-card spotify-track-card"><h3>'+esc(item.title)+'</h3><p>Spotify '+esc(item.type)+'</p><div class="media-actions"><button type="button" data-spotify-save="1">Save to ORBIT</button><a class="spotify-track-link" href="'+esc(item.url)+'" target="_blank" rel="noopener noreferrer">Open on Spotify ↗</a></div></article>';
 }
 function spotifySaveCurrent(){
  const v=window.orbitCurrentSpotifyItem;if(!v){notify("Load a Spotify link first.");return;}
@@ -433,14 +440,14 @@ function playAudioTrack(id){
 async function refreshOfflineMusicQueue(){offlineMusicQueue=(await getOfflineItems()).filter(x=>String(x.kind||"").toLowerCase()==="audio").sort((a,b)=>a.savedAt-b.savedAt);return offlineMusicQueue;}
 async function playOfflineMusicAt(index){if(!offlineMusicQueue.length){notify("No downloaded music is available.");return;}if(index<0||index>=offlineMusicQueue.length){notify("There are no more downloaded music tracks.");return;}const item=offlineMusicQueue[index];await playOffline(item.id,"audio",item.title);}
 async function stepMusic(direction){
-  if(currentOfflineAudioId || direction>0){
-    try{await refreshOfflineMusicQueue();}catch(error){if(currentOfflineAudioId){notify("Could not load your downloaded music list.");return;}}
+  if(currentOfflineAudioId){
+    try{await refreshOfflineMusicQueue();}catch(error){notify("Could not load your downloaded music list.");return;}
     if(offlineMusicQueue.length){
-      const currentIndex=currentOfflineAudioId?offlineMusicQueue.findIndex(x=>String(x.id)===currentOfflineAudioId):-1;
+      const currentIndex=offlineMusicQueue.findIndex(x=>String(x.id)===currentOfflineAudioId);
       const nextIndex=currentIndex<0?(direction>0?0:offlineMusicQueue.length-1):currentIndex+direction;
       await playOfflineMusicAt(nextIndex);return;
     }
-    if(currentOfflineAudioId){notify("No downloaded music is available.");return;}
+    notify("No downloaded music is available.");return;
   }
   if(!musicQueue.length||musicQueueIndex<0){notify("No downloaded music or queued music is available.");return;}
   const n=musicQueueIndex+direction;if(n<0||n>=musicQueue.length){notify("No more tracks in this list.");return;}playAudioTrack(musicQueue[n].id);
@@ -681,22 +688,90 @@ async function downloadOffline(url,title,kind,artwork,button){
 
 async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
 async function playOffline(id,kind,title){try{const item=await getOfflineItem(id);if(!item?.blob)throw Error();const src=URL.createObjectURL(item.blob);if(kind==="film"||kind==="video"){const panel=$("#film-player-panel");showView("movies");panel.innerHTML='<video class="offline-video" src="'+src+'" controls autoplay playsinline></video>';panel.scrollIntoView({behavior:"smooth",block:"nearest"});setPlayer(title,"Saved on this device","Offline video");return;}currentOfflineAudioId=String(id);clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;refreshOfflineMusicQueue().catch(()=>{});await audio.play();setPlayer(title,"Saved on this device","Offline music");}catch{notify("This offline file could not be found or played.");}}
+function bookCard(b){
+  const author=Array.isArray(b.authors)?b.authors.map(a=>a.first_name+" "+a.last_name).join(", "):"Public domain";
+  const title=b.title||"Audiobook";
+  const rss=b.url_rss||"";
+  return `<article class="media-card book-card"><div class="media-cover book-cover">▤</div><h3 title="${esc(title)}">${esc(title)}</h3><p>${esc(author)}</p><div class="media-actions"><small>LibriVox, free</small><div class="music-card-actions"><button data-bookplay="${esc(rss)}" data-title="${esc(title)}">Listen</button><button data-bookdownload="${esc(rss)}" data-title="${esc(title)}" title="Save audiobook for offline playback">↓ Save offline</button></div></div></article>`;
+}
 async function loadBooks(term=""){
-  const host=$("#book-results");host.innerHTML='<div class="loading-card">Searching the LibriVox catalogue…</div>';
+  const host=$("#book-results");if(!host)return;
+  host.innerHTML='<div class="loading-card">Searching the LibriVox catalogue…</div>';
+  const cleanTerm=(term||"").trim();
+  const pillMap={popular:"",fiction:"^stories",adventure:"^adventure",poetry:"^poetry"};
+  const query=pillMap[cleanTerm.toLowerCase()]!==undefined?pillMap[cleanTerm.toLowerCase()]:cleanTerm;
   try{
-    const url="https://librivox.org/api/feed/audiobooks/?format=json&limit=30"+(term?"&title="+encodeURIComponent(term):"");
-    const requestUrl=window.orbitDesktop?.isDesktop?"/api/librivox?url="+encodeURIComponent(url):url;const r=await fetch(requestUrl);if(!r.ok)throw new Error("LibriVox unavailable");const data=await r.json();const books=data.books||[];
-    host.innerHTML=books.length?books.map(b=>{
-      const author=Array.isArray(b.authors)?b.authors.map(a=>a.first_name+" "+a.last_name).join(", "):"Public domain";
-      return `<article class="media-card"><div class="media-cover book-cover">▤</div><h3 title="${esc(b.title)}">${esc(b.title)}</h3><p>${esc(author)}</p><div class="media-actions"><small>LibriVox, free</small><button data-bookplay="${esc(b.url_rss||"")}" data-title="${esc(b.title)}">Listen </button></div></article>`;
-    }).join(""):'<div class="empty-state">No audiobooks found for that search.</div>';
+    let books=[];
+    if(!query){
+      const url="https://librivox.org/api/feed/audiobooks/?format=json&limit=30";
+      const r=await fetch("/api/librivox?url="+encodeURIComponent(url));
+      if(!r.ok)throw new Error("LibriVox unavailable");
+      const data=await r.json();
+      books=data.books||[];
+    }else if(query.startsWith("^")){
+      const url="https://librivox.org/api/feed/audiobooks/?format=json&limit=30&title="+encodeURIComponent(query);
+      const r=await fetch("/api/librivox?url="+encodeURIComponent(url));
+      if(!r.ok)throw new Error("LibriVox unavailable");
+      const data=await r.json();
+      books=data.books||[];
+    }else{
+      const uTitle="/api/librivox?url="+encodeURIComponent("https://librivox.org/api/feed/audiobooks/?format=json&limit=25&title=^"+encodeURIComponent(query));
+      const uAuthor="/api/librivox?url="+encodeURIComponent("https://librivox.org/api/feed/audiobooks/?format=json&limit=25&author="+encodeURIComponent(query));
+      const [r1,r2]=await Promise.allSettled([
+        fetch(uTitle).then(r=>r.ok?r.json():{books:[]}),
+        fetch(uAuthor).then(r=>r.ok?r.json():{books:[]})
+      ]);
+      const b1=r1.status==="fulfilled"?(r1.value.books||[]):[];
+      const b2=r2.status==="fulfilled"?(r2.value.books||[]):[];
+      const seen=new Set();
+      for(const b of [...b1,...b2]){
+        if(b&&b.id&&!seen.has(b.id)){
+          seen.add(b.id);
+          books.push(b);
+        }
+      }
+    }
+    host.dataset.loaded="1";
+    host.innerHTML=books.length?books.map(bookCard).join(""):'<div class="empty-state">No audiobooks found for that search. Try another title or author.</div>';
   }catch{host.innerHTML='<div class="empty-state">LibriVox could not be reached. You can still browse the catalogue at librivox.org.</div>';}
+}
+async function getBookAudioUrl(rss){
+  if(!rss)throw new Error("This book has no public audio feed.");
+  const feedUrl="/api/rss?url="+encodeURIComponent(rss);
+  const r=await fetch(feedUrl);
+  if(!r.ok)throw new Error("Audiobook feed unavailable");
+  const xml=new DOMParser().parseFromString(await r.text(),"text/xml");
+  const item=xml.querySelector("item");
+  const enclosure=item?.querySelector("enclosure");
+  const src=enclosure?.getAttribute("url");
+  if(!src)throw new Error("No audio source found in feed");
+  return src;
 }
 async function playBook(rss,title){
   clearYoutubePlayer();currentOfflineAudioId=null;currentMusicTrack=null;currentStation=null;
   if(!rss){notify("This book has no public audio feed.");return;}
-  try{const feedUrl=window.orbitDesktop?.isDesktop?"/api/rss?url="+encodeURIComponent(rss):rss;const r=await fetch(feedUrl);if(!r.ok)throw new Error();const xml=new DOMParser().parseFromString(await r.text(),"text/xml");const item=xml.querySelector("item");const enclosure=item?.querySelector("enclosure");const src=enclosure?.getAttribute("url");if(!src)throw new Error();audio.src=src;await audio.play();setPlayer(title,"LibriVox / public-domain audiobook","Audiobook");}
-  catch{window.open(rss,"_blank","noopener");notify("Opened the audiobook feed in a new tab.");}
+  try{
+    const src=await getBookAudioUrl(rss);
+    audio.src=src;
+    await audio.play();
+    setPlayer(title,"LibriVox / public-domain audiobook","Audiobook");
+  }catch{
+    window.open(rss,"_blank","noopener");
+    notify("Opened the audiobook feed in a new tab.");
+  }
+}
+async function downloadBook(rss,title,button){
+  if(!rss){notify("This book has no public audio feed.");return;}
+  const original=button?.textContent||"↓ Save offline";
+  try{
+    if(button){button.disabled=true;button.textContent="Connecting…";}
+    notify("Resolving audiobook download…");
+    const src=await getBookAudioUrl(rss);
+    await downloadOffline(src,title,"audio","",button);
+  }catch(e){
+    notify(e?.message||"Audiobook download unavailable.");
+    if(button){button.disabled=false;button.textContent=original;}
+  }
 }
 function searchGlobal(term){return searchEverything(term);}
 async function searchEverything(term){
@@ -710,7 +785,7 @@ async function searchEverything(term){
   fetch("/api/audius-search?q="+safeQ,{signal:AbortSignal.timeout(22000)}).then(r=>r.ok?r.json():Promise.reject()),
   fetch("/api/youtube-search?q="+safeQ,{signal:AbortSignal.timeout(25000)}).then(r=>r.ok?r.json():Promise.reject()),
   fetch("/api/spinn-movies",{signal:AbortSignal.timeout(35000)}).then(r=>r.ok?r.json():Promise.reject()),
-  fetch("https://itunes.apple.com/search?term="+safeQ+"&entity=podcast&limit=8",{signal:AbortSignal.timeout(20000)}).then(r=>r.ok?r.json():Promise.reject()),
+   fetch("/api/itunes-search?term="+safeQ+"&kind=podcast&limit=8",{signal:AbortSignal.timeout(20000)}).then(r=>r.ok?r.json():Promise.reject()),
   fetch("/api/librivox?url="+encodeURIComponent("https://librivox.org/api/feed/audiobooks/?format=json&limit=8&title="+safeQ),{signal:AbortSignal.timeout(20000)}).then(r=>r.ok?r.json():Promise.reject()),
   fetch("/api/global-search?q="+safeQ,{signal:AbortSignal.timeout(75000)}).then(r=>r.ok?r.json():Promise.reject())
  ]);
@@ -723,7 +798,7 @@ async function searchEverything(term){
  if(radio.length)blocks.push(section("Radio stations",radio.map(stationCard).join("")));
  if(tracks.length)blocks.push(section("Audio music",tracks.map(musicCard).join("")));
  if(podcasts.length)blocks.push(section("Podcasts",podcasts.map(x=>{const title=x.collectionName||x.trackName||"Podcast";return '<article class="media-card"><img class="media-cover" src="'+esc(x.artworkUrl600||x.artworkUrl100||"")+'" alt=""><h3>'+esc(title)+'</h3><p>'+esc(x.artistName||"Podcast")+'</p><div class="media-actions"><small>Podcast</small><button data-podcast="'+esc(x.collectionId||"")+'" data-title="'+esc(title)+'">Episodes</button></div></article>';}).join("")));
- if(books.length)blocks.push(section("Audiobooks",books.map(b=>{const title=b.title||"Audiobook";const author=Array.isArray(b.authors)?b.authors.map(a=>a.first_name+" "+a.last_name).join(", "):"Public domain";return '<article class="media-card"><div class="media-cover book-cover">▤</div><h3>'+esc(title)+'</h3><p>'+esc(author)+'</p><div class="media-actions"><small>LibriVox</small><button data-bookplay="'+esc(b.url_rss||"")+'" data-title="'+esc(title)+'">Listen</button></div></article>';}).join("")));
+ if(books.length)blocks.push(section("Audiobooks",books.map(bookCard).join("")));
  if(videos.length)blocks.push(section("Music videos",videos.slice(0,8).map(x=>'<article class="media-card music-video-card"><img class="media-cover" src="'+esc(x.thumbnail||"")+'" alt=""><h3>'+esc(x.title||"Music video")+'</h3><p>'+esc(x.author||"Artist")+'</p><div class="media-actions"><small>Video</small><button data-youtube="'+esc(x.videoId)+'" data-title="'+esc(x.title||"Music video")+'" data-artist="'+esc(x.author||"Artist")+'">Play video</button></div></article>').join("")));
  const movieMatches=tmdbMovies.filter(movie=>[movie.title,...(movie.genreNames||[])].join(" ").toLowerCase().includes(q.toLowerCase()));
  if(movieMatches.length)blocks.push(section("Movies · TMDB",movieMatches.slice(0,8).map(tmdbMovieCard).join("")));
@@ -738,10 +813,24 @@ async function searchEverything(term){
  host.innerHTML=blocks.length?blocks.join(""):'<div class="empty-state">No matches were found. Try a different title, artist, station, country or channel name. Some catalogues may be temporarily unavailable.</div>';
 }
 
+let orbitSystemThemeMql=null;
+function onOrbitSystemThemeChange(e){
+  if(localStorage.getItem("orbit-theme")==="system"){
+    document.documentElement.dataset.theme=e.matches?"light":"dark";
+  }
+}
 function applyOrbitTheme(theme){
   const chosen=["dark","light","system"].includes(theme)?theme:"dark";
-  document.documentElement.dataset.theme=chosen;
   localStorage.setItem("orbit-theme",chosen);
+  if(!orbitSystemThemeMql && window.matchMedia){
+    orbitSystemThemeMql=window.matchMedia("(prefers-color-scheme: light)");
+    orbitSystemThemeMql.addEventListener?.("change",onOrbitSystemThemeChange);
+  }
+  if(chosen==="system"){
+    document.documentElement.dataset.theme=(orbitSystemThemeMql&&orbitSystemThemeMql.matches)?"light":"dark";
+  } else {
+    document.documentElement.dataset.theme=chosen;
+  }
 }
 function setupSettings(){
   const theme=$("#setting-theme"),motion=$("#setting-motion"),volume=$("#setting-volume"),volumeValue=$("#setting-volume-value"),remember=$("#setting-remember-volume"),nav=$("#setting-nav-visible");
@@ -992,6 +1081,7 @@ function setupEvents(){
     const open=e.target.closest("[data-open]");if(open){window.open(open.dataset.open,"_blank","noopener");return;}
     const searchTv=e.target.closest("[data-search-tv]");if(searchTv){showView("global-live");playGlobalChannel(searchTv.dataset.searchTv);return;}
     const book=e.target.closest("[data-bookplay]");if(book){playBook(book.dataset.bookplay,book.dataset.title);return;}
+    const bookDl=e.target.closest("[data-bookdownload]");if(bookDl){downloadBook(bookDl.dataset.bookdownload,bookDl.dataset.title,bookDl);return;}
   });
   $("#previous-track").addEventListener("click",()=>stepMusic(-1));$("#next-track").addEventListener("click",()=>stepMusic(1));audio.addEventListener("ended",()=>stepMusic(1));
   $("#play-button").addEventListener("click",()=>{if(currentYoutubeId){const frame=$("#youtube-player-panel iframe");if(frame?.contentWindow){const command=currentYoutubePaused?"playVideo":"pauseVideo";frame.contentWindow.postMessage(JSON.stringify({event:"command",func:command,args:[]}),"*");currentYoutubePaused=!currentYoutubePaused;$("#play-button").classList.toggle("is-playing",!currentYoutubePaused);}return;}if(!audio.src){notify("Choose something to play first.");return;}if(audio.paused)audio.play().catch(()=>{});else audio.pause();$("#play-button").classList.toggle("is-playing",!audio.paused);});
@@ -1060,8 +1150,27 @@ async function boot(){
   refreshFavViews();
 }
 boot();
-// ORBIT PWA/mobile local testing: QR + installable home-screen experience
-(async()=>{try{const info=await fetch('/api/mobile-info',{cache:'no-store'}).then(r=>r.json());const entry=(info.addresses||[]).find(x=>/wi-?fi|wireless/i.test(x.iface))||(info.addresses||[])[0];const host=entry?.address||location.hostname;const url='http://'+host+':'+info.port+'/';const a=document.getElementById('orbit-mobile-url');if(a){a.href=url;a.textContent=url;}const qr=document.getElementById('orbit-mobile-qr');if(qr)qr.src='/api/mobile-qr?url='+encodeURIComponent(url);const copy=document.getElementById('mobile-test-copy');if(copy)copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(url);document.getElementById('mobile-test-copy-status').textContent='Copied '+url;copy.textContent='Copied';}catch{document.getElementById('mobile-test-copy-status').textContent=url;}});}catch(e){const a=document.getElementById('orbit-mobile-url');if(a)a.textContent='Start ORBIT in LAN test mode first.';}})();
+// ORBIT PWA/mobile: QR + installable mobile link
+(()=>{
+  const webUrl=location.origin+'/';
+  const a=document.getElementById('orbit-mobile-url');
+  if(a){a.href=webUrl;a.textContent=webUrl;}
+  const qr=document.getElementById('orbit-mobile-qr');
+  if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(webUrl);
+  const copy=document.getElementById('mobile-test-copy');
+  if(copy)copy.addEventListener('click',async()=>{
+    try{
+      await navigator.clipboard.writeText(webUrl);
+      const st=document.getElementById('mobile-test-copy-status');
+      if(st)st.textContent='Copied '+webUrl;
+      copy.textContent='Copied';
+      setTimeout(()=>{if(copy.isConnected)copy.textContent='Copy phone link';},2500);
+    }catch{
+      const st=document.getElementById('mobile-test-copy-status');
+      if(st)st.textContent=webUrl;
+    }
+  });
+})();
 if('serviceWorker' in navigator && location.protocol==='http:' && location.hostname!=='127.0.0.1' && location.hostname!=='localhost')navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
 // ORBIT Mobile showcase: rotating feature previews

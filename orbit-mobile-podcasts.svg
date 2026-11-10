@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="560" viewBox="0 0 760 560">
+<defs>
+ <linearGradient id="pod-screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2d2217"/><stop offset="1" stop-color="#0e0a07"/></linearGradient>
+ <linearGradient id="pod-art" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f59e0b"/><stop offset="1" stop-color="#b45309"/></linearGradient>
+ <filter id="pod-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<ellipse cx="380" cy="490" rx="230" ry="32" fill="#000" opacity=".35" filter="url(#pod-shadow)"/>
+<g transform="translate(230 25)">
+ <rect x="0" y="0" width="300" height="500" rx="42" fill="#0a0805" stroke="#52402e" stroke-width="4"/>
+ <rect x="14" y="14" width="272" height="472" rx="32" fill="url(#pod-screen)"/>
+ <rect x="102" y="22" width="96" height="16" rx="8" fill="#050403"/>
+ <text x="32" y="58" fill="#fef3c7" font-size="12" font-family="system-ui, -apple-system, sans-serif">9:41</text>
+ <text x="32" y="100" fill="#fffbeb" font-size="22" font-weight="700" font-family="system-ui, -apple-system, sans-serif">Podcasts &amp; Audio</text>
+ <text x="32" y="122" fill="#fde68a" font-size="12" font-family="system-ui, -apple-system, sans-serif">LibriVox classics &amp; top podcasts</text>
+
+ <!-- Featured podcast card -->
+ <rect x="28" y="145" width="244" height="150" rx="16" fill="url(#pod-art)"/>
+ <circle cx="150" cy="205" r="38" fill="#78350f" opacity=".4"/>
+ <path d="M145 192 C145 186 155 186 155 192 L155 208 C155 214 145 214 145 208 Z" fill="#fffbeb"/>
+ <path d="M139 200 C139 216 161 216 161 200 M150 216 L150 226 M142 226 L158 226" stroke="#fffbeb" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+ <text x="44" y="270" fill="#ffffff" font-size="14" font-weight="700" font-family="system-ui, -apple-system, sans-serif">The Knowledge Project</text>
+ <text x="44" y="286" fill="#fef3c7" font-size="11" font-family="system-ui, -apple-system, sans-serif">Shane Parrish · Ep. 189</text>
+
+ <!-- Audio scrubber card -->
+ <rect x="28" y="315" width="244" height="60" rx="12" fill="#241a11" stroke="#4a3622" stroke-width="1"/>
+ <circle cx="56" cy="345" r="16" fill="#d97706"/>
+ <path d="M52 338 L63 345 L52 352 Z" fill="#ffffff"/>
+ <text x="82" y="340" fill="#fffbeb" font-size="13" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Frankenstein</text>
+ <text x="82" y="356" fill="#d97706" font-size="11" font-family="system-ui, -apple-system, sans-serif">LibriVox · Ch. 4 · 18:24</text>
+ <rect x="220" y="335" width="38" height="20" rx="6" fill="#f59e0b" opacity=".2"/>
+ <text x="226" y="349" fill="#fbbf24" font-size="9" font-weight="700" font-family="system-ui, -apple-system, sans-serif">1.5×</text>
+
+ <!-- Episode items -->
+ <rect x="28" y="390" width="244" height="42" rx="10" fill="#241a11" stroke="#3b2b1a" stroke-width="1"/>
+ <text x="44" y="415" fill="#fef3c7" font-size="12" font-family="system-ui, -apple-system, sans-serif">The Daily · NYT</text>
+ <text x="238" y="415" fill="#d97706" font-size="11" font-family="system-ui, -apple-system, sans-serif">28m</text>
+
+ <rect x="28" y="440" width="244" height="42" rx="10" fill="#241a11" stroke="#3b2b1a" stroke-width="1"/>
+ <text x="44" y="465" fill="#fef3c7" font-size="12" font-family="system-ui, -apple-system, sans-serif">Huberman Lab · Sleep Toolkit</text>
+ <text x="238" y="465" fill="#d97706" font-size="11" font-family="system-ui, -apple-system, sans-serif">1h 45m</text>
+</g>
+</svg>

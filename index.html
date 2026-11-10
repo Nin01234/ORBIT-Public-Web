@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -10,7 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./orbit-feature-additions.css"><link rel="stylesheet" href="./orbit-ui-fixes-20261109.css"><link rel="stylesheet" href="./orbit-mobile.css">
-  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css"></head>
+  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css">
+  <script>(function(){try{var t=localStorage.getItem("orbit-theme")||"dark";if(t==="system")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";if(t==="light")document.documentElement.dataset.theme="light";}catch(e){}})();</script>
+</head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
@@ -21,7 +23,7 @@
           <button class="nav-link active" data-view="discover" aria-haspopup="true" aria-expanded="false"><span>⌂</span> Discover</button>
           <button class="discover-submenu-toggle" id="discover-submenu-toggle" type="button" aria-label="Show Discover submenu" aria-expanded="false">⌄</button>
           <div class="discover-submenu" id="discover-submenu" aria-label="Discover pages">
-            <button class="nav-link" data-view="global-live"><span>▣</span> Global Live</button>
+            <button class="nav-link" data-view="global-live" id="global-live-nav"><span>▣</span> Global Live</button>
             <button class="nav-link" data-view="audiobooks"><span>▤</span> Audiobooks</button>
           </div>
         </div>
@@ -148,11 +150,11 @@
   </div>
   <script>
     (() => {
-      const isDesktopBrowser = !window.orbitDesktop?.isDesktop && window.matchMedia('(min-width: 801px)').matches;
-      if (!isDesktopBrowser) return;
-      document.documentElement.classList.add('orbit-web-omnisave');
-      const frame = document.getElementById('omnisave-browser-frame');
-      if (frame) frame.src = 'https://videodownloader.site/';
+      if (!window.orbitDesktop?.isDesktop) {
+        document.documentElement.classList.add('orbit-web-omnisave');
+        const frame = document.getElementById('omnisave-browser-frame');
+        if (frame) frame.src = 'https://videodownloader.site/';
+      }
     })();
   </script>
 

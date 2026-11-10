@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="560" viewBox="0 0 760 560">
+<defs>
+ <linearGradient id="mus-screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#241b35"/><stop offset="1" stop-color="#0d0a14"/></linearGradient>
+ <linearGradient id="mus-art" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f59e0b"/><stop offset="1" stop-color="#d97706"/></linearGradient>
+ <linearGradient id="mus-glow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ec4899"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+ <filter id="mus-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<ellipse cx="380" cy="490" rx="230" ry="32" fill="#000" opacity=".35" filter="url(#mus-shadow)"/>
+<g transform="translate(230 25)">
+ <rect x="0" y="0" width="300" height="500" rx="42" fill="#0c0a12" stroke="#483f59" stroke-width="4"/>
+ <rect x="14" y="14" width="272" height="472" rx="32" fill="url(#mus-screen)"/>
+ <rect x="102" y="22" width="96" height="16" rx="8" fill="#07050a"/>
+ <text x="32" y="58" fill="#f3e8ff" font-size="12" font-family="system-ui, -apple-system, sans-serif">9:41</text>
+ <text x="32" y="100" fill="#fdf4ff" font-size="22" font-weight="700" font-family="system-ui, -apple-system, sans-serif">Music Discovery</text>
+ <text x="32" y="122" fill="#c084fc" font-size="12" font-family="system-ui, -apple-system, sans-serif">Stream or download offline</text>
+
+ <!-- Album Art Card -->
+ <rect x="28" y="145" width="244" height="150" rx="16" fill="url(#mus-glow)"/>
+ <circle cx="150" cy="205" r="42" fill="#18181b" opacity=".5"/>
+ <circle cx="150" cy="205" r="16" fill="#f59e0b"/>
+ <circle cx="150" cy="205" r="6" fill="#18181b"/>
+ <text x="44" y="270" fill="#ffffff" font-size="14" font-weight="700" font-family="system-ui, -apple-system, sans-serif">Cosmic Echoes</text>
+ <text x="44" y="286" fill="#fbcfe8" font-size="11" font-family="system-ui, -apple-system, sans-serif">Audius Select · High Fidelity</text>
+
+ <!-- Music Player Bar -->
+ <rect x="28" y="315" width="244" height="58" rx="12" fill="#1e182a" stroke="#3b2d54" stroke-width="1"/>
+ <circle cx="56" cy="344" r="16" fill="#d97706"/>
+ <path d="M52 337 L63 344 L52 351 Z" fill="#ffffff"/>
+ <text x="82" y="339" fill="#fdf4ff" font-size="13" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Solaris Dreams</text>
+ <text x="82" y="355" fill="#a855f7" font-size="11" font-family="system-ui, -apple-system, sans-serif">Astral Sound · 3:42</text>
+ <rect x="218" y="334" width="42" height="20" rx="6" fill="#22c55e" opacity=".2"/>
+ <text x="224" y="348" fill="#4ade80" font-size="9" font-weight="700" font-family="system-ui, -apple-system, sans-serif">↓ SAVE</text>
+
+ <!-- Track List Preview -->
+ <rect x="28" y="388" width="244" height="42" rx="10" fill="#1e182a" stroke="#2d2242" stroke-width="1"/>
+ <text x="44" y="413" fill="#e9d5ff" font-size="12" font-family="system-ui, -apple-system, sans-serif">01. Neon Horizons</text>
+ <text x="238" y="413" fill="#a855f7" font-size="11" font-family="system-ui, -apple-system, sans-serif">4:12</text>
+
+ <rect x="28" y="438" width="244" height="42" rx="10" fill="#1e182a" stroke="#2d2242" stroke-width="1"/>
+ <text x="44" y="463" fill="#e9d5ff" font-size="12" font-family="system-ui, -apple-system, sans-serif">02. Midnight Odyssey</text>
+ <text x="238" y="463" fill="#a855f7" font-size="11" font-family="system-ui, -apple-system, sans-serif">3:55</text>
+</g>
+</svg>

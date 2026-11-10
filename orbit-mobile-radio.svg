@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="560" viewBox="0 0 760 560">
+<defs>
+ <linearGradient id="rad-screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14343d"/><stop offset="1" stop-color="#09141c"/></linearGradient>
+ <linearGradient id="rad-art" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6ee7b7"/><stop offset="1" stop-color="#047857"/></linearGradient>
+ <filter id="rad-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<ellipse cx="380" cy="490" rx="230" ry="32" fill="#000" opacity=".32" filter="url(#rad-shadow)"/>
+<g transform="translate(230 25)">
+ <rect x="0" y="0" width="300" height="500" rx="42" fill="#071017" stroke="#4b6369" stroke-width="4"/>
+ <rect x="14" y="14" width="272" height="472" rx="32" fill="url(#rad-screen)"/>
+ <rect x="102" y="22" width="96" height="16" rx="8" fill="#050b10"/>
+ <text x="32" y="58" fill="#eef4ee" font-size="12" font-family="system-ui, -apple-system, sans-serif">9:41</text>
+ <text x="32" y="100" fill="#f5f4ed" font-size="22" font-weight="700" font-family="system-ui, -apple-system, sans-serif">Radio Global</text>
+ <text x="32" y="122" fill="#9db7b7" font-size="12" font-family="system-ui, -apple-system, sans-serif">Thousands of live stations</text>
+
+ <!-- Live radio station card -->
+ <rect x="28" y="145" width="244" height="150" rx="16" fill="url(#rad-art)"/>
+ <circle cx="150" cy="205" r="38" fill="#064e3b" opacity=".4"/>
+ <circle cx="150" cy="205" r="28" fill="none" stroke="#f3f1df" stroke-width="2" stroke-dasharray="4 3"/>
+ <path d="M144 193 L162 205 L144 217 Z" fill="#f3f1df"/>
+ <text x="44" y="270" fill="#f0fdf4" font-size="14" font-weight="700" font-family="system-ui, -apple-system, sans-serif">BBC World Service</text>
+ <text x="44" y="286" fill="#a7f3d0" font-size="11" font-family="system-ui, -apple-system, sans-serif">● LIVE · 94.1 FM · London</text>
+
+ <!-- Frequency waves -->
+ <g stroke="#6ee7b7" stroke-width="3" stroke-linecap="round" opacity=".8">
+  <line x1="42" y1="335" x2="42" y2="345"/>
+  <line x1="52" y1="325" x2="52" y2="355"/>
+  <line x1="62" y1="315" x2="62" y2="365"/>
+  <line x1="72" y1="330" x2="72" y2="350"/>
+  <line x1="82" y1="310" x2="82" y2="370"/>
+  <line x1="92" y1="325" x2="92" y2="355"/>
+  <line x1="102" y1="335" x2="102" y2="345"/>
+ </g>
+ <text x="120" y="345" fill="#f5f4ed" font-size="13" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Now Tuning…</text>
+
+ <!-- Station list preview -->
+ <rect x="28" y="385" width="244" height="42" rx="10" fill="#132a31" stroke="#254852" stroke-width="1"/>
+ <circle cx="48" cy="406" r="10" fill="#3b82f6"/>
+ <text x="68" y="411" fill="#e2e8f0" font-size="12" font-family="system-ui, -apple-system, sans-serif">NPR All Things Considered</text>
+
+ <rect x="28" y="435" width="244" height="42" rx="10" fill="#132a31" stroke="#254852" stroke-width="1"/>
+ <circle cx="48" cy="456" r="10" fill="#ec4899"/>
+ <text x="68" y="461" fill="#e2e8f0" font-size="12" font-family="system-ui, -apple-system, sans-serif">Radio Paradise (Mellow)</text>
+</g>
+</svg>

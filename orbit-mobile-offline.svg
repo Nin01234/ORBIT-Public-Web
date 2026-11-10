@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="560" viewBox="0 0 760 560">
+<defs>
+ <linearGradient id="off-screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0f2922"/><stop offset="1" stop-color="#06120e"/></linearGradient>
+ <linearGradient id="off-art" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#10b981"/><stop offset="1" stop-color="#047857"/></linearGradient>
+ <filter id="off-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<ellipse cx="380" cy="490" rx="230" ry="32" fill="#000" opacity=".35" filter="url(#off-shadow)"/>
+<g transform="translate(230 25)">
+ <rect x="0" y="0" width="300" height="500" rx="42" fill="#06120e" stroke="#255447" stroke-width="4"/>
+ <rect x="14" y="14" width="272" height="472" rx="32" fill="url(#off-screen)"/>
+ <rect x="102" y="22" width="96" height="16" rx="8" fill="#040b08"/>
+ <text x="32" y="58" fill="#d1fae5" font-size="12" font-family="system-ui, -apple-system, sans-serif">9:41</text>
+ <text x="32" y="100" fill="#ecfdf5" font-size="22" font-weight="700" font-family="system-ui, -apple-system, sans-serif">Offline Vault</text>
+ <text x="32" y="122" fill="#6ee7b7" font-size="12" font-family="system-ui, -apple-system, sans-serif">Zero data required · Ready anytime</text>
+
+ <!-- Storage status card -->
+ <rect x="28" y="145" width="244" height="135" rx="16" fill="url(#off-art)"/>
+ <circle cx="62" cy="188" r="22" fill="#064e3b" opacity=".5"/>
+ <path d="M62 176 L62 196 M55 190 L62 197 L69 190" stroke="#f0fdf4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+ <text x="96" y="185" fill="#ffffff" font-size="15" font-weight="700" font-family="system-ui, -apple-system, sans-serif">24 Files Saved</text>
+ <text x="96" y="202" fill="#d1fae5" font-size="11" font-family="system-ui, -apple-system, sans-serif">Music · Podcasts · Audiobooks</text>
+
+ <!-- Storage bar -->
+ <rect x="44" y="235" width="212" height="8" rx="4" fill="#064e3b"/>
+ <rect x="44" y="235" width="85" height="8" rx="4" fill="#ecfdf5"/>
+ <text x="44" y="260" fill="#a7f3d0" font-size="10" font-family="system-ui, -apple-system, sans-serif">142 MB used of 1.2 GB available</text>
+
+ <!-- Downloaded items list -->
+ <rect x="28" y="295" width="244" height="52" rx="10" fill="#13382e" stroke="#22594b" stroke-width="1"/>
+ <circle cx="50" cy="321" r="14" fill="#10b981"/>
+ <path d="M46 321 L49 324 L56 317" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+ <text x="74" y="316" fill="#f0fdf4" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Ambient Waves (Audius)</text>
+ <text x="74" y="331" fill="#6ee7b7" font-size="10" font-family="system-ui, -apple-system, sans-serif">Downloaded · 4:18 · 8.2 MB</text>
+
+ <rect x="28" y="355" width="244" height="52" rx="10" fill="#13382e" stroke="#22594b" stroke-width="1"/>
+ <circle cx="50" cy="381" r="14" fill="#10b981"/>
+ <path d="M46 381 L49 384 L56 377" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+ <text x="74" y="376" fill="#f0fdf4" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Sherlock Holmes Ch. 1</text>
+ <text x="74" y="391" fill="#6ee7b7" font-size="10" font-family="system-ui, -apple-system, sans-serif">Audiobook · 24:10 · 22.4 MB</text>
+
+ <rect x="28" y="415" width="244" height="52" rx="10" fill="#13382e" stroke="#22594b" stroke-width="1"/>
+ <circle cx="50" cy="441" r="14" fill="#10b981"/>
+ <path d="M46 441 L49 444 L56 437" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+ <text x="74" y="436" fill="#f0fdf4" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Tech Talks Daily Ep. 82</text>
+ <text x="74" y="451" fill="#6ee7b7" font-size="10" font-family="system-ui, -apple-system, sans-serif">Podcast · 18:32 · 16.8 MB</text>
+</g>
+</svg>

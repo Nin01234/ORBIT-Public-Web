@@ -1,4 +1,4 @@
-﻿import http from "node:http";
+import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,7 +7,7 @@ import { gunzipSync } from "node:zlib";
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".svg":"image/svg+xml", ".png":"image/png", ".ico":"image/x-icon", ".webmanifest":"application/manifest+json" };
-const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-mobile-hero.svg","mobile-bridge.js","manifest.webmanifest","sw.js"]);
+const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js"]);
 const cache = new Map();
 const rate = new Map();
 const TTL = { radio: 120000, music: 180000, podcast: 300000, countries: 86400000, channels: 21600000, films: 3600000, movies: 3600000 };
@@ -89,8 +89,10 @@ async function api(req,res,url) {
   }
   if(p==="/api/librivox") {
     let target;try{target=new URL(url.searchParams.get("url")||"");}catch{return send(res,400,{error:"Invalid LibriVox URL"});}
-    if(target.protocol!=="https:"||target.hostname!=="librivox.org"||target.pathname!=="/api/feed/audiobooks/")return send(res,400,{error:"Only the LibriVox catalogue is supported"});
-    const upstream=await fetch(target,{signal:AbortSignal.timeout(15000)});if(!upstream.ok)throw new Error("LibriVox unavailable");
+    if(target.protocol!=="https:"||target.hostname!=="librivox.org"||!/^\/api\/feed\/audiobooks\/?$/.test(target.pathname))return send(res,400,{error:"Only the LibriVox catalogue is supported"});
+    const upstream=await fetch(target,{signal:AbortSignal.timeout(15000)});
+    if(upstream.status===404)return send(res,200,{books:[]},"public, max-age=300");
+    if(!upstream.ok)throw new Error("LibriVox unavailable");
     res.writeHead(200,{"Content-Type":"application/json; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"});res.end(await upstream.text());return;
   }
   if(p==="/api/rss") {
@@ -236,11 +238,11 @@ const server=http.createServer(async(req,res)=>{
     res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Public-Web/releases/download/v1.1.3/ORBIT-Setup-1.1.3-x64.exe","Cache-Control":"no-store"}).end();
     return;
   }
-  const ip=(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").toString().split(",")[0].trim();
-  const now=Date.now(),entry=rate.get(ip)||{start:now,count:0};
-  if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;rate.set(ip,entry);
-  if(entry.count>150){res.writeHead(429,{"Retry-After":"60","Content-Type":"application/json"}).end('{"error":"Too many requests. Please wait a minute."}');return;}
   if(url.pathname.startsWith("/api/")){
+    const ip=(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").toString().split(",")[0].trim();
+    const now=Date.now(),entry=rate.get(ip)||{start:now,count:0};
+    if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;rate.set(ip,entry);
+    if(entry.count>150){res.writeHead(429,{"Retry-After":"60","Content-Type":"application/json"}).end('{"error":"Too many requests. Please wait a minute."}');return;}
     if(req.method!=="GET"&&req.method!=="HEAD"){res.writeHead(405,{"Allow":"GET, HEAD"}).end("Method not allowed");return;}
     try{return await api(req,res,url);}catch(error){console.error("ORBIT public API:",url.pathname,error.message);if(!res.headersSent)send(res,502,{error:"The requested service is temporarily unavailable."});else res.destroy();return;}
   }
@@ -253,6 +255,9 @@ const server=http.createServer(async(req,res)=>{
   fs.readFile(target,(err,data)=>{if(err){res.writeHead(404).end("Not found");return;}res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","X-Content-Type-Options":"nosniff","Referrer-Policy":"strict-origin-when-cross-origin","X-Frame-Options":"SAMEORIGIN","Permissions-Policy":"camera=(), microphone=(), geolocation=()","Cache-Control":name==="index.html"?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
 });
 const host=process.env.RENDER?"0.0.0.0":"127.0.0.1";
-server.listen(port,host,()=>console.log("ORBIT public-web server listening on "+host+":"+port));
+server.listen(port,host,()=>{
+  console.log("ORBIT public-web server listening on "+host+":"+port);
+  loadTvCatalog().catch(e=>console.log("TV catalog prewarm:",e.message));
+});
 
 
