@@ -143,6 +143,13 @@
       <section class="view" id="view-omnisave">
 
 
+  <div class="omnisave-import-panel" style="margin:0 0 18px;padding:18px;border:1px solid var(--line,#26333d);border-radius:14px;background:var(--panel,#111a22)">
+    <h2 style="margin:0 0 8px">Add a movie to ORBIT Downloads</h2>
+    <p style="margin:0 0 12px;color:var(--muted,#9aa8b5)">If OmniSave saves a video to your device, select that file here. ORBIT stores a private browser copy on this device so you can watch it from Downloads.</p>
+    <input id="omnisave-import-file" type="file" accept="video/*,.mp4,.mkv,.webm,.mov,.m4v" aria-label="Choose a movie file from your device">
+    <button class="button button-light" id="omnisave-import-button" type="button" style="margin-top:10px">Add to ORBIT Downloads</button>
+    <p id="omnisave-import-status" role="status" style="margin:8px 0 0"></p>
+  </div>
   <div class="omnisave-frame-wrap">
     <webview id="omnisave-webview" src="https://videodownloader.site/" partition="persist:orbit-omnisave" webpreferences="contextIsolation=yes,nodeIntegration=no,sandbox=yes" title="ORBIT video search"></webview>
     <iframe id="omnisave-browser-frame" title="OmniSave video downloader" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="clipboard-read; clipboard-write" src="about:blank"></iframe>

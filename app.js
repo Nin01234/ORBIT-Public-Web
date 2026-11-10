@@ -1,4 +1,4 @@
-﻿const $ = (s,root=document)=>root.querySelector(s);
+const $ = (s,root=document)=>root.querySelector(s);
 const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
 const audio = $("#audio-player");
 const SPINN_RADIO_API = "/api/radio-stations";
@@ -686,7 +686,20 @@ async function downloadOffline(url,title,kind,artwork,button){
   }
 }
 
-async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
+async function importOmniVideo(){
+  const input=$("#omnisave-import-file"),status=$("#omnisave-import-status"),button=$("#omnisave-import-button"),file=input?.files?.[0];
+  if(!file){notify("Choose a movie file from your device first.");return;}
+  if(!file.type.startsWith("video/")&&!/\.(mp4|mkv|webm|mov|m4v|avi)$/i.test(file.name)){notify("Please choose a supported video file.");return;}
+  if(button){button.disabled=true;button.textContent="Saving…";}
+  if(status)status.textContent="Saving "+file.name+" into this browser’s ORBIT library…";
+  try{
+    const id="omni-import-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+    await offlineDBRequest("readwrite",s=>s.put({id,title:file.name.replace(/\.[^.]+$/,""),kind:"video",artwork:"",savedAt:Date.now(),bytes:file.size,mime:file.type||"video/mp4",filename:file.name,blob:file}));
+    if(status)status.textContent="Added! Open Downloads to watch it offline.";
+    notify("Movie added to ORBIT Downloads on this device.");loadOfflineLibrary();input.value="";
+  }catch(err){if(status)status.textContent="Could not save this file. Browser storage may be full or unavailable.";notify("Could not add movie: "+(err?.message||"storage error"));}
+  finally{if(button){button.disabled=false;button.textContent="Add to ORBIT Downloads";}}
+}async function loadOfflineLibrary(){const host=$("#offline-results");if(!host)return;host.innerHTML='<div class="loading-card">Loading saved media.</div>';try{const items=await getOfflineItems();host.innerHTML=items.length?items.sort((a,b)=>b.savedAt-a.savedAt).map(x=>'<article class="media-card offline-card">'+(x.artwork?'<img class="media-cover" src="'+esc(x.artwork)+'" alt="" loading="lazy">':'<div class="media-cover offline-placeholder">ORBIT</div>')+'<h3>'+esc(x.title)+'</h3><p>'+esc(String(x.kind||"audio").toUpperCase())+' · '+(Number(x.bytes)/1048576).toFixed(1)+' MB · saved '+new Date(x.savedAt).toLocaleDateString()+'</p><div class="media-actions"><button data-offline-play="'+esc(x.id)+'" data-offline-kind="'+esc(x.kind)+'" data-offline-title="'+esc(x.title)+'">Play offline</button><button data-offline-delete="'+esc(x.id)+'">Remove</button></div></article>').join(""):'<div class="empty-state">Nothing downloaded yet. Download supported tracks or episodes and they will be saved on this device for offline playback.</div>';}catch{host.innerHTML='<div class="empty-state">Your browser could not open offline storage. Check browser storage settings.</div>';}}
 async function playOffline(id,kind,title){try{const item=await getOfflineItem(id);if(!item?.blob)throw Error();const src=URL.createObjectURL(item.blob);if(kind==="film"||kind==="video"){const panel=$("#film-player-panel");showView("movies");panel.innerHTML='<video class="offline-video" src="'+src+'" controls autoplay playsinline></video>';panel.scrollIntoView({behavior:"smooth",block:"nearest"});setPlayer(title,"Saved on this device","Offline video");return;}currentOfflineAudioId=String(id);clearYoutubePlayer();currentStation=null;currentMusicTrack=null;audio.src=src;refreshOfflineMusicQueue().catch(()=>{});await audio.play();setPlayer(title,"Saved on this device","Offline music");}catch{notify("This offline file could not be found or played.");}}
 function bookCard(b){
   const author=Array.isArray(b.authors)?b.authors.map(a=>a.first_name+" "+a.last_name).join(", "):"Public domain";
@@ -1052,6 +1065,7 @@ function setupEvents(){
     const applyOmniCleanView=()=>{try{omni.executeJavaScript("(()=>{const main=document.querySelector('main')||document.body;const apply=()=>{document.querySelector('header')?.remove();document.querySelector('footer')?.remove();document.querySelectorAll('[id^=div-gpt-ad],[data-ad]').forEach(e=>e.remove());for(const e of [...main.querySelectorAll('*')]){if(e.children.length===0&&/omnisave/i.test(e.textContent||'')&&!e.closest('form')){const p=e.closest('a,button,[role=button],section,nav')||e;p.style.setProperty('display','none','important');}}document.body.style.margin='0';document.body.style.background='#0b1117';main.style.maxWidth='1100px';main.style.margin='0 auto';main.style.padding='20px 24px 36px';};apply();if(!window.__orbitCleanViewObserver){window.__orbitCleanViewObserver=new MutationObserver(()=>{clearTimeout(window.__orbitCleanViewTimer);window.__orbitCleanViewTimer=setTimeout(apply,120);});window.__orbitCleanViewObserver.observe(main,{childList:true,subtree:true});}let n=0;const retry=setInterval(()=>{apply();if(++n>=20)clearInterval(retry);},500);})()");}catch(e){}};
     omni.addEventListener("dom-ready",applyOmniCleanView);omni.addEventListener("did-finish-load",applyOmniCleanView);
   }
+  $("#omnisave-import-button")?.addEventListener("click",importOmniVideo);
   $("#omnisave-forward")?.addEventListener("click",()=>{if(omni?.canGoForward())omni.goForward();});
   $("#omnisave-reload")?.addEventListener("click",()=>omni?.reload());
   $("#omnisave-open-external")?.addEventListener("click",()=>window.open("https://videodownloader.site/","_blank"));
