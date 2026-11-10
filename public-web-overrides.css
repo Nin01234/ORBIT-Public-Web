@@ -159,3 +159,32 @@ html[data-theme="light"] .profile-dialog textarea {
   color: var(--ink, #202923) !important;
   border-color: var(--line, #d9dfda) !important;
 }
+
+
+/* Global movable player: drag the grip anywhere, double-click it to dock again. */
+.player-bar{z-index:1100}
+.player-drag-handle{position:absolute;top:-13px;left:50%;transform:translateX(-50%);width:58px;height:24px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted);font-size:15px;line-height:1;letter-spacing:2px;cursor:grab;touch-action:none;box-shadow:0 4px 14px #0003;z-index:3}
+.player-drag-handle:active{cursor:grabbing;color:var(--lime);border-color:var(--lime)}
+.player-bar.is-floating{left:12px;right:auto;top:auto;bottom:92px;width:min(720px,calc(100vw - 24px));height:auto;min-height:104px;padding:25px 16px 12px;border:1px solid var(--line);border-radius:16px;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:8px;box-shadow:0 18px 55px #0008;background:var(--panel);backdrop-filter:blur(18px);}
+.player-bar.is-floating .now-playing{grid-column:1;grid-row:1}.player-bar.is-floating .player-extra{grid-column:2;grid-row:1;display:flex!important}.player-bar.is-floating .player-center{grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:center;gap:16px}.player-bar.is-floating .player-controls{gap:12px}.player-bar.is-floating .track-progress{max-width:340px}
+.player-bar.is-floating .player-drag-handle{top:3px;left:50%;background:var(--panel2)}
+@media(max-width:850px){.player-bar.is-floating{width:min(520px,calc(100vw - 16px));left:8px;bottom:auto;padding:27px 12px 10px;min-height:104px}.player-bar.is-floating .player-extra{display:flex!important}.player-bar.is-floating .player-state{display:none}.player-bar.is-floating .player-center{gap:8px}.player-bar.is-floating .player-controls{gap:7px}.player-bar.is-floating .control-button{font-size:11px}.player-bar.is-floating .player-hide{display:grid!important}}
+/* Discover live-update feed */
+.discover-updates{margin:42px 0 18px;padding:24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,var(--panel),var(--panel2));}
+.discover-updates-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:18px}.discover-updates-heading h2{margin:7px 0 5px;font-size:clamp(23px,3vw,30px)}.discover-updates-heading p{margin:0;color:var(--muted);font-size:13px}.discover-live-kicker{display:inline-flex;align-items:center;gap:8px;color:var(--lime);font-size:10px;font-weight:800;letter-spacing:.14em}.discover-live-kicker i{width:8px;height:8px;border-radius:50%;background:#ef6262;box-shadow:0 0 0 5px #ef626222;animation:discoverPulse 1.8s infinite}.discover-updates-tools{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;white-space:nowrap}.discover-updates-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.discover-update-filters{display:flex;flex-wrap:wrap;gap:7px}.discover-updates-toolbar .inline-search{width:min(320px,100%);max-width:none}.discover-updates-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.discover-updates-grid>[data-discover-kind]{min-width:0;position:relative}.discover-updates-grid>[data-discover-kind]::before{content:attr(data-discover-label);display:inline-block;margin:0 0 8px;padding:4px 8px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--lime);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}.discover-updates-grid>[hidden]{display:none!important}.discover-updates-grid .media-card,.discover-updates-grid .station-card{height:calc(100% - 26px)}@keyframes discoverPulse{50%{box-shadow:0 0 0 8px #ef626200;opacity:.65}}
+@media(max-width:1000px){.discover-updates-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.discover-updates{padding:16px;margin-top:28px}.discover-updates-heading{align-items:flex-start;flex-direction:column}.discover-updates-tools{width:100%;justify-content:space-between}.discover-updates-toolbar{align-items:stretch;flex-direction:column}.discover-updates-toolbar .inline-search{width:100%}.discover-updates-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.discover-updates-grid .media-card,.discover-updates-grid .station-card{padding:10px}.discover-updates-grid .media-actions{flex-wrap:wrap}.discover-updates-grid .media-actions button{font-size:9px}}
+@media(max-width:390px){.discover-updates-grid{grid-template-columns:1fr 1fr}.discover-update-filters .pill{padding:7px 9px}}
+
+
+.player-dock{display:none!important}.player-bar.is-floating .player-dock{display:grid!important;place-items:center;min-width:48px;height:30px;padding:0 8px;font-size:10px}
+
+/* Allow the revealed mobile player to float and be dragged anywhere in the viewport. */
+@media(max-width:850px){
+ body.mobile-player-open .player-bar.is-floating{position:fixed!important;left:8px!important;right:auto!important;top:8px!important;bottom:auto!important;width:min(340px,calc(100vw - 16px))!important;max-width:calc(100vw - 16px)!important;height:auto!important;min-height:104px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;gap:8px!important;padding:27px 12px 10px!important;border:1px solid var(--line)!important;border-radius:16px!important;background:var(--panel)!important;box-shadow:0 18px 55px #0008!important;backdrop-filter:blur(18px)!important}
+ body.mobile-player-open .player-bar.is-floating .now-playing{grid-column:1!important;grid-row:1!important}
+ body.mobile-player-open .player-bar.is-floating .player-extra{grid-column:2!important;grid-row:1!important;display:flex!important}
+ body.mobile-player-open .player-bar.is-floating .player-center{grid-column:1/-1!important;grid-row:2!important;display:flex!important;flex-direction:column!important;gap:8px!important}
+ body.mobile-player-open .player-bar.is-floating .player-drag-handle{top:3px!important;left:50%!important}
+ body.mobile-player-open .player-bar.is-floating .player-dock{display:grid!important}
+}
