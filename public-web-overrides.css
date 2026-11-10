@@ -188,3 +188,42 @@ html[data-theme="light"] .profile-dialog textarea {
  body.mobile-player-open .player-bar.is-floating .player-drag-handle{top:3px!important;left:50%!important}
  body.mobile-player-open .player-bar.is-floating .player-dock{display:grid!important}
 }
+/* ORBIT mobile Discover card readability and restored hide/show player. */
+.player-drag-handle,.player-dock{display:none!important}
+.player-bar.is-floating{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:auto!important;max-width:none!important;min-height:0!important;height:76px!important;padding:0 28px!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;grid-template-columns:1fr 220px 1fr!important;grid-template-rows:1fr!important}
+.player-bar.is-floating .now-playing,.player-bar.is-floating .player-center,.player-bar.is-floating .player-extra{grid-column:auto!important;grid-row:auto!important}
+.player-bar.is-floating .player-center{flex-direction:column!important;gap:0!important}
+@media(max-width:850px){
+ .player-bar.is-floating{left:8px!important;right:8px!important;top:auto!important;bottom:calc(188px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;height:auto!important;min-height:0!important;padding:9px!important;border:1px solid var(--line)!important;border-radius:14px!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto!important;gap:7px!important;background:var(--panel)!important;box-shadow:0 12px 36px #0005!important}
+ .player-bar.is-floating .now-playing,.player-bar.is-floating .player-center,.player-bar.is-floating .player-extra{grid-column:auto!important;grid-row:auto!important}
+ .player-bar.is-floating .player-center{display:flex!important;flex-direction:column!important;gap:7px!important}
+}
+@media(max-width:700px){
+ .discover-updates{padding:14px!important}
+ .discover-updates-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;align-items:stretch!important}
+ .discover-updates-grid>[data-discover-kind]{display:flex!important;flex-direction:column!important;min-width:0!important;height:auto!important;min-height:0!important;overflow:visible!important}
+ .discover-updates-grid .media-card,.discover-updates-grid .station-card{box-sizing:border-box!important;width:100%!important;height:auto!important;min-height:100%!important;padding:9px!important;display:flex!important;flex-direction:column!important;gap:0!important;overflow:hidden!important}
+ .discover-updates-grid .media-cover{width:100%!important;aspect-ratio:4/3!important;object-fit:cover!important;flex:0 0 auto!important}
+ .discover-updates-grid .media-card h3,.discover-updates-grid .station-card h3{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;white-space:normal!important;overflow:hidden!important;text-overflow:ellipsis!important;overflow-wrap:anywhere!important;word-break:normal!important;line-height:1.35!important;min-height:2.7em!important;height:auto!important;font-size:11px!important;margin:9px 0 5px!important}
+ .discover-updates-grid .media-card p,.discover-updates-grid .station-card p{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;white-space:normal!important;overflow:hidden!important;text-overflow:ellipsis!important;overflow-wrap:anywhere!important;line-height:1.45!important;min-height:4.35em!important;height:auto!important;font-size:10px!important;margin:0 0 8px!important}
+ .discover-updates-grid .station-card p{min-height:2.9em!important;-webkit-line-clamp:2!important}
+ .discover-updates-grid .media-actions,.discover-updates-grid .station-card-bottom{display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;margin-top:auto!important;padding-top:7px!important}
+ .discover-updates-grid .media-actions button{max-width:100%!important;white-space:normal!important;font-size:9px!important;padding:7px 8px!important}
+ .discover-updates-grid .media-actions small,.discover-updates-grid .station-card-bottom small{font-size:9px!important;line-height:1.35!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ .discover-updates-grid>[data-discover-kind]::before{font-size:9px!important;max-width:100%!important;white-space:normal!important}
+ .discover-updates-toolbar .inline-search{min-height:42px!important;font-size:12px!important}
+ .discover-update-filters{gap:6px!important}
+ .discover-update-filters .pill{flex:0 0 auto!important;font-size:10px!important}
+}
+@media(max-width:360px){.discover-updates-grid{grid-template-columns:1fr!important}.discover-updates-grid .media-cover{aspect-ratio:16/9!important}}
+/* Final cascade override for mobile player hide/show controls. */
+@media(max-width:760px){
+ .player-bar{display:none!important}
+ body.mobile-player-open .player-bar{display:grid!important;position:fixed!important;z-index:1200;left:8px!important;right:8px!important;top:auto!important;bottom:calc(188px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;height:auto!important;min-height:0!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto!important;gap:7px!important;padding:9px!important;border:1px solid var(--line)!important;border-radius:14px!important;background:var(--panel)!important;box-shadow:0 12px 36px #0005!important}
+ body.mobile-player-open .player-bar .player-extra{display:flex!important;justify-content:flex-end!important}
+ body.mobile-player-open .player-bar .player-hide{display:grid!important}
+ body.mobile-player-open .player-bar .player-center{display:flex!important;flex-direction:column!important;gap:7px!important}
+ .player-drag-handle,.player-dock{display:none!important}
+ .player-reveal{display:flex!important;position:fixed!important;z-index:1201;right:12px!important;bottom:calc(190px + env(safe-area-inset-bottom))!important}
+ body.mobile-player-open .player-reveal{bottom:calc(350px + env(safe-area-inset-bottom))!important}
+}

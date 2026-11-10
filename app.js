@@ -178,35 +178,6 @@ function playStation(id){
   attemptRadioPlayback(token,0);
 }
 
-function setupMovablePlayer(){
-  const bar=$(".player-bar"),handle=$("#player-drag-handle"),dockButton=$("#player-dock");if(!bar||!handle||bar.dataset.movableReady)return;bar.dataset.movableReady="1";
-  let drag=null;
-  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-  const moveTo=(left,top)=>{
-    const rect=bar.getBoundingClientRect();
-    const maxLeft=Math.max(8,window.innerWidth-rect.width-8),maxTop=Math.max(8,window.innerHeight-rect.height-8);
-    bar.classList.add("is-floating");
-    bar.style.setProperty("left",clamp(left,8,maxLeft)+"px","important");bar.style.setProperty("top",clamp(top,8,maxTop)+"px","important");bar.style.setProperty("right","auto","important");bar.style.setProperty("bottom","auto","important");
-  };
-  const save=()=>{if(!bar.classList.contains("is-floating"))return;const r=bar.getBoundingClientRect();try{localStorage.setItem("orbit-player-position",JSON.stringify({x:Math.round(r.left),y:Math.round(r.top)}));}catch{}};
-  const restore=()=>{try{const p=JSON.parse(localStorage.getItem("orbit-player-position")||"null");if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y))requestAnimationFrame(()=>moveTo(p.x,p.y));}catch{}};
-  const dock=()=>{bar.classList.remove("is-floating");bar.style.removeProperty("left");bar.style.removeProperty("top");bar.style.removeProperty("right");bar.style.removeProperty("bottom");try{localStorage.removeItem("orbit-player-position");}catch{};};
-  handle.addEventListener("pointerdown",e=>{
-    if(e.pointerType==="mouse"&&e.button!==0)return;
-    const before=bar.getBoundingClientRect();
-    if(!bar.classList.contains("is-floating"))moveTo(before.left,Math.max(8,before.top-34));
-    const now=bar.getBoundingClientRect();drag={dx:e.clientX-now.left,dy:e.clientY-now.top,pointerId:e.pointerId};
-    try{handle.setPointerCapture(e.pointerId);}catch{}e.preventDefault();
-  });
-  handle.addEventListener("pointermove",e=>{if(!drag||drag.pointerId!==e.pointerId)return;moveTo(e.clientX-drag.dx,e.clientY-drag.dy);});
-  const end=e=>{if(!drag||e.pointerId!==drag.pointerId)return;drag=null;save();};
-  handle.addEventListener("pointerup",end);handle.addEventListener("pointercancel",end);
-  handle.addEventListener("dblclick",e=>{e.preventDefault();dock();});
-  dockButton?.addEventListener("click",dock);
-  handle.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();if(bar.classList.contains("is-floating"))dock();else{const r=bar.getBoundingClientRect();moveTo(Math.max(8,(window.innerWidth-r.width)/2),Math.max(8,r.top-34));save();}}});
-  window.addEventListener("resize",()=>{if(bar.classList.contains("is-floating")){const r=bar.getBoundingClientRect();moveTo(r.left,r.top);save();}});
-  restore();
-}
 function renderDiscoverUpdates(){
   const host=$("#discover-updates-grid");if(!host)return;
   const sources=[
@@ -237,10 +208,18 @@ async function refreshDiscoverUpdates(){
   await Promise.all(tasks.map(task=>Promise.resolve(task).then(()=>renderDiscoverUpdates()).catch(()=>{})));
   renderDiscoverUpdates();
 }
+async function searchDiscoverUpdates(term){
+  const query=String(term||"").trim();if(!query){return refreshDiscoverUpdates();}
+  const status=$("#discover-updates-status");if(status)status.textContent="Searching connected catalogues…";
+  const tasks=[loadAudioMusic(query),loadYouTubeMusic(query),loadItunes("podcasts",query),loadBooks(query),loadArchiveFilms(query)];
+  await Promise.all(tasks.map(task=>Promise.resolve(task).then(()=>renderDiscoverUpdates()).catch(()=>{})));
+  renderDiscoverUpdates();if(status)status.textContent="Search results for “"+query+"”";
+}
 function setupDiscoverUpdates(){
   const host=$("#discover-updates-grid");if(!host||host.dataset.ready)return;host.dataset.ready="1";
   $$(".discover-update-filters [data-discover-filter]").forEach(button=>button.addEventListener("click",()=>{$$(".discover-update-filters [data-discover-filter]").forEach(x=>x.classList.toggle("active",x===button));filterDiscoverUpdates();}));
   $("#discover-updates-search")?.addEventListener("input",filterDiscoverUpdates);
+  $("#discover-updates-search")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchDiscoverUpdates(e.currentTarget.value);}});
   $("#discover-updates-refresh")?.addEventListener("click",()=>refreshDiscoverUpdates());
   document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-(window.orbitDiscoverLastRefresh||0)>600000){window.orbitDiscoverLastRefresh=Date.now();refreshDiscoverUpdates();}});
 }
@@ -1207,7 +1186,7 @@ function setupEvents(){
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");});
   const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),playerReveal=$("#player-reveal"),fullscreenToggle=$("#fullscreen-toggle");
-  setupSettings();setupGlobalLive();setupMovablePlayer();setupDiscoverUpdates();
+  setupSettings();setupGlobalLive();setupDiscoverUpdates();try{localStorage.removeItem("orbit-player-position");}catch{}
   const syncFullscreen=()=>{const active=!!document.fullscreenElement;fullscreenToggle.title=active?"Exit full screen":"Enter full screen";fullscreenToggle.setAttribute("aria-label",fullscreenToggle.title);document.body.classList.toggle("app-fullscreen",active);};
   fullscreenToggle.addEventListener("click",async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify("Full-screen mode is not available right now.");}});
   document.addEventListener("fullscreenchange",syncFullscreen);syncFullscreen();

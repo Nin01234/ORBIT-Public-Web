@@ -184,3 +184,14 @@
  html[data-theme="light"] .orbit-mobile-landing .orbit-connect-heading p,
  html[data-theme="light"] .orbit-mobile-landing .orbit-connect-card p{color:var(--muted,#657168)!important}
 }
+/* ORBIT mobile player: compact docked player with a separate reveal button. */
+@media(max-width:760px){
+ .player-bar{display:none!important}
+ body.mobile-player-open .player-bar{display:grid!important;position:fixed!important;z-index:1200;left:8px!important;right:8px!important;top:auto!important;bottom:calc(188px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;height:auto!important;min-height:0!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto!important;gap:7px!important;padding:9px!important;border:1px solid var(--line)!important;border-radius:14px!important;background:var(--panel)!important;box-shadow:0 12px 36px #0005!important}
+ body.mobile-player-open .player-bar .player-extra{display:flex!important;justify-content:flex-end!important}
+ body.mobile-player-open .player-bar .player-hide{display:grid!important}
+ body.mobile-player-open .player-bar .player-center{display:flex!important;flex-direction:column!important;gap:7px!important}
+ .player-drag-handle,.player-dock{display:none!important}
+ .player-reveal{display:flex!important;position:fixed!important;z-index:1201;right:12px!important;bottom:calc(190px + env(safe-area-inset-bottom))!important}
+ body.mobile-player-open .player-reveal{bottom:calc(350px + env(safe-area-inset-bottom))!important}
+}
