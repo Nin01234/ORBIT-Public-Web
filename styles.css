@@ -113,3 +113,30 @@ body.player-hidden .player-reveal{display:grid}
 .orbit-legal-copy a{color:var(--accent,#8bd6c8);text-decoration:underline;overflow-wrap:anywhere}
 @media(max-width:640px){.orbit-legal-actions{grid-template-columns:1fr}.orbit-legal-contact{padding:13px}}
 
+
+/* ORBIT Universal Downloader — feature-flagged, browser-local downloads */
+.orbit-universal-downloader{margin:0 0 22px;padding:clamp(16px,3vw,24px);border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,var(--panel),var(--panel2,rgba(255,255,255,.025)));box-shadow:0 14px 38px rgba(0,0,0,.12)}
+.orbit-universal-downloader[hidden]{display:none!important}
+.orbit-downloader-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.orbit-downloader-kicker{display:block;margin-bottom:7px;color:var(--lime);font-size:10px;font-weight:800;letter-spacing:.16em}
+.orbit-downloader-heading h2{margin:0 0 7px;font-size:clamp(20px,3vw,27px)}
+.orbit-downloader-heading p{margin:0;color:var(--muted);line-height:1.55;max-width:680px}
+.orbit-downloader-mark{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border:1px solid var(--line);border-radius:14px;color:var(--lime);font-size:28px}
+.orbit-direct-download-form{display:flex;gap:10px;flex-wrap:wrap}
+.orbit-direct-download-form input{flex:1 1 320px;min-width:0;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:9px;background:var(--bg,var(--panel));color:var(--text);font:inherit}
+.orbit-direct-download-form button{min-height:48px}
+.orbit-downloader-status{min-height:22px;margin:12px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+.orbit-downloader-status[data-state="error"]{color:#ff9a9a}
+.orbit-downloader-status[data-state="success"]{color:var(--lime)}
+.orbit-downloader-status[data-state="warning"]{color:#f2c879}
+.orbit-downloader-notes{display:flex;gap:9px 18px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:11px}
+.orbit-downloader-notes span:first-child{color:var(--lime)}
+.orbit-downloader-support{margin-top:15px;padding-top:13px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}
+.orbit-downloader-support summary{cursor:pointer;color:var(--text);font-weight:650}
+.orbit-downloader-support p{max-width:850px;margin:9px 0 0}
+.orbit-downloader-progress{display:flex;align-items:center;gap:12px;margin-top:14px;color:var(--muted);font-size:11px}
+.orbit-downloader-progress[hidden]{display:none}
+.orbit-downloader-progress-track{height:5px;flex:1;overflow:hidden;border-radius:10px;background:var(--line)}
+.orbit-downloader-progress-track span{display:block;width:35%;height:100%;border-radius:10px;background:var(--lime);animation:orbit-download-indeterminate 1.2s ease-in-out infinite alternate}
+@keyframes orbit-download-indeterminate{from{transform:translateX(-20%)}to{transform:translateX(190%)}}
+@media(max-width:600px){.orbit-direct-download-form{display:grid}.orbit-direct-download-form button{width:100%}.orbit-downloader-mark{width:40px;height:40px;flex-basis:40px}.orbit-downloader-notes{display:grid;gap:7px}}
