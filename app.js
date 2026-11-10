@@ -385,7 +385,9 @@ function renderMusicResults(){
 function musicCard(track){
   const saved=isMusicFav(track.id);
   const playLabel=track.previewOnly?"Play preview":"Play full track";
-  const download='<button data-download-track="'+esc(track.id)+'" title="'+(track.canDownload?"Download for offline":"This artist has not enabled downloads")+'"'+(track.canDownload?"":" disabled")+'>'+(track.canDownload?"↓ Download":"↓ Unavailable")+'</button>';
+  const pid=track.providerId||track.id.replace(/^audius:/,"");
+  const streamUrl="/api/audius-stream?id="+encodeURIComponent(pid);
+  const download='<button data-download-track="'+esc(track.id)+'" data-stream-url="'+esc(streamUrl)+'" title="Save for offline playback">↓ Save offline</button>';
   return '<article class="media-card music-audio-card"><img class="media-cover" src="'+esc(track.artwork||"") + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><h3 title="'+esc(track.title)+'">'+esc(track.title)+'</h3><p>'+esc(track.artist||"Independent artist")+'  -  '+musicDuration(track.duration)+'</p><div class="media-actions"><small>'+esc(track.source||track.genre||"Audio track")+(track.previewOnly?" · Preview":"")+'</small><div class="music-card-actions"><button data-audio-play="'+esc(track.id)+'">'+playLabel+'</button>'+download+'<button class="heart-button '+(saved?"saved":"")+'" data-audio-fav="'+esc(track.id)+'" title="Save favourite">'+(saved?"\u{1F496}":"\u{1F90D}")+'</button></div></div></article>';
 }
 async function loadAudioMusic(term="afrobeats"){
@@ -980,7 +982,7 @@ function setupEvents(){
     const yt=e.target.closest("[data-youtube]");if(yt){playYouTubeVideo(yt.dataset.youtube,yt.dataset.title,yt.dataset.artist);return;}
     const podcast=e.target.closest("[data-podcast]");if(podcast){loadPodcastEpisodes(podcast.dataset.podcast,podcast.dataset.title);return;}
     const podcastPlay=e.target.closest("[data-podcast-play]");if(podcastPlay){playPodcastEpisode(podcastPlay.dataset.podcastPlay);return;}
-    const downloadTrack=e.target.closest("[data-download-track]");if(downloadTrack){const track=musicTrackCache.get(String(downloadTrack.dataset.downloadTrack));if(track&&track.source==="Audius"&&track.canDownload){const id=encodeURIComponent(track.providerId||track.id.replace(/^audius:/,""));downloadOffline("/api/audius-download?id="+id,track.title,"audio",track.artwork,downloadTrack);}else notify("The artist has not enabled downloads for this track.");return;}
+    const downloadTrack=e.target.closest("[data-download-track]");if(downloadTrack){const track=musicTrackCache.get(String(downloadTrack.dataset.downloadTrack));if(track&&track.source==="Audius"){const pid=encodeURIComponent(track.providerId||track.id.replace(/^audius:/,""));const url=track.canDownload?"/api/audius-download?id="+pid:"/api/audius-stream?id="+pid;downloadOffline(url,track.title,"audio",track.artwork,downloadTrack);}else if(downloadTrack.dataset.streamUrl){downloadOffline(downloadTrack.dataset.streamUrl,downloadTrack.dataset.downloadTitle||"Track","audio","",downloadTrack);}else notify("This track cannot be saved offline.");return;}
     const downloadUrl=e.target.closest("[data-download-url]");if(downloadUrl){downloadOffline(downloadUrl.dataset.downloadUrl,downloadUrl.dataset.downloadTitle,downloadUrl.dataset.downloadKind,"",downloadUrl);return;}
     const downloadFilm=e.target.closest("[data-download-film]");if(downloadFilm){fetch("/api/film-download-url?id="+encodeURIComponent(downloadFilm.dataset.downloadFilm)).then(r=>{if(!r.ok)throw new Error("No downloadable file listed");return r.json();}).then(x=>downloadOffline(x.url,x.title,"film","",downloadFilm)).catch(()=>notify("This archive item has no downloadable film file."));return;}
     const offlinePlay=e.target.closest("[data-offline-play]");if(offlinePlay){playOffline(offlinePlay.dataset.offlinePlay,offlinePlay.dataset.offlineKind,offlinePlay.dataset.offlineTitle);return;}

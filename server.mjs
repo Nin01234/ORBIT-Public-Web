@@ -77,7 +77,7 @@ async function api(req,res,url) {
     const target=new URL(upstream.url);if(target.protocol!=="https:")throw new Error("Unsafe download redirect");
     const filename=(String(track.title||"ORBIT-audio").replace(/[<>:"/\|?*\x00-\x1f]/g," ").trim().slice(0,100)||"ORBIT-audio")+".mp3";
     res.writeHead(200,{"Content-Type":upstream.headers.get("content-type")||"audio/mpeg","Content-Disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(filename),"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"});
-    const {Readable}=await import("node:stream");Readable.fromWeb(upstream.body).pipe(res);return;
+    const {Readable}=await import("node:stream");const dl=Readable.fromWeb(upstream.body);dl.on("error",err=>{console.error("ORBIT download stream error:",err.message);if(!res.destroyed)res.destroy();});res.on("close",()=>dl.destroy());dl.pipe(res);return;
   }
   if(p==="/api/audius-stream") {
     const id=safeText(url.searchParams.get("id"),16);if(!/^\d{1,16}$/.test(id))return send(res,400,{error:"Invalid track ID"});
@@ -85,7 +85,7 @@ async function api(req,res,url) {
     if(!upstream.ok||!upstream.body)throw new Error("Audio stream unavailable");
     const target=new URL(upstream.url);if(target.protocol!=="https:")throw new Error("Unsafe stream redirect");
     res.writeHead(upstream.status,{"Content-Type":upstream.headers.get("content-type")||"audio/mpeg","Cache-Control":"no-store","X-Content-Type-Options":"nosniff"});
-    const {Readable}=await import("node:stream");Readable.fromWeb(upstream.body).pipe(res);return;
+    const {Readable}=await import("node:stream");const st=Readable.fromWeb(upstream.body);st.on("error",err=>{console.error("ORBIT stream error:",err.message);if(!res.destroyed)res.destroy();});res.on("close",()=>st.destroy());st.pipe(res);return;
   }
   if(p==="/api/librivox") {
     let target;try{target=new URL(url.searchParams.get("url")||"");}catch{return send(res,400,{error:"Invalid LibriVox URL"});}
