@@ -166,7 +166,22 @@
   <div class="media-grid" id="favorite-music-results"><div class="empty-state">Save a track from Music and it will appear here.</div></div>
 </section>
 
-      <section class="view" id="view-downloads"><div class="section-heading"><div><h2>Your downloads</h2><p>Saved audio and video on this device</p></div></div><div class="media-grid" id="offline-results"><div class="loading-card">Loading your offline library...</div></div></section>
+      <section class="view" id="view-downloads">
+  <div class="section-heading"><div><h2>Your downloads</h2><p>Saved audio and video on this device</p></div></div>
+  <section class="orbit-universal-downloader" id="orbit-universal-downloader" hidden aria-labelledby="orbit-downloader-title">
+    <div class="orbit-downloader-heading"><div><span class="orbit-downloader-kicker">ORBIT DOWNLOADS</span><h2 id="orbit-downloader-title">Universal media downloader</h2><p>Save a direct audio or video file link to this device and your ORBIT offline library. No account required.</p></div><span class="orbit-downloader-mark" aria-hidden="true">⇩</span></div>
+    <form id="orbit-direct-download-form" class="orbit-direct-download-form">
+      <label class="sr-only" for="orbit-direct-download-url">Direct media file URL</label>
+      <input id="orbit-direct-download-url" type="url" inputmode="url" autocomplete="url" placeholder="Paste a direct .mp4, .mp3, .webm or other media file URL" required>
+      <button class="button button-light" id="orbit-direct-download-button" type="submit">Download media</button>
+    </form>
+    <div class="orbit-downloader-progress" id="orbit-downloader-progress" hidden><div class="orbit-downloader-progress-track"><span id="orbit-downloader-progress-fill"></span></div><span id="orbit-downloader-progress-label">Preparing download…</span></div>
+    <p class="orbit-downloader-status" id="orbit-downloader-status" role="status" aria-live="polite">Direct public media-file links are supported when the host permits browser access (CORS).</p>
+    <div class="orbit-downloader-notes"><span>✓ Downloads stay on this device</span><span>✓ Also saved to ORBIT Downloads</span><span>✓ No sign-up required</span></div>
+    <details class="orbit-downloader-support"><summary>Supported links and limitations</summary><p>Use a direct link to an audio or video file from a source that permits cross-origin access. A webpage link from YouTube, TikTok, Instagram, Facebook or another social platform is not a direct media file and is not currently supported by this downloader. ORBIT does not bypass DRM, private content, paywalls or platform restrictions. Some hosts block browser downloads; those links will be reported as unavailable.</p></details>
+  </section>
+  <div class="media-grid" id="offline-results"><div class="loading-card">Loading your offline library...</div></div>
+</section>
 
       <section class="view" id="view-settings"><div class="page-intro"><div><h1>Your experience.</h1><p>Personalise how ORBIT looks and behaves on this device.</p></div></div>
 <section class="settings-card orbit-mobile-install orbit-mobile-landing">
