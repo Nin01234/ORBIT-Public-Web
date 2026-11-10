@@ -986,7 +986,7 @@ async function playGlobalChannel(id){
  status.textContent=(lastError?.message||"No working public stream was found.")+" Try another channel. Some broadcasters may be offline or region-restricted.";
 }
 function setupGlobalLive(){
- const nav=$("#global-live-nav");if(nav)nav.hidden=localStorage.getItem("orbit-global-live")!=="1";
+ const nav=$("#global-live-nav");if(nav)nav.hidden=false;
  $("#global-tv-search").addEventListener("input",()=>{
   const q=$("#global-tv-search").value.trim().toLowerCase(),selected=$("#global-tv-country").value;
   if(selected){renderGlobalLiveChannels();return;}
