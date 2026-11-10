@@ -141,15 +141,18 @@
 </section>
 
       <section class="view" id="view-omnisave">
-  <div class="page-intro"><div><h1>OmniSave Movies.</h1><p>Search and download free, public-domain full movies directly into ORBIT Downloads.</p></div></div>
-  <div class="omnisave-import-panel" style="margin:0 0 18px;padding:18px;border:1px solid var(--line,#26333d);border-radius:14px;background:var(--panel,#111a22)">
-    <form id="omnisave-search-form" style="display:flex;gap:10px;flex-wrap:wrap">
-      <input id="omnisave-query" type="search" placeholder="Search movie title, e.g. Night of the Living Dead" aria-label="Search public-domain movies" style="flex:1;min-width:220px">
-      <button class="button button-light" id="omnisave-search-button" type="submit">Search movies</button>
-    </form>
-    <p id="omnisave-status" role="status" style="margin:10px 0 0;color:var(--muted,#9aa8b5)">Browse verified public-domain movie listings. Commercial films require permission or a licensed service.</p>
+  <div class="page-intro"><div><h1>OmniSave Movies & Downloads.</h1><p>Use the actual VideoDownloader.site experience inside ORBIT. Search titles, choose available formats and download without intentionally opening a separate browser page.</p></div></div>
+  <div class="omnisave-embed-toolbar">
+    <div class="omnisave-embed-status" id="omnisave-status" role="status" aria-live="polite">OmniSave will load here when you open this page.</div>
+    <div class="omnisave-embed-actions">
+      <button class="button button-light" id="omnisave-reload" type="button">Reload OmniSave</button>
+      <button class="button button-outline" id="omnisave-fullscreen" type="button">Full screen</button>
+    </div>
   </div>
-  <div class="media-grid" id="omnisave-results"><div class="loading-card">Loading free movie catalogue…</div></div>
+  <div class="omnisave-embed-shell">
+    <iframe id="omnisave-frame" title="VideoDownloader.site embedded inside ORBIT" src="about:blank" data-src="https://videodownloader.site/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="clipboard-read; clipboard-write; fullscreen" allowfullscreen></iframe>
+  </div>
+  <p class="catalogue-disclaimer">The embedded service is operated by VideoDownloader.site, not ORBIT. Search results, supported sources, available formats, downloads and service availability are controlled by that website. Only download content you are authorized to save.</p>
   <div class="omnisave-import-panel" style="margin:20px 0 18px;padding:18px;border:1px solid var(--line,#26333d);border-radius:14px;background:var(--panel,#111a22)">
     <h2 style="margin:0 0 8px">Already have a movie file?</h2>
     <p style="margin:0 0 12px;color:var(--muted,#9aa8b5)">Choose a video from your device to add it to ORBIT Downloads for offline viewing on this device.</p>
