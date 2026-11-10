@@ -2,12 +2,14 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { WebSocketServer, WebSocket } from "ws";
+import { randomBytes } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".svg":"image/svg+xml", ".png":"image/png", ".ico":"image/x-icon", ".webmanifest":"application/manifest+json" };
-const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js"]);
+const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
 const cache = new Map();
 const rate = new Map();
 const TTL = { radio: 120000, music: 180000, podcast: 300000, countries: 86400000, channels: 21600000, films: 3600000, movies: 3600000 };
@@ -252,7 +254,55 @@ const server=http.createServer(async(req,res)=>{
   const icon=/^icons\/[A-Za-z0-9._-]+\.png$/i.test(name);
   if(!allowed.has(name)&&!icon){res.writeHead(404).end("Not found");return;}
   const target=path.resolve(root,name);if(!target.startsWith(root+path.sep)){res.writeHead(403).end("Forbidden");return;}
-  fs.readFile(target,(err,data)=>{if(err){res.writeHead(404).end("Not found");return;}res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","X-Content-Type-Options":"nosniff","Referrer-Policy":"strict-origin-when-cross-origin","X-Frame-Options":"SAMEORIGIN","Permissions-Policy":"camera=(), microphone=(), geolocation=()","Cache-Control":name==="index.html"?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
+  fs.readFile(target,(err,data)=>{if(err){res.writeHead(404).end("Not found");return;}res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","X-Content-Type-Options":"nosniff","Referrer-Policy":"strict-origin-when-cross-origin","X-Frame-Options":"SAMEORIGIN","Permissions-Policy":"camera=(), microphone=(self), geolocation=()","Cache-Control":name==="index.html"?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
+});
+const liveRooms=new Map();
+const liveWss=new WebSocketServer({noServer:true,maxPayload:8192});
+function wsSend(socket,payload){if(socket&&socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify(payload));}
+function closeLiveRoom(roomId,reason="The host ended this live podcast."){const room=liveRooms.get(roomId);if(!room)return;for(const listener of room.listeners.values()){wsSend(listener,{type:"ended",message:reason});try{listener.close(1000,reason.slice(0,120));}catch{}}room.listeners.clear();liveRooms.delete(roomId);}
+liveWss.on("connection",(socket,request)=>{
+  socket.isAlive=true;socket.on("pong",()=>{socket.isAlive=true;});socket.on("error",()=>{});
+  socket.on("message",raw=>{
+    let message;try{message=JSON.parse(raw.toString());}catch{return wsSend(socket,{type:"error",message:"Invalid live message."});}
+    if(!message||typeof message.type!=="string")return;
+    if(message.type==="create"){
+      if(socket.role)return wsSend(socket,{type:"error",message:"This connection already has a role."});
+      const ip=String(request.headers["x-forwarded-for"]||request.socket.remoteAddress||"unknown").split(",")[0].trim();
+      if(liveRooms.size>=150||[...liveRooms.values()].filter(room=>room.ip===ip).length>=2)return wsSend(socket,{type:"error",message:"The free live-room limit has been reached for now. Try again later."});
+      let roomId;do{roomId=randomBytes(5).toString("hex").toUpperCase();}while(liveRooms.has(roomId));
+      socket.role="host";socket.roomId=roomId;liveRooms.set(roomId,{host:socket,listeners:new Map(),createdAt:Date.now(),ip});return wsSend(socket,{type:"created",room:roomId});
+    }
+    if(message.type==="join"){
+      const roomId=String(message.room||"").toUpperCase();if(!/^[A-F0-9]{10}$/.test(roomId))return wsSend(socket,{type:"error",message:"Enter a valid room code."});
+      const room=liveRooms.get(roomId);if(!room||room.host.readyState!==WebSocket.OPEN)return wsSend(socket,{type:"error",message:"That live room is not available. Check the code or ask the host to start again."});if(room.listeners.size>=8)return wsSend(socket,{type:"error",message:"This live room has reached its free-version limit of 8 listeners."});
+      if(socket.role)return wsSend(socket,{type:"error",message:"Leave your current room first."});
+      const peerId=randomBytes(8).toString("hex");socket.role="listener";socket.roomId=roomId;socket.peerId=peerId;room.listeners.set(peerId,socket);
+      wsSend(socket,{type:"joined",room:roomId,peerId});wsSend(room.host,{type:"peer-joined",peerId});return;
+    }
+    if(message.type==="signal"){
+      const room=liveRooms.get(socket.roomId);if(!room)return;
+      const peerId=String(message.peerId||"");if(!message.data||typeof message.data!=="object")return;
+      if(socket.role==="host"){const target=room.listeners.get(peerId);if(target)wsSend(target,{type:"signal",data:message.data});}
+      else if(socket.role==="listener"&&socket.peerId===peerId){wsSend(room.host,{type:"signal",peerId,data:message.data});}
+      return;
+    }
+    if(message.type==="leave"&&socket.role==="listener"){const room=liveRooms.get(socket.roomId);if(room){room.listeners.delete(socket.peerId);wsSend(room.host,{type:"peer-left",peerId:socket.peerId});}socket.role=null;socket.roomId=null;return;}
+    if(message.type==="end"&&socket.role==="host"){closeLiveRoom(socket.roomId);socket.role=null;socket.roomId=null;return;}
+  });
+  socket.on("close",()=>{
+    const room=liveRooms.get(socket.roomId);if(!room)return;
+    if(socket.role==="host")closeLiveRoom(socket.roomId);
+    else if(socket.role==="listener"){room.listeners.delete(socket.peerId);wsSend(room.host,{type:"peer-left",peerId:socket.peerId});}
+  });
+});
+const heartbeat=setInterval(()=>{for(const socket of liveWss.clients){if(socket.isAlive===false){socket.terminate();continue;}socket.isAlive=false;socket.ping();}},30000);
+liveWss.on("close",()=>clearInterval(heartbeat));
+server.on("upgrade",(request,socket,head)=>{
+  let pathname;try{pathname=new URL(request.url||"/","http://localhost").pathname;}catch{socket.destroy();return;}
+  if(pathname!=="/signal"){socket.destroy();return;}
+  const origin=request.headers.origin||"";
+  if(origin){try{const u=new URL(origin),local=["localhost","127.0.0.1"].includes(u.hostname);if(!local&&u.host!==request.headers.host){socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");socket.destroy();return;}}catch{socket.destroy();return;}}
+  liveWss.handleUpgrade(request,socket,head,ws=>liveWss.emit("connection",ws,request));
 });
 const host=process.env.RENDER?"0.0.0.0":"127.0.0.1";
 server.listen(port,host,()=>{

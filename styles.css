@@ -113,3 +113,21 @@ body.player-hidden .player-reveal{display:grid}
 .orbit-legal-copy a{color:var(--accent,#8bd6c8);text-decoration:underline;overflow-wrap:anywhere}
 @media(max-width:640px){.orbit-legal-actions{grid-template-columns:1fr}.orbit-legal-contact{padding:13px}}
 
+
+/* ORBIT peer-to-peer live podcast room */
+.live-podcast-panel{margin:0 0 28px;padding:22px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.live-podcast-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.live-podcast-panel-heading h2{margin:6px 0;font-size:24px}
+.live-podcast-panel-heading p,.live-podcast-note{color:var(--muted);font-size:12px;line-height:1.65;margin:0}
+.live-podcast-free{border:1px solid var(--line);border-radius:30px;padding:7px 10px;color:var(--lime);font-size:10px;white-space:nowrap}
+.live-podcast-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.live-podcast-join{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.live-podcast-join span{font-size:11px;color:var(--muted)}
+.live-podcast-join input{width:160px;max-width:45vw;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);text-transform:uppercase;letter-spacing:.12em}
+.live-podcast-room{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:8px}
+.live-podcast-room>span{font-size:9px;color:var(--muted);letter-spacing:.12em}
+.live-podcast-room strong{font:700 20px var(--display);letter-spacing:.18em;color:var(--lime)}
+.live-podcast-status{margin:12px 0;color:var(--ink);font-size:12px}
+#live-podcast-audio{display:block;width:100%;max-width:520px;margin:12px 0}
+.live-podcast-note{font-size:10px;max-width:900px}
+@media(max-width:600px){.live-podcast-panel{padding:15px}.live-podcast-panel-heading{flex-direction:column}.live-podcast-controls,.live-podcast-join{align-items:stretch;width:100%}.live-podcast-controls>button,.live-podcast-join button{width:100%}.live-podcast-join input{flex:1;width:100%;max-width:none}.live-podcast-room{flex-wrap:wrap}.live-podcast-room strong{font-size:17px}}

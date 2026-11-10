@@ -4,6 +4,13 @@
   "private": true,
   "description": "ORBIT public web deployment staging copy",
   "type": "module",
-  "scripts": { "start": "node server.mjs" },
-  "engines": { "node": ">=20" }
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "^8.22.2"
+  }
 }
