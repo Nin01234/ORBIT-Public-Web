@@ -1194,9 +1194,27 @@ function setupEvents(){
   if(localStorage.getItem("orbit-player-hidden")==="1")document.body.classList.add("player-hidden");
   navToggle.addEventListener("click",()=>{const hidden=document.body.classList.toggle("nav-hidden");localStorage.setItem("orbit-nav-hidden",hidden?"1":"0");navToggle.title=hidden?"Show navigation":"Hide navigation";navToggle.setAttribute("aria-label",navToggle.title);const setting=$("#setting-nav-visible");if(setting)setting.checked=!hidden;});
   playerHide.addEventListener("click",()=>{document.body.classList.add("player-hidden");document.body.classList.remove("mobile-player-open");localStorage.setItem("orbit-player-hidden","1");});
-  playerReveal.addEventListener("click",()=>{document.body.classList.remove("player-hidden");document.body.classList.add("mobile-player-open");localStorage.setItem("orbit-player-hidden","0");});  let revealDrag=null, suppressRevealClick=false;
+  playerReveal.addEventListener("click",()=>{document.body.classList.remove("player-hidden");document.body.classList.add("mobile-player-open");localStorage.setItem("orbit-player-hidden","0");});  // The launcher and expanded player are one vertically movable control group.
+  const fullPlayer=document.querySelector(".player-bar");
+  let revealDrag=null, suppressRevealClick=false;
+  const playerGap=12;
+  const applyGroupPosition=(launcherTop)=>{
+    const safeLauncher=Math.max(8,Math.min(innerHeight-playerReveal.offsetHeight-8,launcherTop));
+    playerReveal.style.top=safeLauncher+"px";playerReveal.style.bottom="auto";
+    if(fullPlayer && document.body.classList.contains("mobile-player-open")){
+      fullPlayer.style.bottom="auto";
+      const panelTop=Math.max(8,Math.min(innerHeight-fullPlayer.offsetHeight-8,safeLauncher+playerReveal.offsetHeight+playerGap));
+      fullPlayer.style.top=panelTop+"px";
+    }
+  };
   const savedRevealY=Number(localStorage.getItem("orbit-player-reveal-y"));
-  if(Number.isFinite(savedRevealY)&&savedRevealY>0){playerReveal.style.top=Math.min(savedRevealY,Math.max(8,innerHeight-58))+"px";playerReveal.style.bottom="auto";}
+  if(Number.isFinite(savedRevealY)&&savedRevealY>0)applyGroupPosition(savedRevealY);
+  playerReveal.addEventListener("click",()=>{
+    document.body.classList.remove("player-hidden");document.body.classList.add("mobile-player-open");
+    localStorage.setItem("orbit-player-hidden","0");
+    const y=Number(localStorage.getItem("orbit-player-reveal-y"));
+    applyGroupPosition(Number.isFinite(y)&&y>0?y:Math.max(8,innerHeight-playerReveal.offsetHeight-210));
+  });
   playerReveal.addEventListener("pointerdown",e=>{
     if(e.button!==undefined&&e.button!==0)return;
     const rect=playerReveal.getBoundingClientRect();
@@ -1208,16 +1226,14 @@ function setupEvents(){
     const delta=e.clientY-revealDrag.startY;
     if(Math.abs(delta)>4)revealDrag.moved=true;
     if(!revealDrag.moved)return;
-    const y=Math.max(8,Math.min(innerHeight-playerReveal.offsetHeight-8,revealDrag.originY+delta));
-    playerReveal.style.top=y+"px";playerReveal.style.bottom="auto";
+    applyGroupPosition(revealDrag.originY+delta);
   });
   const finishRevealDrag=e=>{
     if(!revealDrag||e.pointerId!==revealDrag.pointerId)return;
     if(revealDrag.moved){
       const y=Math.max(8,Math.min(innerHeight-playerReveal.offsetHeight-8,playerReveal.getBoundingClientRect().top));
       localStorage.setItem("orbit-player-reveal-y",String(Math.round(y)));
-      suppressRevealClick=true;
-      setTimeout(()=>{suppressRevealClick=false;},250);
+      suppressRevealClick=true;setTimeout(()=>{suppressRevealClick=false;},250);
     }
     revealDrag=null;
   };
