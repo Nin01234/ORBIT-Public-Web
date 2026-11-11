@@ -261,7 +261,7 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||"/","http://localhost");
   if(url.pathname==="/healthz"){securityHeaders(res);res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
   if(url.pathname==="/download"||url.pathname==="/download/windows"){
-    securityHeaders(res);res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.12/ORBIT-Setup-1.1.12-x64.exe","Cache-Control":"no-store"}).end();
+    securityHeaders(res);res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.20/ORBIT-Setup-1.1.20-x64.exe","Cache-Control":"no-store"}).end();
     return;
   }
   if(url.pathname.startsWith("/api/")){
