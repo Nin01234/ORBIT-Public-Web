@@ -9,7 +9,7 @@ import { gunzipSync } from "node:zlib";
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".svg":"image/svg+xml", ".png":"image/png", ".ico":"image/x-icon", ".webmanifest":"application/manifest+json" };
-const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
+const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-web-refresh.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
 const cache = new Map();
 const rate = new Map();
 const rateCleanup = setInterval(() => {

@@ -1,0 +1,162 @@
+/* ORBIT Web and mobile light refresh; Electron desktop is deliberately excluded. */
+html:not(.orbit-desktop-app)[data-theme="light"] {
+  color-scheme: light;
+  --bg:#F5F7FB; --panel:#FFFFFF; --panel2:#EDF2F8; --line:#DFE6EF;
+  --ink:#172338; --muted:#64748B; --lime:#2563EB; --orange:#0891B2;
+  --blue:#0EA5E9; --shadow:#D8E1EC;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] body {
+  background:linear-gradient(180deg,#F8FAFD 0%,#F3F6FB 100%);
+  color:var(--ink);font-family:"Figtree","Instrument Sans",Arial,sans-serif;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .sidebar {
+  background:#FFF;border-color:#E3EAF2;box-shadow:8px 0 28px rgba(26,43,68,.035);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .brand {color:#14243B}
+html:not(.orbit-desktop-app)[data-theme="light"] .brand-mark {color:#2563EB;border-color:#2563EB}
+html:not(.orbit-desktop-app)[data-theme="light"] .nav-link {color:#64748B;border-radius:11px}
+html:not(.orbit-desktop-app)[data-theme="light"] .nav-link:hover {background:#F1F5FB;color:#1E3A5F}
+html:not(.orbit-desktop-app)[data-theme="light"] .nav-link.active {
+  color:#1D4ED8;background:linear-gradient(100deg,#EAF1FF,#F2F7FF);box-shadow:inset 3px 0 #2563EB;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .nav-link.active>span {color:#2563EB}
+html:not(.orbit-desktop-app)[data-theme="light"] .status-card,
+html:not(.orbit-desktop-app)[data-theme="light"] .station-card,
+html:not(.orbit-desktop-app)[data-theme="light"] .media-card,
+html:not(.orbit-desktop-app)[data-theme="light"] .settings-card,
+html:not(.orbit-desktop-app)[data-theme="light"] .live-podcast-panel,
+html:not(.orbit-desktop-app)[data-theme="light"] .music-player-status,
+html:not(.orbit-desktop-app)[data-theme="light"] .podcast-player-panel,
+html:not(.orbit-desktop-app)[data-theme="light"] .book-chapters,
+html:not(.orbit-desktop-app)[data-theme="light"] .station-panel {
+  background:#FFF;color:#172338;border:1px solid #E1E8F0;border-radius:14px;
+  box-shadow:0 8px 24px rgba(31,53,82,.045);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .topbar {border-color:#E1E8F0;margin-bottom:28px}
+html:not(.orbit-desktop-app)[data-theme="light"] .breadcrumb,
+html:not(.orbit-desktop-app)[data-theme="light"] .side-label,
+html:not(.orbit-desktop-app)[data-theme="light"] .eyebrow,
+html:not(.orbit-desktop-app)[data-theme="light"] .page-footer {color:#718096}
+html:not(.orbit-desktop-app)[data-theme="light"] .breadcrumb b,
+html:not(.orbit-desktop-app)[data-theme="light"] h1,
+html:not(.orbit-desktop-app)[data-theme="light"] h2,
+html:not(.orbit-desktop-app)[data-theme="light"] h3 {color:#172338}
+html:not(.orbit-desktop-app)[data-theme="light"] .hero {
+  border:1px solid #D9E5F5;border-radius:20px;
+  background:radial-gradient(ellipse at 84% 18%,rgba(56,189,248,.2),transparent 38%),linear-gradient(115deg,#FFF,#EFF5FF 58%,#E6F4FA);
+  box-shadow:0 18px 45px rgba(41,75,125,.08);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .hero:before {
+  background:linear-gradient(105deg,rgba(255,255,255,.96),rgba(245,249,255,.82) 52%,rgba(219,240,250,.15));
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .hero-copy p,
+html:not(.orbit-desktop-app)[data-theme="light"] .page-intro p,
+html:not(.orbit-desktop-app)[data-theme="light"] .station-card p,
+html:not(.orbit-desktop-app)[data-theme="light"] .media-card p {color:#64748B}
+html:not(.orbit-desktop-app)[data-theme="light"] .planet {
+  background:radial-gradient(circle at 32% 28%,#BAE6FD 0%,#60A5FA 28%,#2563EB 62%,#173B78 82%);
+  box-shadow:inset -26px -20px 55px #1E3A8A,0 16px 48px rgba(37,99,235,.15);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .planet-land {background:#DBEAFE}
+html:not(.orbit-desktop-app)[data-theme="light"] .orbit-ring {border-color:rgba(37,99,235,.22)}
+html:not(.orbit-desktop-app)[data-theme="light"] .orbit-tag {
+  color:#1E293B;background:rgba(255,255,255,.92);border-color:#DCE6F2;box-shadow:0 8px 22px rgba(31,53,82,.08);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .search-box,
+html:not(.orbit-desktop-app)[data-theme="light"] .inline-search,
+html:not(.orbit-desktop-app)[data-theme="light"] .station-search,
+html:not(.orbit-desktop-app)[data-theme="light"] .panel-top select,
+html:not(.orbit-desktop-app)[data-theme="light"] .setting-row select,
+html:not(.orbit-desktop-app)[data-theme="light"] .setting-row input,
+html:not(.orbit-desktop-app)[data-theme="light"] textarea {
+  background:#FFF;color:#172338;border:1px solid #DCE5EF;border-radius:10px;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] input::placeholder,
+html:not(.orbit-desktop-app)[data-theme="light"] textarea::placeholder {color:#94A3B8}
+html:not(.orbit-desktop-app)[data-theme="light"] .chrome-toggle,
+html:not(.orbit-desktop-app)[data-theme="light"] .player-reveal {
+  background:#FFF;color:#334155;border:1px solid #DFE6EF;box-shadow:0 3px 12px rgba(31,53,82,.06);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .button,
+html:not(.orbit-desktop-app)[data-theme="light"] .button-light,
+html:not(.orbit-desktop-app)[data-theme="light"] .button-primary,
+html:not(.orbit-desktop-app)[data-theme="light"] button.primary {
+  color:#FFF;background:#2563EB;border:1px solid #2563EB;border-radius:10px;box-shadow:0 5px 15px rgba(37,99,235,.16);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .button:hover,
+html:not(.orbit-desktop-app)[data-theme="light"] .button-light:hover,
+html:not(.orbit-desktop-app)[data-theme="light"] button.primary:hover {background:#1D4ED8}
+html:not(.orbit-desktop-app)[data-theme="light"] .text-button,
+html:not(.orbit-desktop-app)[data-theme="light"] .subtle-link {
+  color:#1E3A5F;background:#FFF;border:1px solid #DCE5EF;border-radius:10px;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .station-art,
+html:not(.orbit-desktop-app)[data-theme="light"] .avatar {background:linear-gradient(135deg,#2563EB,#06B6D4);color:#FFF}
+html:not(.orbit-desktop-app)[data-theme="light"] .mini-play,
+html:not(.orbit-desktop-app)[data-theme="light"] .station-row button,
+html:not(.orbit-desktop-app)[data-theme="light"] .media-actions button,
+html:not(.orbit-desktop-app)[data-theme="light"] .music-card-actions button[data-audio-play],
+html:not(.orbit-desktop-app)[data-theme="light"] .episode-actions button {
+  background:#EAF1FF;color:#1D4ED8;border:1px solid #D5E3FF;border-radius:9px;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .explore-card {
+  background-color:#FFF;border:1px solid #E1E8F0;border-radius:16px;box-shadow:0 8px 24px rgba(31,53,82,.045);
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .podcast-card {background-image:radial-gradient(circle at 90% 10%,rgba(139,92,246,.10),transparent 44%),linear-gradient(135deg,#FFF,#F5F1FF)}
+html:not(.orbit-desktop-app)[data-theme="light"] .book-card {background-image:radial-gradient(circle at 85% 20%,rgba(6,182,212,.12),transparent 44%),linear-gradient(135deg,#FFF,#EFFBFC)}
+html:not(.orbit-desktop-app)[data-theme="light"] .music-card {background-image:radial-gradient(circle at 85% 20%,rgba(37,99,235,.12),transparent 44%),linear-gradient(135deg,#FFF,#EFF4FF)}
+html:not(.orbit-desktop-app)[data-theme="light"] .explore-kicker,
+html:not(.orbit-desktop-app)[data-theme="light"] .explore-arrow {color:#2563EB}
+html:not(.orbit-desktop-app)[data-theme="light"] .globe-stage {background:radial-gradient(ellipse at center,#E3F0FF,#F7FAFF 72%);border:1px solid #DCE5EF}
+html:not(.orbit-desktop-app)[data-theme="light"] .station-row,
+html:not(.orbit-desktop-app)[data-theme="light"] .station-card-bottom {border-color:#E7EDF4}
+html:not(.orbit-desktop-app)[data-theme="light"] .pill {background:#FFF;color:#64748B;border-color:#DCE5EF}
+html:not(.orbit-desktop-app)[data-theme="light"] .pill.active,
+html:not(.orbit-desktop-app)[data-theme="light"] .pill:hover {background:#EAF1FF;color:#1D4ED8;border-color:#93B4F8}
+html:not(.orbit-desktop-app)[data-theme="light"] .player-bar {
+  background:rgba(255,255,255,.97);border-color:#DCE5EF;box-shadow:0 -8px 30px rgba(31,53,82,.06);color:#172338;
+}
+html:not(.orbit-desktop-app)[data-theme="light"] .player-controls .control-button,
+html:not(.orbit-desktop-app)[data-theme="light"] .player-extra {color:#475569}
+html:not(.orbit-desktop-app)[data-theme="light"] .player-bar .player-art {background:#EAF1FF!important;color:#1D4ED8!important}
+html:not(.orbit-desktop-app)[data-theme="light"] .empty-state,
+html:not(.orbit-desktop-app)[data-theme="light"] .loading-card {background:#FFF;color:#64748B;border-color:#CBD5E1}
+html:not(.orbit-desktop-app)[data-theme="light"] .toast {background:#1D4ED8;color:#FFF}
+html:not(.orbit-desktop-app)[data-theme="light"] :where(button,a,input,select,textarea):focus-visible {outline:3px solid rgba(37,99,235,.25);outline-offset:2px}
+@media(max-width:850px) {
+  html:not(.orbit-desktop-app)[data-theme="light"] .main-area {padding-left:18px;padding-right:18px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .topbar {gap:10px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .hero {border-radius:17px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .section-heading {gap:12px;flex-wrap:wrap}
+}
+@media(max-width:760px) {
+  html:not(.orbit-desktop-app)[data-theme="light"] .sidebar {
+    background:rgba(255,255,255,.97)!important;border-top:1px solid #DCE5EF!important;
+    box-shadow:0 -8px 26px rgba(31,53,82,.09)!important;backdrop-filter:blur(18px);
+  }
+  html:not(.orbit-desktop-app)[data-theme="light"] .sidebar .nav-link {color:#64748B!important;background:transparent!important;border-color:transparent!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .sidebar .nav-link.active {color:#1D4ED8!important;background:#EAF1FF!important;border-color:#D5E3FF!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .main-area {padding-left:0!important;padding-right:0!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .topbar {
+    padding:8px 12px!important;min-height:56px!important;margin-bottom:10px!important;
+    background:rgba(255,255,255,.92);border-bottom:1px solid #E5EBF3;
+  }
+  html:not(.orbit-desktop-app)[data-theme="light"] .topbar-left {min-width:0;flex:1}
+  html:not(.orbit-desktop-app)[data-theme="light"] .top-actions {min-width:0}
+  html:not(.orbit-desktop-app)[data-theme="light"] .search-box {min-width:0;max-width:100%;box-shadow:0 2px 8px rgba(31,53,82,.035)}
+  html:not(.orbit-desktop-app)[data-theme="light"] .view {padding:14px 12px 24px!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .hero {
+    min-height:270px!important;padding:21px 17px!important;border-radius:16px;
+    background:radial-gradient(ellipse at 86% 14%,rgba(56,189,248,.18),transparent 40%),linear-gradient(130deg,#FFF,#EEF5FF);
+  }
+  html:not(.orbit-desktop-app)[data-theme="light"] .hero-copy h1 {font-size:clamp(34px,9vw,46px)!important;letter-spacing:-1.6px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .page-intro {margin:22px 0 16px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .page-intro h1 {font-size:clamp(28px,7vw,38px)!important;letter-spacing:-1px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .station-grid,
+  html:not(.orbit-desktop-app)[data-theme="light"] .media-grid {gap:10px}
+  html:not(.orbit-desktop-app)[data-theme="light"] .settings-card {padding:15px!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .player-bar {background:rgba(255,255,255,.98)!important;border:1px solid #DCE5EF!important;box-shadow:0 12px 32px rgba(31,53,82,.12)!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] body.mobile-player-open .player-bar {background:rgba(255,255,255,.98)!important;color:#172338!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .player-reveal {background:#FFF!important;color:#1D4ED8!important;border-color:#DCE5EF!important;box-shadow:0 6px 18px rgba(31,53,82,.14)!important}
+  html:not(.orbit-desktop-app)[data-theme="light"] .orbit-mobile-landing {background:#FFF!important;border-color:#E1E8F0!important}
+}

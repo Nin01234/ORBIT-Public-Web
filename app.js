@@ -935,7 +935,7 @@ function applyOrbitTheme(theme){
 function setupSettings(){
   const theme=$("#setting-theme"),motion=$("#setting-motion"),volume=$("#setting-volume"),volumeValue=$("#setting-volume-value"),remember=$("#setting-remember-volume"),nav=$("#setting-nav-visible");
   if(!theme)return;
-  theme.value=localStorage.getItem("orbit-theme")||"dark";
+  theme.value=localStorage.getItem("orbit-theme")||"light";
   motion.checked=localStorage.getItem("orbit-reduce-motion")==="1";
   remember.checked=localStorage.getItem("orbit-remember-volume")!=="0";
   nav.checked=localStorage.getItem("orbit-nav-hidden")!=="1";
@@ -947,7 +947,7 @@ function setupSettings(){
   volume.addEventListener("input",()=>{orbitBaseVolume=Number(volume.value)/100;applyOrbitSound(orbitSoundMode);volumeValue.textContent=volume.value+"%";if(remember.checked)localStorage.setItem("orbit-volume",volume.value);});
   remember.addEventListener("change",()=>{localStorage.setItem("orbit-remember-volume",remember.checked?"1":"0");if(!remember.checked)localStorage.removeItem("orbit-volume");});
   nav.addEventListener("change",()=>{document.body.classList.toggle("nav-hidden",!nav.checked);localStorage.setItem("orbit-nav-hidden",nav.checked?"0":"1");$("#nav-toggle").title=nav.checked?"Hide navigation":"Show navigation";});
-  $("#settings-reset").addEventListener("click",()=>{["orbit-theme","orbit-reduce-motion","orbit-volume","orbit-remember-volume","orbit-nav-hidden","orbit-sound","orbit-audiobooks","orbit-global-live"].forEach(k=>localStorage.removeItem(k));theme.value="dark";motion.checked=false;remember.checked=true;nav.checked=true;volume.value="80";volumeValue.textContent="80%";orbitBaseVolume=.8;audio.volume=.8;const soundSelect=$("#setting-sound");if(soundSelect)soundSelect.value="normal";orbitSoundMode="normal";document.documentElement.classList.remove("reduce-motion");applyOrbitSound("normal");applyOrbitTheme("dark");document.body.classList.remove("nav-hidden");$("#nav-toggle").title="Hide navigation";notify("Settings restored to defaults.");});
+  $("#settings-reset").addEventListener("click",()=>{["orbit-theme","orbit-reduce-motion","orbit-volume","orbit-remember-volume","orbit-nav-hidden","orbit-sound","orbit-audiobooks","orbit-global-live"].forEach(k=>localStorage.removeItem(k));theme.value="light";motion.checked=false;remember.checked=true;nav.checked=true;volume.value="80";volumeValue.textContent="80%";orbitBaseVolume=.8;audio.volume=.8;const soundSelect=$("#setting-sound");if(soundSelect)soundSelect.value="normal";orbitSoundMode="normal";document.documentElement.classList.remove("reduce-motion");applyOrbitSound("normal");applyOrbitTheme("light");document.body.classList.remove("nav-hidden");$("#nav-toggle").title="Hide navigation";notify("Settings restored to defaults.");});
 }
 
 

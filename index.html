@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b1117"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#F5F7FB"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="description" content="A world of sound. Discover live radio, podcasts, audiobooks and music from everywhere.">
   <title>ORBIT, sound without borders</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./orbit-feature-additions.css"><link rel="stylesheet" href="./orbit-ui-fixes-20261109.css"><link rel="stylesheet" href="./orbit-mobile.css">
-  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css">
-  <script>(function(){try{var t=localStorage.getItem("orbit-theme")||"dark";if(t==="system")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";if(t==="light")document.documentElement.dataset.theme="light";}catch(e){}})();</script>
+  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css"><link rel="stylesheet" href="./orbit-web-refresh.css?v=20261111-local-preview">
+  <script>(function(){try{var preview=new URLSearchParams(location.search).get("preview-theme");var t=preview==="light"?"light":(localStorage.getItem("orbit-theme")||"light");if(preview==="light")localStorage.setItem("orbit-theme","light");if(t==="system")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
 <body>
   <div class="app-shell">
