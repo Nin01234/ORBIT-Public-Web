@@ -1235,11 +1235,14 @@ function setupEvents(){
     }
     const wasDrag=revealDrag.moved;
     revealDrag=null;
-    if(cancelled||wasDrag){suppressRevealClick=true;setTimeout(()=>{suppressRevealClick=false;},500);}
+    // Mobile browsers do not always dispatch a synthesized click after pointer capture.
+    // Open directly on a completed pointer tap; a real drag only repositions the launcher.
+    if(!cancelled&&!wasDrag)openMobilePlayer();
+    suppressRevealClick=true;
+    setTimeout(()=>{suppressRevealClick=false;},500);
   };
   playerReveal.addEventListener("pointerup",e=>finishRevealDrag(e,false));
   playerReveal.addEventListener("pointercancel",e=>finishRevealDrag(e,true));
-  // Use the native click for taps; suppress it only when the pointer actually dragged.
   playerReveal.addEventListener("click",e=>{
     if(suppressRevealClick){e.preventDefault();e.stopImmediatePropagation();suppressRevealClick=false;return;}
     openMobilePlayer();
