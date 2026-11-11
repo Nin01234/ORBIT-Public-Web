@@ -244,3 +244,7 @@ html[data-theme="light"] .profile-dialog textarea {
 /* User-requested complete removal of the floating player launcher. */
 .player-reveal{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
+
+/* User requested complete removal of the main player controls; navigation remains unchanged. */
+.player-bar{display:none!important;visibility:hidden!important;pointer-events:none!important}
+
