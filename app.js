@@ -1185,7 +1185,7 @@ function setupEvents(){
   $$("#music-provider-filters [data-music-provider]").forEach(b=>b.addEventListener("click",()=>{$$("#music-provider-filters .pill").forEach(x=>x.classList.toggle("active",x===b));musicProviderFilter=b.dataset.musicProvider;renderMusicResults();}));
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");});
-  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide")),fullscreenToggle=$("#fullscreen-toggle");
+  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),fullscreenToggle=$("#fullscreen-toggle");
   setupSettings();setupGlobalLive();setupDiscoverUpdates();try{localStorage.removeItem("orbit-player-position");}catch{}
   const syncFullscreen=()=>{const active=!!document.fullscreenElement;fullscreenToggle.title=active?"Exit full screen":"Enter full screen";fullscreenToggle.setAttribute("aria-label",fullscreenToggle.title);document.body.classList.toggle("app-fullscreen",active);};
   fullscreenToggle.addEventListener("click",async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify("Full-screen mode is not available right now.");}});
