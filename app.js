@@ -225,6 +225,7 @@ function setupDiscoverUpdates(){
 }
 
 function setPlayer(title,subtitle,state){$("#player-title").textContent=title;$("#player-subtitle").textContent=subtitle;$("#player-state").textContent=state;$("#play-button").classList.add("is-playing");}
+function setPlayerArtwork(artwork,fallback="\u266b"){const host=$("#player-art");if(!host)return;host.replaceChildren();host.style.removeProperty("background-image");if(artwork){const img=document.createElement("img");img.src=artwork;img.alt="";img.decoding="async";img.onerror=()=>{host.replaceChildren(document.createTextNode(fallback));};host.appendChild(img);}else{host.textContent=fallback;}}
 function toggleFav(id){
   let list=favs();const found=list.some(x=>x.stationuuid===id);
   if(found)list=list.filter(x=>x.stationuuid!==id);else{const s=stations.find(x=>x.stationuuid===id)||stationCache.get(id)||currentStation;if(s)list.unshift(s);}
@@ -480,7 +481,7 @@ function playAudioTrack(id){
   if(!audio.src){notify("This provider has not enabled playback for this track.");return;}
   audio.play().then(()=>{
     setPlayer(track.title,track.artist+"  -  "+(track.source||"Music"),track.previewOnly?"Preview playback":"Full audio track");
-    $("#player-art").textContent="";$("#player-art").style.backgroundImage=track.artwork?"url("+JSON.stringify(track.artwork)+")":"";$("#player-art").style.backgroundSize="cover";
+    setPlayerArtwork(track.artwork,"\u266b");
     $("#player-fav").textContent=isMusicFav(track.id)?"\u{1F496}":"\u{1F90D}";
     $("#player-fav").classList.toggle("saved",isMusicFav(track.id));
   }).catch(()=>notify("This track could not be streamed. Try another track."));
@@ -663,7 +664,7 @@ function playYouTubeVideo(id,title,artist){
   const panel=$("#youtube-player-panel");
   panel.innerHTML='<iframe class="youtube-embed" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0&playsinline=1&enablejsapi=1&origin='+encodeURIComponent(window.location.origin)+'" title="'+esc(title)+'" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>';
   setPlayer(title,artist,"Playing music video");
-  $("#player-art").textContent="\u266b";
+  setPlayerArtwork("","\u266b");
   panel.scrollIntoView({behavior:"smooth",block:"nearest"});
 }const podcastEpisodeCache = new Map();
 async function loadPodcastEpisodes(id,title){

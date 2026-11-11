@@ -320,3 +320,8 @@ body:not(.player-hidden) .player-bar{display:grid!important;visibility:visible!i
 /* Drag handle must receive touch and mouse pointer movement without opening on drag. */
 .player-reveal{touch-action:none!important;pointer-events:auto!important;cursor:grab!important;z-index:1500!important}
 .player-reveal:active{cursor:grabbing!important}
+
+/* Keep the playing track artwork clipped neatly inside the player?s left circular thumbnail. */
+.player-bar .player-art{width:48px!important;height:48px!important;flex:0 0 48px!important;min-width:48px!important;min-height:48px!important;border-radius:50%!important;overflow:hidden!important;display:grid!important;place-items:center!important;background-color:#1b3430!important;background-image:none!important;padding:0!important}
+.player-bar .player-art img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;border-radius:inherit!important}
+@media(max-width:760px){.player-bar .player-art{width:40px!important;height:40px!important;flex-basis:40px!important;min-width:40px!important;min-height:40px!important}}
