@@ -1185,7 +1185,7 @@ function setupEvents(){
   $$("#music-provider-filters [data-music-provider]").forEach(b=>b.addEventListener("click",()=>{$$("#music-provider-filters .pill").forEach(x=>x.classList.toggle("active",x===b));musicProviderFilter=b.dataset.musicProvider;renderMusicResults();}));
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");});
-  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),fullscreenToggle=$("#fullscreen-toggle");
+  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),playerReveal=$("#player-reveal"),playerBar=$(".player-bar"),fullscreenToggle=$("#fullscreen-toggle");
   setupSettings();setupGlobalLive();setupDiscoverUpdates();try{localStorage.removeItem("orbit-player-position");}catch{}
   const syncFullscreen=()=>{const active=!!document.fullscreenElement;fullscreenToggle.title=active?"Exit full screen":"Enter full screen";fullscreenToggle.setAttribute("aria-label",fullscreenToggle.title);document.body.classList.toggle("app-fullscreen",active);};
   fullscreenToggle.addEventListener("click",async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify("Full-screen mode is not available right now.");}});
@@ -1193,7 +1193,29 @@ function setupEvents(){
   if(localStorage.getItem("orbit-nav-hidden")==="1")document.body.classList.add("nav-hidden");
   if(localStorage.getItem("orbit-player-hidden")==="1")document.body.classList.add("player-hidden");
   navToggle.addEventListener("click",()=>{const hidden=document.body.classList.toggle("nav-hidden");localStorage.setItem("orbit-nav-hidden",hidden?"1":"0");navToggle.title=hidden?"Show navigation":"Hide navigation";navToggle.setAttribute("aria-label",navToggle.title);const setting=$("#setting-nav-visible");if(setting)setting.checked=!hidden;});
-  playerHide.addEventListener("click",()=>{document.body.classList.add("player-hidden");document.body.classList.remove("mobile-player-open");localStorage.setItem("orbit-player-hidden","1");});
+  const playerPositionKey="orbit-player-dock-position-v1";
+  let dockPosition=null;
+  try{dockPosition=JSON.parse(localStorage.getItem(playerPositionKey)||"null");}catch{}
+  const clampDock=(x,y)=>({x:Math.max(6,Math.min(window.innerWidth-58,x)),y:Math.max(6,Math.min(window.innerHeight-58,y))});
+  const placeDock=(x,y)=>{
+    const p=clampDock(x,y);dockPosition=p;
+    playerReveal.style.setProperty("left",p.x+"px","important");playerReveal.style.setProperty("top",p.y+"px","important");playerReveal.style.setProperty("right","auto","important");playerReveal.style.setProperty("bottom","auto","important");
+    if(!document.body.classList.contains("player-hidden")){
+      const w=Math.min(720,window.innerWidth-20),h=window.innerWidth<=760?104:84;
+      const px=Math.max(8,Math.min(window.innerWidth-w-8,p.x-8));
+      const py=Math.max(8,Math.min(window.innerHeight-h-8,p.y+62));
+      playerBar.style.setProperty("left",px+"px","important");playerBar.style.setProperty("top",py+"px","important");playerBar.style.setProperty("right","auto","important");playerBar.style.setProperty("bottom","auto","important");playerBar.style.setProperty("transform","none","important");playerBar.style.setProperty("width",w+"px","important");
+    }
+    try{localStorage.setItem(playerPositionKey,JSON.stringify(p));}catch{}
+  };
+  const showDock=()=>{document.body.classList.remove("player-hidden","mobile-player-open");localStorage.setItem("orbit-player-hidden","0");playerReveal.setAttribute("aria-label","Move player or hide it");};
+  const hideDock=()=>{document.body.classList.add("player-hidden");document.body.classList.remove("mobile-player-open");localStorage.setItem("orbit-player-hidden","1");playerReveal.setAttribute("aria-label","Show player");};
+  playerReveal.addEventListener("pointerdown",e=>{if(e.button!==0&&e.pointerType==="mouse")return;playerReveal.setPointerCapture(e.pointerId);const startX=e.clientX,startY=e.clientY,rect=playerReveal.getBoundingClientRect(),baseX=rect.left,baseY=rect.top;let moved=false;const move=ev=>{const dx=ev.clientX-startX,dy=ev.clientY-startY;if(Math.abs(dx)+Math.abs(dy)>5)moved=true;if(moved)placeDock(baseX+dx,baseY+dy);};const up=()=>{playerReveal.removeEventListener("pointermove",move);playerReveal.removeEventListener("pointerup",up);playerReveal.removeEventListener("pointercancel",up);if(!moved){if(document.body.classList.contains("player-hidden"))showDock();else hideDock();}else if(document.body.classList.contains("player-hidden")){showDock();if(dockPosition)placeDock(dockPosition.x,dockPosition.y);}};playerReveal.addEventListener("pointermove",move);playerReveal.addEventListener("pointerup",up);playerReveal.addEventListener("pointercancel",up);});
+  if(!dockPosition||!Number.isFinite(dockPosition.x)||!Number.isFinite(dockPosition.y))dockPosition={x:Math.max(12,window.innerWidth-70),y:Math.max(12,window.innerHeight-170)};
+  placeDock(dockPosition.x,dockPosition.y);
+  if(localStorage.getItem("orbit-player-hidden")==="1")hideDock();else showDock();
+  playerHide.addEventListener("click",hideDock);
+  window.addEventListener("resize",()=>{if(dockPosition)placeDock(dockPosition.x,dockPosition.y);});
   audio.addEventListener("error",()=>{
     if(currentStation&&radioPlayback&&radioPlayback.token===radioPlayToken&&!radioPlayback.active){
       retryRadioPlayback(radioPlayToken,"Radio connection interrupted");return;

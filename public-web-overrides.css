@@ -249,7 +249,7 @@ html[data-theme="light"] .profile-dialog textarea {
 .player-bar{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
 
-/* ORBIT redesigned compact player dock — November 2026 */
+/* ORBIT redesigned compact player dock ï¿½ November 2026 */
 .player-bar,
 body.player-hidden .player-bar,
 body.mobile-player-open .player-bar {
@@ -305,3 +305,14 @@ body.mobile-player-open .player-bar {
  .player-bar .player-art {width:34px!important;height:34px!important;flex-basis:34px!important}
  .player-bar .control-button {min-width:24px!important}
 }
+
+
+/* Draggable ORBIT player handle and hide/show behaviour */
+.player-bar .player-extra{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;min-width:0!important}
+.player-bar .player-extra #player-state{display:none!important}
+.player-bar .player-hide{display:grid!important;place-items:center!important;width:32px!important;height:32px!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:50%!important;background:rgba(255,255,255,.08)!important;color:#fff!important;font-size:21px!important;line-height:1!important;cursor:pointer!important}
+.player-reveal{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;z-index:1402!important;left:auto;top:auto;right:18px;bottom:110px;width:48px;height:48px;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.28);border-radius:50%;background:#b7f36b;color:#14200c;font-size:27px;font-weight:800;box-shadow:0 7px 24px #0007;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.player-reveal:active{cursor:grabbing}
+body.player-hidden .player-bar{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body:not(.player-hidden) .player-bar{display:grid!important;visibility:visible!important;pointer-events:auto!important}
+@media(max-width:760px){.player-bar,body:not(.player-hidden) .player-bar{grid-template-columns:minmax(0,1fr) minmax(132px,.9fr)!important;grid-template-rows:1fr!important;left:8px!important;right:auto!important;bottom:auto!important;width:calc(100vw - 16px)!important;height:94px!important;min-height:94px!important;padding:8px!important;border-radius:16px!important;gap:6px!important}.player-bar .player-extra{position:absolute!important;right:5px!important;top:4px!important}.player-bar .player-hide{width:25px!important;height:25px!important;font-size:17px!important}.player-bar .now-playing{padding-right:24px!important}.player-reveal{width:46px;height:46px;font-size:26px}}
