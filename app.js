@@ -1185,7 +1185,7 @@ function setupEvents(){
   $$("#music-provider-filters [data-music-provider]").forEach(b=>b.addEventListener("click",()=>{$$("#music-provider-filters .pill").forEach(x=>x.classList.toggle("active",x===b));musicProviderFilter=b.dataset.musicProvider;renderMusicResults();}));
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");});
-  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),fullscreenToggle=$("#fullscreen-toggle");
+  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),playerReveal=$("#player-reveal"),fullscreenToggle=$("#fullscreen-toggle");
   setupSettings();setupGlobalLive();setupDiscoverUpdates();try{localStorage.removeItem("orbit-player-position");}catch{}
   const syncFullscreen=()=>{const active=!!document.fullscreenElement;fullscreenToggle.title=active?"Exit full screen":"Enter full screen";fullscreenToggle.setAttribute("aria-label",fullscreenToggle.title);document.body.classList.toggle("app-fullscreen",active);};
   fullscreenToggle.addEventListener("click",async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify("Full-screen mode is not available right now.");}});
@@ -1193,7 +1193,8 @@ function setupEvents(){
   if(localStorage.getItem("orbit-nav-hidden")==="1")document.body.classList.add("nav-hidden");
   if(localStorage.getItem("orbit-player-hidden")==="1")document.body.classList.add("player-hidden");
   navToggle.addEventListener("click",()=>{const hidden=document.body.classList.toggle("nav-hidden");localStorage.setItem("orbit-nav-hidden",hidden?"1":"0");navToggle.title=hidden?"Show navigation":"Hide navigation";navToggle.setAttribute("aria-label",navToggle.title);const setting=$("#setting-nav-visible");if(setting)setting.checked=!hidden;});
-  playerHide.addEventListener("click",()=>{document.body.classList.add("player-hidden");document.body.classList.remove("mobile-player-open");localStorage.setItem("orbit-player-hidden","1");});
+  playerReveal?.addEventListener("click",()=>{document.body.classList.toggle("mobile-player-open");document.body.classList.remove("player-hidden");localStorage.setItem("orbit-player-hidden","0");playerReveal.setAttribute("aria-label",document.body.classList.contains("mobile-player-open")?"Close music player":"Open music player");playerReveal.title=document.body.classList.contains("mobile-player-open")?"Close music player":"Open music player";});
+  playerHide.addEventListener("click",()=>{document.body.classList.remove("mobile-player-open");document.body.classList.add("player-hidden");localStorage.setItem("orbit-player-hidden","1");});
   audio.addEventListener("error",()=>{
     if(currentStation&&radioPlayback&&radioPlayback.token===radioPlayToken&&!radioPlayback.active){
       retryRadioPlayback(radioPlayToken,"Radio connection interrupted");return;
