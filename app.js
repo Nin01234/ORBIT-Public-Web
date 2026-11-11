@@ -1208,9 +1208,31 @@ function setupEvents(){
     }
     try{localStorage.setItem(playerPositionKey,JSON.stringify(p));}catch{}
   };
-  const showDock=()=>{document.body.classList.remove("player-hidden","mobile-player-open");localStorage.setItem("orbit-player-hidden","0");playerReveal.setAttribute("aria-label","Move player or hide it");};
+  const showDock=()=>{document.body.classList.remove("player-hidden","mobile-player-open");localStorage.setItem("orbit-player-hidden","0");playerReveal.setAttribute("aria-label","Move player or hide it");if(dockPosition)placeDock(dockPosition.x,dockPosition.y);};
   const hideDock=()=>{document.body.classList.add("player-hidden");document.body.classList.remove("mobile-player-open");localStorage.setItem("orbit-player-hidden","1");playerReveal.setAttribute("aria-label","Show player");};
-  playerReveal.addEventListener("pointerdown",e=>{if(e.button!==0&&e.pointerType==="mouse")return;playerReveal.setPointerCapture(e.pointerId);const startX=e.clientX,startY=e.clientY,rect=playerReveal.getBoundingClientRect(),baseX=rect.left,baseY=rect.top;let moved=false;const move=ev=>{const dx=ev.clientX-startX,dy=ev.clientY-startY;if(Math.abs(dx)+Math.abs(dy)>5)moved=true;if(moved)placeDock(baseX+dx,baseY+dy);};const up=()=>{playerReveal.removeEventListener("pointermove",move);playerReveal.removeEventListener("pointerup",up);playerReveal.removeEventListener("pointercancel",up);if(!moved){if(document.body.classList.contains("player-hidden"))showDock();else hideDock();}else if(document.body.classList.contains("player-hidden")){showDock();if(dockPosition)placeDock(dockPosition.x,dockPosition.y);}};playerReveal.addEventListener("pointermove",move);playerReveal.addEventListener("pointerup",up);playerReveal.addEventListener("pointercancel",up);});
+  playerReveal.addEventListener("pointerdown",e=>{
+    if(e.button!==0&&e.pointerType==="mouse")return;
+    e.preventDefault();
+    const pointerId=e.pointerId,startX=e.clientX,startY=e.clientY,rect=playerReveal.getBoundingClientRect(),baseX=rect.left,baseY=rect.top;
+    let moved=false;
+    try{playerReveal.setPointerCapture(pointerId);}catch{}
+    const move=ev=>{
+      if(ev.pointerId!==pointerId)return;
+      const dx=ev.clientX-startX,dy=ev.clientY-startY;
+      if(Math.hypot(dx,dy)>4)moved=true;
+      if(moved){ev.preventDefault();placeDock(baseX+dx,baseY+dy);}
+    };
+    const finish=ev=>{
+      if(ev.pointerId!==pointerId)return;
+      window.removeEventListener("pointermove",move);
+      window.removeEventListener("pointerup",finish);
+      window.removeEventListener("pointercancel",finish);
+      if(!moved){if(document.body.classList.contains("player-hidden"))showDock();else hideDock();}
+    };
+    window.addEventListener("pointermove",move,{passive:false});
+    window.addEventListener("pointerup",finish);
+    window.addEventListener("pointercancel",finish);
+  });
   if(!dockPosition||!Number.isFinite(dockPosition.x)||!Number.isFinite(dockPosition.y))dockPosition={x:Math.max(12,window.innerWidth-70),y:Math.max(12,window.innerHeight-(window.innerWidth<=760?260:170))};
   placeDock(dockPosition.x,dockPosition.y);
   if(localStorage.getItem("orbit-player-hidden")==="1")hideDock();else showDock();

@@ -316,3 +316,7 @@ body.mobile-player-open .player-bar {
 body.player-hidden .player-bar{display:none!important;visibility:hidden!important;pointer-events:none!important}
 body:not(.player-hidden) .player-bar{display:grid!important;visibility:visible!important;pointer-events:auto!important}
 @media(max-width:760px){.player-bar,body:not(.player-hidden) .player-bar{grid-template-columns:minmax(0,1fr) minmax(132px,.9fr)!important;grid-template-rows:1fr!important;left:8px!important;right:auto!important;bottom:auto!important;width:calc(100vw - 16px)!important;height:94px!important;min-height:94px!important;padding:8px!important;border-radius:16px!important;gap:6px!important}.player-bar .player-extra{position:absolute!important;right:5px!important;top:4px!important}.player-bar .player-hide{width:25px!important;height:25px!important;font-size:17px!important}.player-bar .now-playing{padding-right:24px!important}.player-reveal{width:46px;height:46px;font-size:26px}}
+
+/* Drag handle must receive touch and mouse pointer movement without opening on drag. */
+.player-reveal{touch-action:none!important;pointer-events:auto!important;cursor:grab!important;z-index:1500!important}
+.player-reveal:active{cursor:grabbing!important}
