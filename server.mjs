@@ -100,10 +100,17 @@ async function api(req,res,url) {
   }
   if(p==="/api/audius-stream") {
     const id=safeText(url.searchParams.get("id"),16);if(!/^\d{1,16}$/.test(id))return send(res,400,{error:"Invalid track ID"});
-    const upstream=await fetch("https://api.audius.co/v1/tracks/"+id+"/stream?app_name=ORBIT",{redirect:"follow",headers:{"User-Agent":"ORBIT Public Web/1.0"},signal:AbortSignal.timeout(20000)});
-    if(!upstream.ok||!upstream.body)throw new Error("Audio stream unavailable");
+    const rangeHeaders={"User-Agent":"ORBIT Public Web/1.0"};
+    const range=req.headers.range,ifRange=req.headers["if-range"];
+    if(range)rangeHeaders.Range=range;
+    if(ifRange)rangeHeaders["If-Range"]=ifRange;
+    const upstream=await fetch("https://api.audius.co/v1/tracks/"+id+"/stream?app_name=ORBIT",{method:req.method==="HEAD"?"HEAD":"GET",redirect:"follow",headers:rangeHeaders,signal:AbortSignal.timeout(20000)});
+    if(!upstream.ok||(!upstream.body&&req.method!=="HEAD"))throw new Error("Audio stream unavailable");
     const target=new URL(upstream.url);if(target.protocol!=="https:")throw new Error("Unsafe stream redirect");
-    res.writeHead(upstream.status,{"Content-Type":upstream.headers.get("content-type")||"audio/mpeg","Cache-Control":"no-store","X-Content-Type-Options":"nosniff"});
+    const headers={"Content-Type":upstream.headers.get("content-type")||"audio/mpeg","Cache-Control":"no-store","X-Content-Type-Options":"nosniff"};
+    for(const name of ["content-length","content-range","accept-ranges","etag","last-modified"]){const value=upstream.headers.get(name);if(value)headers[name]=value;}
+    res.writeHead(upstream.status,headers);
+    if(req.method==="HEAD"){res.end();return;}
     const {Readable}=await import("node:stream");const st=Readable.fromWeb(upstream.body);st.on("error",err=>{console.error("ORBIT stream error:",err.message);if(!res.destroyed)res.destroy();});res.on("close",()=>st.destroy());st.pipe(res);return;
   }
   if(p==="/api/librivox") {
@@ -327,5 +334,4 @@ server.listen(port,host,()=>{
   console.log("ORBIT public-web server listening on "+host+":"+port);
   loadTvCatalog().catch(e=>console.log("TV catalog prewarm:",e.message));
 });
-
 
