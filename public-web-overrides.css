@@ -248,3 +248,60 @@ html[data-theme="light"] .profile-dialog textarea {
 /* User requested complete removal of the main player controls; navigation remains unchanged. */
 .player-bar{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
+
+/* ORBIT redesigned compact player dock — November 2026 */
+.player-bar,
+body.player-hidden .player-bar,
+body.mobile-player-open .player-bar {
+  box-sizing:border-box!important; position:fixed!important; z-index:1100!important;
+  left:50%!important; right:auto!important; top:auto!important; bottom:0!important;
+  transform:translateX(-50%)!important; visibility:visible!important; opacity:1!important;
+  pointer-events:auto!important; display:grid!important;
+  width:min(1120px,calc(100vw - 36px))!important; height:84px!important; min-height:84px!important;
+  padding:10px 18px!important; margin:0!important;
+  grid-template-columns:minmax(220px,1fr) minmax(260px,1.25fr) minmax(130px,.55fr)!important;
+  grid-template-rows:1fr!important; align-items:center!important; gap:18px!important;
+  border:1px solid rgba(145,180,166,.24)!important; border-radius:20px 20px 0 0!important;
+  border-bottom:0!important; background:rgba(13,22,29,.97)!important;
+  color:#f3f7f4!important; box-shadow:0 -10px 38px rgba(0,0,0,.28)!important;
+  backdrop-filter:blur(22px)!important; -webkit-backdrop-filter:blur(22px)!important;
+}
+.player-bar .now-playing {display:flex!important;min-width:0!important;align-items:center!important;gap:11px!important}
+.player-bar .player-art {width:48px!important;height:48px!important;flex:0 0 48px!important;border-radius:12px!important;display:grid!important;place-items:center!important;background:linear-gradient(135deg,#274d43,#172d36)!important;color:#d9f4e7!important;font-size:19px!important}
+.player-bar .track-meta {min-width:0!important;display:flex!important;flex-direction:column!important;gap:4px!important}
+.player-bar .track-meta b {font-size:13px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:#f3f7f4!important}
+.player-bar .track-meta small {font-size:11px!important;color:#aabbb3!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.player-bar .heart-button,.player-bar .player-extra {display:none!important}
+.player-bar .player-center {display:grid!important;min-width:0!important;grid-template-rows:34px 18px!important;gap:5px!important;align-items:center!important}
+.player-bar .player-controls {display:flex!important;align-items:center!important;justify-content:center!important;gap:13px!important}
+.player-bar .control-button {display:grid!important;place-items:center!important;min-width:34px!important;height:32px!important;padding:0 8px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#c5d4cd!important;font-size:11px!important;font-weight:650!important}
+.player-bar .control-button:hover {background:rgba(255,255,255,.09)!important;color:#fff!important}
+.player-bar #stop-button,.player-bar #seek-back,.player-bar #seek-forward,.player-bar #volume-button {display:none!important}
+.player-bar .play-button {width:36px!important;height:36px!important;min-width:36px!important;border:0!important;border-radius:50%!important;background:#b7f36b!important;color:#102018!important;box-shadow:0 3px 14px rgba(183,243,107,.22)!important}
+.player-bar .play-button:hover {transform:scale(1.06)!important}
+.player-bar .track-progress {display:grid!important;grid-template-columns:34px minmax(0,1fr) 34px!important;align-items:center!important;gap:8px!important}
+.player-bar .track-progress span {font-size:10px!important;color:#9fb2a8!important;font-variant-numeric:tabular-nums!important}
+.player-bar #track-seek {width:100%!important;height:4px!important;accent-color:#b7f36b!important;cursor:pointer!important}
+@media(max-width:760px){
+ .player-bar,body.player-hidden .player-bar,body.mobile-player-open .player-bar {
+  left:8px!important;right:8px!important;bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  transform:none!important;width:auto!important;max-width:none!important;height:78px!important;min-height:78px!important;
+  padding:8px 10px!important;border:1px solid rgba(145,180,166,.24)!important;border-radius:16px!important;
+  grid-template-columns:minmax(0,1fr) minmax(142px,.9fr)!important;grid-template-rows:1fr!important;gap:8px!important;
+ }
+ .player-bar .player-art {width:40px!important;height:40px!important;flex-basis:40px!important;border-radius:10px!important}
+ .player-bar .now-playing {gap:8px!important}
+ .player-bar .track-meta b {font-size:12px!important}
+ .player-bar .track-meta small {font-size:10px!important}
+ .player-bar .player-center {grid-template-rows:34px 16px!important;gap:3px!important}
+ .player-bar .player-controls {gap:5px!important}
+ .player-bar .control-button {min-width:27px!important;height:30px!important;padding:0 4px!important;font-size:10px!important}
+ .player-bar .play-button {width:34px!important;height:34px!important;min-width:34px!important}
+ .player-bar .track-progress {grid-template-columns:27px minmax(0,1fr) 27px!important;gap:4px!important}
+ .player-bar .track-progress span {font-size:9px!important}
+}
+@media(max-width:360px){
+ .player-bar,body.player-hidden .player-bar,body.mobile-player-open .player-bar {grid-template-columns:minmax(0,1fr) 126px!important;padding:7px!important;gap:5px!important}
+ .player-bar .player-art {width:34px!important;height:34px!important;flex-basis:34px!important}
+ .player-bar .control-button {min-width:24px!important}
+}
