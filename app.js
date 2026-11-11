@@ -1294,7 +1294,7 @@ boot();
     }
   });
 })();
-if('serviceWorker' in navigator && location.protocol==='http:' && location.hostname!=='127.0.0.1' && location.hostname!=='localhost')navigator.serviceWorker.register('/sw.js').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:' && location.hostname!=='127.0.0.1' && location.hostname!=='localhost'){navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});}
 
 // ORBIT Mobile showcase: rotating feature previews
 (()=>{const root=document.querySelector('.orbit-mobile-showcase');if(!root||root.dataset.ready)return;root.dataset.ready='1';

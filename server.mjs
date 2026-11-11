@@ -272,7 +272,7 @@ const server=http.createServer(async(req,res)=>{
   const icon=/^icons\/[A-Za-z0-9._-]+\.png$/i.test(name);
   if(!allowed.has(name)&&!icon){res.writeHead(404).end("Not found");return;}
   const target=path.resolve(root,name);if(!target.startsWith(root+path.sep)){res.writeHead(403).end("Forbidden");return;}
-  fs.readFile(target,(err,data)=>{if(err){securityHeaders(res);res.writeHead(404).end("Not found");return;}securityHeaders(res);res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","Cache-Control":name==="index.html"?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
+  fs.readFile(target,(err,data)=>{if(err){securityHeaders(res);res.writeHead(404).end("Not found");return;}securityHeaders(res);res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","Cache-Control":name==="index.html"||name==="sw.js"||/\.(js|css)$/.test(name)?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
 });
 const liveRooms=new Map();
 const liveWss=new WebSocketServer({noServer:true,maxPayload:8192});
