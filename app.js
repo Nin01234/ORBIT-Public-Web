@@ -1232,16 +1232,17 @@ function setupEvents(){
     if(revealDrag.moved){
       const y=Math.max(8,Math.min(innerHeight-playerReveal.offsetHeight-8,playerReveal.getBoundingClientRect().top));
       localStorage.setItem("orbit-player-reveal-y",String(Math.round(y)));
-    } else if(!cancelled){ openMobilePlayer(); }
+    }
+    const wasDrag=revealDrag.moved;
     revealDrag=null;
-    suppressRevealClick=true;setTimeout(()=>{suppressRevealClick=false;},350);
+    if(cancelled||wasDrag){suppressRevealClick=true;setTimeout(()=>{suppressRevealClick=false;},500);}
   };
   playerReveal.addEventListener("pointerup",e=>finishRevealDrag(e,false));
   playerReveal.addEventListener("pointercancel",e=>finishRevealDrag(e,true));
-  // Keep keyboard and assistive-technology activation working too.
+  // Use the native click for taps; suppress it only when the pointer actually dragged.
   playerReveal.addEventListener("click",e=>{
     if(suppressRevealClick){e.preventDefault();e.stopImmediatePropagation();suppressRevealClick=false;return;}
-    if(e.detail===0)openMobilePlayer();
+    openMobilePlayer();
   },true);
   audio.addEventListener("error",()=>{
     if(currentStation&&radioPlayback&&radioPlayback.token===radioPlayToken&&!radioPlayback.active){
