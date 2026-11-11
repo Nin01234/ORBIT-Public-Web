@@ -240,3 +240,7 @@ html[data-theme="light"] .profile-dialog textarea {
 
 /* Rebuilt mobile player launcher: tap to show/hide the player. */
 @media(max-width:760px){.player-reveal{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;right:14px!important;bottom:calc(112px + env(safe-area-inset-bottom))!important;z-index:1300!important;width:54px!important;height:54px!important;border:0!important;border-radius:50%!important;background:var(--lime,#b7f34a)!important;color:#14200c!important;font-size:26px!important;font-weight:800!important;align-items:center!important;justify-content:center!important;box-shadow:0 6px 22px #0005!important;touch-action:manipulation!important;cursor:pointer!important}body.mobile-player-open .player-reveal{bottom:calc(112px + env(safe-area-inset-bottom))!important}}
+
+/* User-requested complete removal of the floating player launcher. */
+.player-reveal{display:none!important;visibility:hidden!important;pointer-events:none!important}
+
