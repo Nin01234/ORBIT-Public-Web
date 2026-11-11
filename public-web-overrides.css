@@ -234,3 +234,6 @@ html[data-theme="light"] .profile-dialog textarea {
  body.mobile-player-open .player-bar{bottom:auto!important}
  body.mobile-player-open .player-bar[style*="top"]{position:fixed!important}
 }
+
+/* Floating player launcher removed: keep the main player controls only. */
+.player-reveal{display:none!important;visibility:hidden!important;pointer-events:none!important}

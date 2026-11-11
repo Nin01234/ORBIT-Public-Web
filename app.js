@@ -1185,7 +1185,7 @@ function setupEvents(){
   $$("#music-provider-filters [data-music-provider]").forEach(b=>b.addEventListener("click",()=>{$$("#music-provider-filters .pill").forEach(x=>x.classList.toggle("active",x===b));musicProviderFilter=b.dataset.musicProvider;renderMusicResults();}));
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");});
-  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),playerReveal=$("#player-reveal"),fullscreenToggle=$("#fullscreen-toggle");
+  const navToggle=$("#nav-toggle"),playerHide=$("#player-hide"),fullscreenToggle=$("#fullscreen-toggle");
   setupSettings();setupGlobalLive();setupDiscoverUpdates();try{localStorage.removeItem("orbit-player-position");}catch{}
   const syncFullscreen=()=>{const active=!!document.fullscreenElement;fullscreenToggle.title=active?"Exit full screen":"Enter full screen";fullscreenToggle.setAttribute("aria-label",fullscreenToggle.title);document.body.classList.toggle("app-fullscreen",active);};
   fullscreenToggle.addEventListener("click",async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{notify("Full-screen mode is not available right now.");}});
@@ -1194,59 +1194,6 @@ function setupEvents(){
   if(localStorage.getItem("orbit-player-hidden")==="1")document.body.classList.add("player-hidden");
   navToggle.addEventListener("click",()=>{const hidden=document.body.classList.toggle("nav-hidden");localStorage.setItem("orbit-nav-hidden",hidden?"1":"0");navToggle.title=hidden?"Show navigation":"Hide navigation";navToggle.setAttribute("aria-label",navToggle.title);const setting=$("#setting-nav-visible");if(setting)setting.checked=!hidden;});
   playerHide.addEventListener("click",()=>{document.body.classList.add("player-hidden");document.body.classList.remove("mobile-player-open");localStorage.setItem("orbit-player-hidden","1");});
-  // The launcher and expanded player move as one group. A clean tap opens it; a drag only repositions it.
-  const fullPlayer=document.querySelector(".player-bar");
-  let revealDrag=null, suppressRevealClick=false;
-  const playerGap=12;
-  const applyGroupPosition=(launcherTop)=>{
-    const safeLauncher=Math.max(8,Math.min(innerHeight-playerReveal.offsetHeight-8,launcherTop));
-    playerReveal.style.top=safeLauncher+"px";playerReveal.style.bottom="auto";
-    if(fullPlayer && document.body.classList.contains("mobile-player-open")){
-      fullPlayer.style.bottom="auto";
-      const panelTop=Math.max(8,Math.min(innerHeight-fullPlayer.offsetHeight-8,safeLauncher+playerReveal.offsetHeight+playerGap));
-      fullPlayer.style.top=panelTop+"px";
-    }
-  };
-  const openMobilePlayer=()=>{
-    document.body.classList.remove("player-hidden");document.body.classList.add("mobile-player-open");
-    localStorage.setItem("orbit-player-hidden","0");
-    const y=Number(localStorage.getItem("orbit-player-reveal-y"));
-    applyGroupPosition(Number.isFinite(y)&&y>0?y:Math.max(8,innerHeight-playerReveal.offsetHeight-210));
-  };
-  const savedRevealY=Number(localStorage.getItem("orbit-player-reveal-y"));
-  if(Number.isFinite(savedRevealY)&&savedRevealY>0)applyGroupPosition(savedRevealY);
-  playerReveal.addEventListener("pointerdown",e=>{
-    if(e.button!==undefined&&e.button!==0)return;
-    const rect=playerReveal.getBoundingClientRect();
-    revealDrag={pointerId:e.pointerId,startY:e.clientY,originY:rect.top,moved:false};
-    playerReveal.setPointerCapture?.(e.pointerId);
-  });
-  playerReveal.addEventListener("pointermove",e=>{
-    if(!revealDrag||e.pointerId!==revealDrag.pointerId)return;
-    const delta=e.clientY-revealDrag.startY;
-    if(Math.abs(delta)>8)revealDrag.moved=true;
-    if(revealDrag.moved)applyGroupPosition(revealDrag.originY+delta);
-  });
-  const finishRevealDrag=(e,cancelled=false)=>{
-    if(!revealDrag||e.pointerId!==revealDrag.pointerId)return;
-    if(revealDrag.moved){
-      const y=Math.max(8,Math.min(innerHeight-playerReveal.offsetHeight-8,playerReveal.getBoundingClientRect().top));
-      localStorage.setItem("orbit-player-reveal-y",String(Math.round(y)));
-    }
-    const wasDrag=revealDrag.moved;
-    revealDrag=null;
-    // Mobile browsers do not always dispatch a synthesized click after pointer capture.
-    // Open directly on a completed pointer tap; a real drag only repositions the launcher.
-    if(!cancelled&&!wasDrag)openMobilePlayer();
-    suppressRevealClick=true;
-    setTimeout(()=>{suppressRevealClick=false;},500);
-  };
-  playerReveal.addEventListener("pointerup",e=>finishRevealDrag(e,false));
-  playerReveal.addEventListener("pointercancel",e=>finishRevealDrag(e,true));
-  playerReveal.addEventListener("click",e=>{
-    if(suppressRevealClick){e.preventDefault();e.stopImmediatePropagation();suppressRevealClick=false;return;}
-    openMobilePlayer();
-  },true);
   audio.addEventListener("error",()=>{
     if(currentStation&&radioPlayback&&radioPlayback.token===radioPlayToken&&!radioPlayback.active){
       retryRadioPlayback(radioPlayToken,"Radio connection interrupted");return;
