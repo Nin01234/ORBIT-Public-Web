@@ -37,16 +37,29 @@ function runYoutubeMusicBridge(action, values = {}) {
       ytmusicBridgeActive = Math.max(0, ytmusicBridgeActive - 1);
       if (error) reject(error); else resolve(value);
     };
-    const timer = setTimeout(() => { try { child.kill(); } catch {} finish(new Error("The music service took too long to respond.")); }, 35000);
+    const timeoutMs = Number(process.env.ORBIT_YTMUSIC_TIMEOUT_MS || 90000);
+    const timer = setTimeout(() => {
+      console.error("[ORBIT YouTube Music] Python bridge timeout", { action, timeoutMs, stderr: stderr.trim() });
+      try { child.kill("SIGKILL"); } catch {}
+      finish(new Error("YouTube Music is taking longer than expected. Please try again."));
+    }, timeoutMs);
     child.stdout.on("data", chunk => { stdout += chunk.toString("utf8"); if (stdout.length > 2 * 1024 * 1024) { try { child.kill(); } catch {} finish(new Error("The music service returned too much data.")); } });
     child.stderr.on("data", chunk => { if (stderr.length < 12000) stderr += chunk.toString("utf8"); });
-    child.once("error", error => finish(new Error("Could not start the YouTube Music service: " + error.message)));
+    child.once("error", error => {
+      console.error("[ORBIT YouTube Music] Python process spawn error", { action, message: error.message, stderr: stderr.trim() });
+      finish(new Error("Could not start the YouTube Music service: " + error.message));
+    });
     child.once("close", code => {
       let payload;
       try { payload = JSON.parse(stdout.trim()); }
-      catch { finish(new Error((stderr.trim() || "The music service returned an invalid response.").slice(0, 500))); return; }
-      if (code !== 0 || payload.error) finish(new Error(String(payload.error || stderr || "The music service failed.").slice(0, 500)));
-      else finish(null, payload);
+      catch {
+        console.error("[ORBIT YouTube Music] Invalid Python bridge JSON", { action, exitCode: code, stderr: stderr.trim() || "<empty>", stdout: stdout.slice(0, 2000) });
+        finish(new Error((stderr.trim() || "The music service returned an invalid response.").slice(0, 500))); return;
+      }
+      if (code !== 0 || payload.error) {
+        console.error("[ORBIT YouTube Music] Python bridge failed", { action, exitCode: code, stderr: stderr.trim() || "<empty>", pythonError: String(payload.error || "") });
+        finish(new Error(String(payload.error || stderr || "The music service failed.").slice(0, 500)));
+      } else finish(null, payload);
     });
   });
 }
@@ -145,14 +158,14 @@ async function api(req,res,url) {
     const videoId=safeText(url.searchParams.get("videoId"),11);
     if(!/^[A-Za-z0-9_-]{11}$/.test(videoId))return send(res,400,{error:"Invalid YouTube Music track identifier"});
     const payload=await runYoutubeMusicBridge("stream",{videoId});
-    if(!payload.url||!["m4a","webm","mp4"].includes(String(payload.format||"").toLowerCase()))return send(res,502,{error:"No supported audio stream was returned"});
+    if(!payload.url||!["m4a","webm","mp4"].includes(String(payload.format||"").toLowerCase()))throw new Error("No supported audio stream was returned by YouTube Music.");
     let target;try{target=new URL(payload.url);}catch{return send(res,502,{error:"The audio provider returned an invalid stream URL"});}
     if(target.protocol!=="https:"||!target.hostname.toLowerCase().endsWith(".googlevideo.com"))return send(res,502,{error:"The audio provider returned an untrusted stream host"});
     const upstreamHeaders={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept":"*/*","Accept-Encoding":"identity"};
     if(req.headers.range)upstreamHeaders.Range=req.headers.range;
     if(req.headers["if-range"])upstreamHeaders["If-Range"]=req.headers["if-range"];
     const upstream=await fetch(target,{method:req.method==="HEAD"?"HEAD":"GET",headers:upstreamHeaders,redirect:"follow",signal:AbortSignal.timeout(45000)});
-    if(!upstream.ok&&upstream.status!==206)throw new Error("The audio provider could not deliver this stream");
+    if(!upstream.ok&&upstream.status!==206)throw new Error("YouTube audio host returned HTTP "+upstream.status+" ("+(upstream.statusText||"request rejected")+"). The stream URL may be expired or blocked.");
     let finalUrl;try{finalUrl=new URL(upstream.url);}catch{throw new Error("The audio provider returned an invalid stream redirect");}
     if(finalUrl.protocol!=="https:"||!finalUrl.hostname.toLowerCase().endsWith(".googlevideo.com"))throw new Error("The audio provider redirected to an untrusted host");
     const audioMime=["m4a","mp4"].includes(String(payload.format).toLowerCase())?"audio/mp4":"audio/webm";
@@ -351,7 +364,12 @@ const server=http.createServer(async(req,res)=>{
     if(rate.size>50000){for(let i=0;i<10000;i++){const first=rate.keys().next().value;if(first===undefined)break;rate.delete(first);}}
     if(entry.count>150){res.writeHead(429,{"Retry-After":"60","Content-Type":"application/json"}).end('{"error":"Too many requests. Please wait a minute."}');return;}
     if(req.method!=="GET"&&req.method!=="HEAD"){res.writeHead(405,{"Allow":"GET, HEAD"}).end("Method not allowed");return;}
-    try{return await api(req,res,url);}catch(error){console.error("ORBIT public API:",url.pathname,error.message);if(!res.headersSent)send(res,502,{error:"The requested service is temporarily unavailable."});else res.destroy();return;}
+    try{return await api(req,res,url);}catch(error){
+      console.error("ORBIT public API:",url.pathname,error?.stack||error?.message||String(error));
+      const isYoutubeAudio=url.pathname==="/api/youtube-music/audio";
+      if(!res.headersSent)send(res,502,{error:isYoutubeAudio?(error?.message||"YouTube Music audio is temporarily unavailable."):"The requested service is temporarily unavailable."});
+      else res.destroy();return;
+    }
   }
   if(!["GET","HEAD"].includes(req.method||"GET")){res.writeHead(405,{"Allow":"GET, HEAD"}).end("Method not allowed");return;}
   let name;try{name=decodeURIComponent(url.pathname).replace(/^\/+/,"");}catch{res.writeHead(400).end("Bad request");return;}

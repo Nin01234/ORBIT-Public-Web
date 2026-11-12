@@ -552,8 +552,10 @@ function playAudioTrack(id){
     if(track.source==="YouTube Music"){
       const videoId=track.videoId||track.providerId||String(track.id).replace(/^ytmusic:/,"");
       if(currentMusicTrack?.id!==track.id)return;
+      $("#player-state").textContent="Loading... please wait while ORBIT connects to YouTube Music.";
       audio.src="/api/youtube-music/audio?videoId="+encodeURIComponent(videoId)+"&fresh="+Date.now();
     }else{
+      $("#player-state").textContent="Connecting to audio stream...";
       audio.src=(track.source==="Audius"||!track.source)?"/api/audius-stream?id="+encodeURIComponent(String(track.providerId||track.id).replace(/^audius:/,"")):(track.playbackUrl||"");
     }
     if(!audio.src)throw new Error("This provider has not enabled playback for this track.");
@@ -568,7 +570,10 @@ function playAudioTrack(id){
     if(track.source==="YouTube Music"&&youtubeMusicRecoveryForTrack!==track.id){
       try{await refreshYouTubeMusicStream(track,0);return;}catch{}
     }
-    if(currentMusicTrack?.id===track.id)notify(error.message||"This track could not be streamed. Try another track.");
+    if(currentMusicTrack?.id===track.id){
+      $("#player-state").textContent=error.message||"This track could not be streamed.";
+      notify(error.message||"This track could not be streamed. Try another track.");
+    }
   });
 }
 async function refreshOfflineMusicQueue(){offlineMusicQueue=(await getOfflineItems()).filter(x=>String(x.kind||"").toLowerCase()==="audio").sort((a,b)=>a.savedAt-b.savedAt);return offlineMusicQueue;}
@@ -1277,6 +1282,9 @@ function setupEvents(){
       refreshYouTubeMusicStream(track,resumeAt).catch(()=>notify("This YouTube Music stream expired and could not be refreshed. Please select the track again."));
     }
   });
+  audio.addEventListener("loadstart",()=>{if(currentMusicTrack?.source==="YouTube Music")$("#player-state").textContent="Loading... please wait while ORBIT fetches the audio stream.";});
+  audio.addEventListener("waiting",()=>{if(currentMusicTrack?.source==="YouTube Music")$("#player-state").textContent="Loading... please wait. Buffering audio.";});
+  audio.addEventListener("canplay",()=>{if(currentMusicTrack?.source==="YouTube Music"&&audio.paused)$("#player-state").textContent="Audio ready. Starting playback...";});
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";syncOrbitMediaPlaybackState();});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");syncOrbitMediaPlaybackState();});
   audio.addEventListener("timeupdate",syncOrbitMediaPlaybackState);

@@ -9,6 +9,7 @@ import gettext
 import json
 import re
 import sys
+import traceback
 from urllib.parse import urlparse, parse_qs
 _original_gettext_translation = gettext.translation
 def _translation_with_fallback(domain, localedir=None, languages=None, class_=None, fallback=False):
@@ -129,6 +130,7 @@ def main():
         else:
             extract_audio(args.video_id)
     except Exception as exc:
+        traceback.print_exc(file=sys.stderr)
         emit({"error": str(exc)[:500] or "The music service is temporarily unavailable."})
         sys.exit(2)
 
