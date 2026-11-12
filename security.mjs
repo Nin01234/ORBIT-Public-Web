@@ -35,7 +35,7 @@ export function securityHeaderValues(isProduction = false) {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), payment=(), usb=()",
+    "Permissions-Policy": "camera=(self), microphone=(self), geolocation=(), payment=(), usb=()",
     "X-DNS-Prefetch-Control": "off",
     "X-Permitted-Cross-Domain-Policies": "none",
     "X-Download-Options": "noopen",
