@@ -1,0 +1,24 @@
+name: ORBIT security checks
+
+on:
+  push:
+    branches:
+      - "security/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run security unit tests
+        run: npm test
+      - name: Check server syntax
+        run: node --check server.mjs
