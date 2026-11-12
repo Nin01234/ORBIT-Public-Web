@@ -353,6 +353,10 @@ async function api(req,res,url) {
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||"/","http://localhost");
   if(url.pathname==="/healthz"){securityHeaders(res);res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
+  if(url.pathname==="/favicon.ico"){
+    securityHeaders(res);res.writeHead(302,{"Location":"/icons/orbit-192.png","Cache-Control":"public, max-age=86400"}).end();
+    return;
+  }
   if(url.pathname==="/download"||url.pathname==="/download/windows"){
     securityHeaders(res);res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.23/ORBIT-Setup-1.1.23-x64-optimized.exe","Cache-Control":"no-store"}).end();
     return;

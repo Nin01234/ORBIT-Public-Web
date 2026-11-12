@@ -488,7 +488,7 @@ function musicCard(track){
   const pid=track.providerId||track.id.replace(/^audius:/,"");
   const streamUrl="/api/audius-stream?id="+encodeURIComponent(pid);
   const download=track.source==="Audius"?`<button data-download-track="${esc(track.id)}" data-stream-url="${esc(streamUrl)}" title="Save for offline playback">? Save offline</button>`:"";
-  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.style.display='none'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(track.source||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?"??":"??"}</button></div></div></article>`;
+  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(track.source||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?"??":"??"}</button></div></div></article>`;
 }
 async function loadAudioMusic(term="afrobeats"){
   const host=$("#audio-music-results");
@@ -520,6 +520,7 @@ function toggleMusicFav(track){
   refreshFavViews();
 }
 let youtubeMusicRecoveryForTrack=null;
+const youtubeMusicFailureUntil=new Map();
 let youtubeMusicRecoveryPromise=null;
 async function refreshYouTubeMusicStream(track,resumeAt=0){
   if(youtubeMusicRecoveryPromise)return youtubeMusicRecoveryPromise;
@@ -544,6 +545,8 @@ async function refreshYouTubeMusicStream(track,resumeAt=0){
 function playAudioTrack(id){
   const track=musicTrackCache.get(String(id))||musicFavs().find(x=>String(x.id)===String(id));
   if(!track){notify("This track is no longer available.");return;}
+  const failedUntil=youtubeMusicFailureUntil.get(String(track.id))||0;
+  if(track.source==="YouTube Music"&&failedUntil>Date.now()){const seconds=Math.ceil((failedUntil-Date.now())/1000);$("#player-state").textContent="YouTube Music is temporarily unavailable. Try again in "+seconds+" seconds, or choose an Audius track.";notify("YouTube Music is temporarily unavailable. Please try again shortly.");return;}
   clearYoutubePlayer();currentStation=null;currentOfflineAudioId=null;currentMusicTrack=track;
   musicQueue=[...musicTrackCache.values()];musicQueueIndex=musicQueue.findIndex(x=>String(x.id)===String(track.id));
   youtubeMusicRecoveryForTrack=null;
@@ -568,11 +571,12 @@ function playAudioTrack(id){
   };
   startPlayback().catch(async error=>{
     if(track.source==="YouTube Music"&&youtubeMusicRecoveryForTrack!==track.id){
-      try{await refreshYouTubeMusicStream(track,0);return;}catch{}
+      try{await refreshYouTubeMusicStream(track,0);return;}catch(recoveryError){error=recoveryError;}
     }
     if(currentMusicTrack?.id===track.id){
-      $("#player-state").textContent=error.message||"This track could not be streamed.";
-      notify(error.message||"This track could not be streamed. Try another track.");
+      if(track.source==="YouTube Music")youtubeMusicFailureUntil.set(String(track.id),Date.now()+60000);
+      $("#player-state").textContent=track.source==="YouTube Music"?"YouTube Music could not provide this audio right now. Please try again in a minute or choose an Audius track.":(error.message||"This track could not be streamed.");
+      notify(track.source==="YouTube Music"?"YouTube Music is temporarily unavailable. Try Audius or retry in one minute.":(error.message||"This track could not be streamed. Try another track."));
     }
   });
 }
