@@ -202,11 +202,28 @@ function filterDiscoverUpdates(){
   host.querySelectorAll("[data-discover-kind]").forEach(card=>{const category=card.dataset.discoverKind;const show=(active==="all"||active===category)&&(!query||card.dataset.discoverText.includes(query));card.hidden=!show;if(show)visible++;});
   let empty=host.querySelector(".discover-filter-empty");if(!visible){if(!empty){empty=document.createElement("div");empty.className="empty-state discover-filter-empty";empty.textContent="No updates match this filter. Try another category or search.";host.appendChild(empty);}empty.hidden=false;}else if(empty)empty.hidden=true;
 }
+const DISCOVER_REFRESH_INTERVAL=5*60*1000;
+let discoverRefreshPromise=null;
+let discoverLastRefreshAt=0;
+function isDiscoverViewActive(){return !document.hidden&&$("#view-discover")?.classList.contains("active");}
 async function refreshDiscoverUpdates(){
-  const status=$("#discover-updates-status");if(status)status.textContent="Refreshing catalogues…";
-  const tasks=[loadFeatured(),loadAudioMusic("trending"),loadYouTubeMusic("trending music"),loadItunes("podcasts","top podcasts"),loadBooks(),loadArchiveFilms("trending")];
-  await Promise.all(tasks.map(task=>Promise.resolve(task).then(()=>renderDiscoverUpdates()).catch(()=>{})));
-  renderDiscoverUpdates();
+  if(discoverRefreshPromise)return discoverRefreshPromise;
+  const status=$("#discover-updates-status");
+  if(status)status.textContent="Refreshing connected catalogues…";
+  discoverLastRefreshAt=Date.now();
+  window.orbitDiscoverLastRefresh=discoverLastRefreshAt;
+  discoverRefreshPromise=(async()=>{
+    const tasks=[()=>loadFeatured(),()=>loadAudioMusic("trending"),()=>loadYouTubeMusic("trending music"),()=>loadItunes("podcasts","top podcasts"),()=>loadBooks(),()=>loadArchiveFilms("trending")];
+    const results=await Promise.allSettled(tasks.map(task=>Promise.resolve().then(task)));
+    renderDiscoverUpdates();
+    const failed=results.filter(result=>result.status==="rejected").length;
+    if(status){
+      const updated=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+      status.textContent=failed?"Updated "+updated+" · "+failed+" source"+(failed===1?"":"s")+" unavailable":"Updated "+updated+" · All connected sources checked";
+    }
+  })();
+  try{return await discoverRefreshPromise;}
+  finally{discoverRefreshPromise=null;}
 }
 async function searchDiscoverUpdates(term){
   const query=String(term||"").trim();if(!query){return refreshDiscoverUpdates();}
@@ -221,7 +238,9 @@ function setupDiscoverUpdates(){
   $("#discover-updates-search")?.addEventListener("input",filterDiscoverUpdates);
   $("#discover-updates-search")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchDiscoverUpdates(e.currentTarget.value);}});
   $("#discover-updates-refresh")?.addEventListener("click",()=>refreshDiscoverUpdates());
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-(window.orbitDiscoverLastRefresh||0)>600000){window.orbitDiscoverLastRefresh=Date.now();refreshDiscoverUpdates();}});
+  const refreshIfDue=()=>{if(isDiscoverViewActive()&&Date.now()-discoverLastRefreshAt>=DISCOVER_REFRESH_INTERVAL)refreshDiscoverUpdates();};
+  document.addEventListener("visibilitychange",refreshIfDue);
+  window.setInterval(refreshIfDue,DISCOVER_REFRESH_INTERVAL);
 }
 
 function setupOrbitMediaSession(){
@@ -283,6 +302,7 @@ function showView(name){
   $$(".nav-link[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
   const labels={discover:"Discover",search:"Search results",globe:"Radio globe",podcasts:"Podcasts",audiobooks:"Audiobooks","global-live":"Global Live",music:"Music", "music-video":"Music Video",movies:"Screen",favorites:"Favourites",downloads:"Downloads",settings:"Settings",omnisave:"OmniSave"};
   $("#page-label").textContent=labels[name]||"Discover";
+  if(name==="discover"&&Date.now()-discoverLastRefreshAt>=DISCOVER_REFRESH_INTERVAL)refreshDiscoverUpdates();
   if(name==="globe"&&!globeInstance){setTimeout(initGlobe,100);loadStationList();}
   if(name==="global-live"&&!orbitLiveLoaded)loadGlobalLiveDirectory();
   if(name==="music"&&!$("#audio-music-results").dataset.loaded){loadAudioMusic("afrobeats").then(()=>$("#audio-music-results").dataset.loaded="1").catch(()=>notify("Music search unavailable."));}
@@ -1293,8 +1313,6 @@ async function boot(){
   $("#connection-status").textContent="Spinn Radio catalogue ready";
   await refreshDiscoverUpdates();
   refreshFavViews();
-  window.orbitDiscoverLastRefresh=Date.now();
-  window.setInterval(()=>{if(!document.hidden){window.orbitDiscoverLastRefresh=Date.now();refreshDiscoverUpdates();}},10*60*1000);
 }
 boot();
 // ORBIT PWA/mobile: QR + installable mobile link
