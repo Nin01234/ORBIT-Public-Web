@@ -39,14 +39,6 @@ html[data-theme="light"] .orbit-download-top:hover{background:rgba(54,112,190,.2
 html[data-theme="light"] .orbit-download-cta{color:var(--ink,#202923)!important;border-color:var(--line,#d9dfda)!important;background:#fff!important;box-shadow:0 1px 4px rgba(0,0,0,.08)!important}
 html[data-theme="light"] .orbit-download-cta:hover{background:var(--panel2,#eef1ee)!important}
 
-/* 2. YouTube Music Video Player & Placeholder */
-html[data-theme="light"] .youtube-player-panel,
-html[data-theme="light"] #youtube-player-panel{background:#fff!important;border-color:var(--line,#d9dfda)!important}
-html[data-theme="light"] .youtube-placeholder{color:var(--muted,#657168)!important}
-html[data-theme="light"] .youtube-placeholder b{color:var(--ink,#202923)!important}
-html[data-theme="light"] .youtube-placeholder small{color:var(--muted,#657168)!important}
-html[data-theme="light"] .youtube-placeholder span{color:var(--lime,#b8874b)!important}
-
 /* 3. Music Page Status Banner & Icon Mark */
 html[data-theme="light"] .music-player-status{background:#fff!important;border-color:var(--line,#d9dfda)!important}
 html[data-theme="light"] .music-status-mark{background:#eee9df!important;color:#59472f!important}
