@@ -83,7 +83,7 @@
   .player-bar .player-extra {display:flex;justify-content:flex-end}
   .player-reveal {display:flex!important;position:fixed!important;z-index:1201;right:12px!important;bottom:calc(190px + env(safe-area-inset-bottom))!important}
   body.mobile-player-open .player-reveal {bottom:calc(350px + env(safe-area-inset-bottom))!important}
-  .film-player-panel,.podcast-player-panel {width:100%;min-width:0;min-height:170px}
+  .film-player-panel,.youtube-player-panel,.podcast-player-panel {width:100%;min-width:0;min-height:170px}
   iframe,video,canvas,img {max-width:100%}
 }
 @media(max-width:420px) {

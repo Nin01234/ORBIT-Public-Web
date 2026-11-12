@@ -27,7 +27,7 @@ This is a separate public-web staging project. The existing desktop app, mobile 
 ## Remaining before a public launch
 1. Implement a carefully restricted streaming relay for radio and TV (the desktop server's proxy must not be exposed as-is).
 2. Add browser-local downloads using IndexedDB and wire the web downloads UI to it. Public downloads must never use or reveal the desktop user's local files.
-3. YouTube search, audio extraction, music-video playback and movie-trailer embeds have been removed from the public website.
+3. Add/replace YouTube search and movie-trailer integration; current movie-trailer endpoint returns an explicit unavailable response.
 4. Complete end-to-end tests for every screen and playback flow in desktop and mobile browsers.
 5. Review third-party terms, content rights, rate limits and attribution.
 6. Connect a GitHub repository to Render (or another host), review the public files, and deploy only after owner approval.

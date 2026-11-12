@@ -23,7 +23,7 @@ Browser radio and TV playback uses provider stream URLs directly. Some third-par
 
 ## Not yet ready
 - Browser-based downloads/offline library: the public web version does not access the desktop app's local downloads.
-- YouTube integrations are intentionally excluded from the public website; the desktop app is maintained separately.
+- YouTube search and movie trailers: not enabled in the public backend yet.
 - A secure public streaming relay is not implemented.
 - Full end-to-end tests have not been completed.
 - Third-party service terms, licensing, attribution and quotas still need review.

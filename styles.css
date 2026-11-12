@@ -30,11 +30,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 .play-glyph{display:inline-block;width:9px;height:12px;background:currentColor;clip-path:polygon(0 0,100% 50%,0 100%);vertical-align:middle}
 .play-button.is-playing{font-size:0}
-.play-button.is-playing:before,.play-button.is-playing:after{content:'';display:inline-block;width:3px;height:12px;background:currentColor;margin:0 var(--space-1)}.music-results-heading{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0}.music-results-heading h2{font-size:20px}.music-results-heading span{font-size:11px;color:var(--muted)}
+.play-button.is-playing:before,.play-button.is-playing:after{content:'';display:inline-block;width:3px;height:12px;background:currentColor;margin:0 var(--space-1)}
+
+.youtube-player-panel{width:100%;aspect-ratio:16/9;max-height:560px;background:#080d12;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:20px 0 28px;display:grid;place-items:center}.youtube-embed{width:100%;height:100%;border:0}.youtube-placeholder{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:24px;color:var(--muted)}.youtube-placeholder span{font-size:48px;color:var(--lime)}.youtube-placeholder b{color:var(--ink);font-size:16px}.youtube-placeholder small{font-size:12px}.music-results-heading{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0}.music-results-heading h2{font-size:20px}.music-results-heading span{font-size:11px;color:var(--muted)}.music-video-card .media-cover{aspect-ratio:16/9}
 
 
 /* ORBIT audio-only Music, Music Video and in-app Screen pages */
-.music-player-status{display:flex;align-items:center;gap:14px;padding:16px 18px;margin:18px 0 28px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}.music-status-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:8px;background:var(--tone-263b34);color:var(--lime);font-size:24px}.music-player-status b,.music-player-status small{display:block}.music-player-status b{font-size:13px}.music-player-status small{font-size:10px;color:var(--muted);margin-top:5px}.catalogue-note,.film-results-heading span{font-size:10px;color:var(--muted)}.music-card-actions{display:flex;align-items:center;gap:8px}.music-card-actions button[data-audio-play],.music-card-actions button[data-bookplay]{border:0;background:var(--tone-263b34);color:var(--lime);border-radius:5px;padding:8px 11px;font-size:10px}.music-audio-card .media-cover{aspect-ratio:1/1}.favorites-music-heading{margin-top:40px}.film-player-panel{width:100%;aspect-ratio:16/9;max-height:650px;min-height:260px;background:#080d12;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:20px 0 28px;display:grid;place-items:center}.archive-film-embed{width:100%;height:100%;border:0;background:#080d12}.film-placeholder{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:24px;color:var(--muted)}.film-placeholder span{font-size:46px;color:var(--lime)}.film-placeholder b{color:var(--ink);font-size:16px}.film-placeholder small{font-size:12px}.film-results-heading{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0}.film-results-heading h2{font-size:20px}.film-cover{aspect-ratio:16/10;object-fit:cover}.catalogue-disclaimer{font-size:10px;color:var(--muted);margin:22px 0}
+.music-player-status{display:flex;align-items:center;gap:14px;padding:16px 18px;margin:18px 0 28px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}.music-status-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:8px;background:var(--tone-263b34);color:var(--lime);font-size:24px}.music-player-status b,.music-player-status small{display:block}.music-player-status b{font-size:13px}.music-player-status small{font-size:10px;color:var(--muted);margin-top:5px}.catalogue-note,.film-results-heading span{font-size:10px;color:var(--muted)}.music-card-actions{display:flex;align-items:center;gap:8px}.music-card-actions button[data-audio-play],.music-card-actions button[data-bookplay]{border:0;background:var(--tone-263b34);color:var(--lime);border-radius:5px;padding:8px 11px;font-size:10px}.music-audio-card .media-cover{aspect-ratio:1/1}.favorites-music-heading{margin-top:40px}.film-player-panel{width:100%;aspect-ratio:16/9;max-height:650px;min-height:260px;background:#080d12;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:20px 0 28px;display:grid;place-items:center}.archive-film-embed{width:100%;height:100%;border:0;background:#080d12}.film-placeholder{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:24px;color:var(--muted)}.film-placeholder span{font-size:46px;color:var(--lime)}.film-placeholder b{color:var(--ink);font-size:16px}.film-placeholder small{font-size:12px}.film-results-heading{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0}.film-results-heading h2{font-size:20px}.film-cover{aspect-ratio:16/10;object-fit:cover}.catalogue-disclaimer{font-size:10px;color:var(--muted);margin:22px 0}.music-video-card .media-cover{aspect-ratio:16/9}
 
 /* ORBIT responsive chrome controls */
 .chrome-toggle,.player-reveal{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;min-width:38px;height:36px;padding:0 11px;font-size:17px;display:grid;place-items:center;transition:background .2s,border-color .2s,transform .2s}
@@ -50,6 +52,8 @@ body.player-hidden .player-bar{transform:translateY(110%);visibility:hidden;poin
 body.player-hidden .player-reveal{display:grid}
 .player-bar{transition:transform .28s ease,visibility .28s ease}
 .app-shell{transition:grid-template-columns .28s ease}
+.youtube-embed{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#05080c}
+.youtube-player-panel{overflow:hidden}
 @media(max-width:850px){.app-shell{grid-template-columns:0 minmax(0,1fr)}.sidebar{transform:translateX(-105%);visibility:hidden}.main-area{grid-column:1/-1;padding-left:18px;padding-right:18px}body.nav-hidden .main-area{padding-left:18px;padding-right:18px}.player-bar{grid-template-columns:minmax(0,1fr) auto}.player-extra{display:none}}
 @media(prefers-reduced-motion:reduce){.sidebar,.player-bar,.app-shell{transition:none}}
 .nav-link[hidden]{display:none!important}
@@ -62,6 +66,11 @@ body.player-hidden .player-reveal{display:grid}
 @media(max-width:850px){.sidebar{transform:translateX(0);visibility:visible}.main-area{grid-column:1/-1}}
 @media(max-width:850px){body.nav-hidden .sidebar{transform:translateX(-105%);visibility:hidden}}
 @media(max-width:850px){.player-bar{grid-template-columns:minmax(0,1fr) auto}.player-controls{gap:8px}.control-button{font-size:12px}.player-reveal{bottom:88px}}
+
+/* ORBIT embedded playback sizing and offline downloads */
+.youtube-player-panel{aspect-ratio:16/9;height:auto;min-height:0;max-height:72vh;display:block;position:relative;background:#05080c}
+.youtube-player-panel iframe,.youtube-embed{display:block;width:100%;height:100%;min-height:0;aspect-ratio:16/9;object-fit:contain;border:0}
+.youtube-placeholder{min-height:260px}
 .podcast-player-panel{width:100%;max-height:420px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:20px 0 28px;padding:18px}
 .podcast-episodes-head b,.podcast-episodes-head small{display:block}.podcast-episodes-head b{font-size:16px}.podcast-episodes-head small{color:var(--muted);font-size:11px;margin-top:4px}
 .podcast-episode{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
@@ -72,7 +81,12 @@ body.player-hidden .player-reveal{display:grid}
 .offline-card .media-cover{aspect-ratio:16/9}
 .book-cover{display:grid;place-items:center;background:var(--panel2);color:var(--lime);font-size:32px;aspect-ratio:1}
 #view-downloads .media-actions button{border:1px solid var(--line);background:var(--tone-263b34);color:var(--lime);border-radius:5px;padding:8px 10px;font-size:10px}
-@media(max-width:850px){.podcast-player-panel{padding:12px}.episode-actions button{padding:7px}}
+@media(max-width:850px){.youtube-player-panel{max-height:56vh}.podcast-player-panel{padding:12px}.episode-actions button{padding:7px}}
+
+/* ORBIT video frame: preserve aspect ratio and hide overflow */
+#youtube-player-panel{width:100%;aspect-ratio:16/9;max-height:70vh;min-height:240px;overflow:hidden;position:relative;background:#05080c}
+#youtube-player-panel iframe{width:100%;height:100%;min-height:0;display:block;object-fit:contain;border:0}
+#youtube-player-panel .youtube-placeholder{width:100%;height:100%;min-height:240px;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .podcast-player-panel{width:100%;max-height:420px;overflow:auto;margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:10px}
 .podcast-episode{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
 .episode-actions{display:flex;gap:8px;flex-shrink:0}
