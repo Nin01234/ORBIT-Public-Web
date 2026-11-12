@@ -145,7 +145,7 @@ async function api(req,res,url) {
     const videoId=safeText(url.searchParams.get("videoId"),11);
     if(!/^[A-Za-z0-9_-]{11}$/.test(videoId))return send(res,400,{error:"Invalid YouTube Music track identifier"});
     const payload=await runYoutubeMusicBridge("stream",{videoId});
-    if(!payload.url||!["m4a","webm"].includes(String(payload.format||"").toLowerCase()))return send(res,502,{error:"No supported audio-only stream was returned"});
+    if(!payload.url||!["m4a","webm","mp4"].includes(String(payload.format||"").toLowerCase()))return send(res,502,{error:"No supported audio stream was returned"});
     let target;try{target=new URL(payload.url);}catch{return send(res,502,{error:"The audio provider returned an invalid stream URL"});}
     if(target.protocol!=="https:"||!target.hostname.toLowerCase().endsWith(".googlevideo.com"))return send(res,502,{error:"The audio provider returned an untrusted stream host"});
     const upstreamHeaders={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept":"*/*","Accept-Encoding":"identity"};
@@ -155,7 +155,8 @@ async function api(req,res,url) {
     if(!upstream.ok&&upstream.status!==206)throw new Error("The audio provider could not deliver this stream");
     let finalUrl;try{finalUrl=new URL(upstream.url);}catch{throw new Error("The audio provider returned an invalid stream redirect");}
     if(finalUrl.protocol!=="https:"||!finalUrl.hostname.toLowerCase().endsWith(".googlevideo.com"))throw new Error("The audio provider redirected to an untrusted host");
-    const headers={"Content-Type":upstream.headers.get("content-type")||((String(payload.format).toLowerCase()==="m4a")?"audio/mp4":"audio/webm"),"Cache-Control":"no-store","Accept-Ranges":"bytes","X-Content-Type-Options":"nosniff"};
+    const audioMime=["m4a","mp4"].includes(String(payload.format).toLowerCase())?"audio/mp4":"audio/webm";
+    const headers={"Content-Type":upstream.headers.get("content-type")||audioMime,"Cache-Control":"no-store","Accept-Ranges":"bytes","X-Content-Type-Options":"nosniff"};
     for(const name of ["content-length","content-range","etag","last-modified"]){const value=upstream.headers.get(name);if(value)headers[name]=value;}
     res.writeHead(upstream.status,headers);
     if(req.method==="HEAD"){res.end();return;}

@@ -78,7 +78,8 @@ def extract_audio(video_id):
         raise ValueError("Invalid YouTube Music track identifier.")
     watch_url = "https://music.youtube.com/watch?v=" + video_id
     options = {
-        "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio",
+        "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best[ext=mp4][acodec!=none]",
+        "extractor_args": {"youtube": {"player_client": ["android_vr"]}},
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
@@ -94,8 +95,9 @@ def extract_audio(video_id):
         info = ydl.extract_info(watch_url, download=False)
     if not info or not info.get("url"):
         raise RuntimeError("YouTube Music did not provide an audio stream for this track.")
-    if info.get("vcodec") not in (None, "none"):
-        raise RuntimeError("The selected stream is not audio-only.")
+    video_included = info.get("vcodec") not in (None, "none")
+    if video_included and not (str(info.get("ext") or "").lower() == "mp4" and info.get("acodec") not in (None, "none")):
+        raise RuntimeError("The selected stream does not contain a supported audio track.")
     stream_url = info["url"]
     parsed = urlparse(stream_url)
     if parsed.scheme != "https" or not parsed.hostname:
@@ -110,6 +112,7 @@ def extract_audio(video_id):
         "url": stream_url,
         "format": info.get("ext") or "",
         "mimeType": info.get("format") or "",
+        "videoIncluded": video_included,
         "duration": int(info.get("duration") or 0),
         "expiresAt": expires
     })
