@@ -358,7 +358,7 @@ const server=http.createServer(async(req,res)=>{
     return;
   }
   if(url.pathname==="/download"||url.pathname==="/download/windows"){
-    securityHeaders(res);res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.23/ORBIT-Setup-1.1.23-x64-optimized.exe","Cache-Control":"no-store"}).end();
+    securityHeaders(res);res.writeHead(302,{"Location":"https://github.com/Nin01234/ORBIT-Desktop/releases/download/v1.1.28/ORBIT-Setup-1.1.28-x64.exe","Cache-Control":"no-store"}).end();
     return;
   }
   if(url.pathname.startsWith("/api/")){
