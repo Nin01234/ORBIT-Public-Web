@@ -1372,7 +1372,8 @@ function setupEvents(){
 async function boot(){
   setupEvents();
   $("#connection-status").textContent="Spinn Radio catalogue ready";
-  await refreshDiscoverUpdates();
+  // Start catalogue retrieval in the background so the interface and saved views are ready immediately.
+  refreshDiscoverUpdates().catch(error=>console.warn("ORBIT background catalogue refresh:",error));
   refreshFavViews();
 }
 boot();
