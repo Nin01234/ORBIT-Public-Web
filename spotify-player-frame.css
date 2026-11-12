@@ -18,12 +18,18 @@ html[data-theme="light"] .spotify-frame-track-meta b{color:#1d2a23}html[data-the
 
 /* Reliable favourite hearts: render with CSS so card icons never become ?? */
 button[data-audio-fav],.spotify-frame-fav{font-size:0!important;line-height:1;min-width:28px;min-height:28px;display:inline-grid;place-items:center}
-button[data-audio-fav]::before{content:'?';font-size:23px;font-family:Arial,sans-serif;font-weight:400;color:var(--muted,#a8bbb1)}
-button[data-audio-fav].saved::before{content:'?';color:var(--lime,#b7f36b)}
-.spotify-frame-fav::before{content:'?';font-size:23px;font-family:Arial,sans-serif;color:#b8c9c0}
-.spotify-frame-fav.saved::before{content:'?';color:#b7f36b}
+button[data-audio-fav]::before{content:'\2661';font-size:23px;font-family:Arial,sans-serif;font-weight:400;color:var(--muted,#a8bbb1)}
+button[data-audio-fav].saved::before{content:'\2665';color:var(--lime,#b7f36b)}
+.spotify-frame-fav::before{content:'\2661';font-size:23px;font-family:Arial,sans-serif;color:#b8c9c0}
+.spotify-frame-fav.saved::before{content:'\2665';color:#b7f36b}
 /* Keep the Spotify-style ORBIT frame prominent without covering the audio cards. */
 .spotify-player-frame{width:min(330px,calc(100vw - 28px));border-color:rgba(183,243,107,.28)}
 .spotify-frame-controls button{font-size:12px;font-weight:700;letter-spacing:.2px}
-.spotify-frame-controls #spotify-frame-play{font-size:13px}
+.spotify-frame-controls #spotify-frame-play{font-size:18px;font-weight:800}
+.spotify-frame-controls #spotify-frame-previous,.spotify-frame-controls #spotify-frame-stop,.spotify-frame-controls #spotify-frame-next{font-size:0}
+.spotify-frame-controls #spotify-frame-previous::before{content:'\23EE';font-size:18px}
+.spotify-frame-controls #spotify-frame-stop::before{content:'\25A0';font-size:15px}
+.spotify-frame-controls #spotify-frame-next::before{content:'\23ED';font-size:18px}
+.spotify-frame-controls button{transition:transform .15s ease,color .15s ease}
+.spotify-frame-controls button:active{transform:scale(.9)}
 @media(max-width:760px){.spotify-player-frame{width:min(300px,calc(100vw - 20px));bottom:calc(205px + env(safe-area-inset-bottom))}}

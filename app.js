@@ -278,8 +278,9 @@ function syncSpotifyPlayerFrame(){
  const fav=$("#spotify-frame-fav");const saved=track?isMusicFav(track.id):station?isFav(station.stationuuid):false;
  fav.textContent=saved?"\u2665":"\u2661";fav.classList.toggle("saved",saved);fav.setAttribute("aria-pressed",String(saved));
  $("#spotify-frame-status").textContent=audio.paused?(track||station?"Paused":"Ready to play"):"Playing now";
- $("#spotify-frame-play").textContent=audio.paused?"Play":"Pause";
+ $("#spotify-frame-play").textContent=audio.paused?"\u25B6":"\u23F8";
  $("#spotify-frame-play").setAttribute("aria-label",audio.paused?"Play music":"Pause music");
+ $("#spotify-frame-play").setAttribute("title",audio.paused?"Play music":"Pause music");
 }
 function spotifyFramePlayPause(){if(!audio.src){notify("Choose a music track or radio station first.");return;}if(audio.paused)audio.play().catch(()=>{});else audio.pause();}
 function spotifyFrameStop(){audio.pause();audio.currentTime=0;$("#play-button").classList.remove("is-playing");$("#player-state").textContent="Stopped";syncSpotifyPlayerFrame();}
@@ -1105,17 +1106,29 @@ function setupGlobalLive(){
 }
 function setupOrbitTransport(){
  const seek=$("#track-seek");
+ const frameSeek=$("#spotify-frame-seek");
  const fmt=n=>Number.isFinite(n)?Math.floor(n/60)+":"+String(Math.floor(n%60)).padStart(2,"0"):"0:00";
  const update=()=>{
   const duration=audio.duration;
   if(Number.isFinite(duration)&&duration>0){
-   if(document.activeElement!==seek)seek.value=String(Math.round(audio.currentTime/duration*1000));
+   const progress=String(Math.round(audio.currentTime/duration*1000));
+   if(document.activeElement!==seek)seek.value=progress;
+   if(frameSeek&&document.activeElement!==frameSeek)frameSeek.value=progress;
    $("#current-time").textContent=fmt(audio.currentTime);$("#total-time").textContent=fmt(duration);
-  }else{$("#current-time").textContent=fmt(0);$("#total-time").textContent="LIVE";}
+   $("#spotify-frame-current").textContent=fmt(audio.currentTime);$("#spotify-frame-total").textContent=fmt(duration);
+  }else{
+   if(seek)seek.value="0";if(frameSeek)frameSeek.value="0";
+   $("#current-time").textContent=fmt(0);$("#total-time").textContent="LIVE";
+   $("#spotify-frame-current").textContent=fmt(0);$("#spotify-frame-total").textContent=audio.src?"LIVE":"0:00";
+  }
+  syncSpotifyPlayerFrame();
  };
  audio.addEventListener("loadedmetadata",update);audio.addEventListener("durationchange",update);audio.addEventListener("timeupdate",update);
+ audio.addEventListener("play",update);audio.addEventListener("pause",update);audio.addEventListener("ended",update);
  seek.addEventListener("input",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=audio.duration*Number(seek.value)/1000;});
  seek.addEventListener("change",update);
+ frameSeek?.addEventListener("input",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=audio.duration*Number(frameSeek.value)/1000;});
+ frameSeek?.addEventListener("change",update);
  $("#seek-back").addEventListener("click",()=>{if(Number.isFinite(audio.duration))audio.currentTime=Math.max(0,audio.currentTime-15);});
  $("#seek-forward").addEventListener("click",()=>{if(Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,audio.currentTime+15);});
 }
