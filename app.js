@@ -274,13 +274,14 @@ function toggleFav(id){
   if(found)list=list.filter(x=>x.stationuuid!==id);else{const s=stations.find(x=>x.stationuuid===id)||stationCache.get(id)||currentStation;if(s)list.unshift(s);}
   saveFavs(list);notify(found?"Removed from favourites":"Saved to your favourites");refreshFavViews();
 }
+function musicFavIcon(saved){return '<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>';}
 function refreshFavViews(){
   const ids=favs();
   $("#favorite-results").innerHTML=ids.length?ids.map(stationCard).join(""):'<div class="empty-state">Your favourite stations will appear here.</div>';
   if(currentStation)$("#player-fav").textContent=isFav(currentStation.stationuuid)?"\u{1F496}":"\u{1F90D}";
   if(currentMusicTrack){const yes=isMusicFav(currentMusicTrack.id);$("#player-fav").textContent=yes?"\u{1F496}":"\u{1F90D}";$("#player-fav").classList.toggle("saved",yes);}
   $$("[data-fav]").forEach(b=>{const yes=isFav(b.dataset.fav);b.textContent=yes?"\u{1F496}":"\u{1F90D}";b.classList.toggle("saved",yes);});
-  $$("[data-audio-fav]").forEach(b=>{const yes=isMusicFav(b.dataset.audioFav);b.textContent=yes?"\u{1F496}":"\u{1F90D}";b.classList.toggle("saved",yes);});
+  $$("[data-audio-fav]").forEach(b=>{const yes=isMusicFav(b.dataset.audioFav);b.innerHTML=musicFavIcon(yes);b.classList.toggle("saved",yes);});
   renderFavouriteMusic();
 }
 let orbitViewHistory=["discover"];
@@ -488,7 +489,7 @@ function musicCard(track){
   const pid=track.providerId||track.id.replace(/^audius:/,"");
   const streamUrl="/api/audius-stream?id="+encodeURIComponent(pid);
   const download=track.source==="Audius"?`<button data-download-track="${esc(track.id)}" data-stream-url="${esc(streamUrl)}" title="Save for offline playback">? Save offline</button>`:"";
-  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(track.source||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?"??":"??"}</button></div></div></article>`;
+  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(track.source||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>':'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>'}</button></div></div></article>`;
 }
 async function loadAudioMusic(term="afrobeats"){
   const host=$("#audio-music-results");

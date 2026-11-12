@@ -131,3 +131,9 @@ body.player-hidden .player-reveal{display:grid}
 #live-podcast-audio{display:block;width:100%;max-width:520px;margin:12px 0}
 .live-podcast-note{font-size:10px;max-width:900px}
 @media(max-width:600px){.live-podcast-panel{padding:15px}.live-podcast-panel-heading{flex-direction:column}.live-podcast-controls,.live-podcast-join{align-items:stretch;width:100%}.live-podcast-controls>button,.live-podcast-join button{width:100%}.live-podcast-join input{flex:1;width:100%;max-width:none}.live-podcast-room{flex-wrap:wrap}.live-podcast-room strong{font-size:17px}}
+
+/* Music-card favourite icon: use inline SVG so it never becomes ?? from emoji/font encoding. */
+.music-card-actions .heart-button{display:inline-grid;place-items:center;min-width:34px;min-height:34px;line-height:1;color:var(--muted);}
+.music-card-actions .heart-button.saved{color:var(--lime);}
+.music-fav-icon{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.music-card-actions .heart-button.saved .music-fav-icon{fill:currentColor;}
