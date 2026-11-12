@@ -487,25 +487,28 @@ function musicCard(track){
   const playLabel=track.previewOnly?"Play preview":"Play full track";
   const pid=track.providerId||track.id.replace(/^audius:/,"");
   const streamUrl="/api/audius-stream?id="+encodeURIComponent(pid);
-  const download='<button data-download-track="'+esc(track.id)+'" data-stream-url="'+esc(streamUrl)+'" title="Save for offline playback">↓ Save offline</button>';
-  return '<article class="media-card music-audio-card"><img class="media-cover" src="'+esc(track.artwork||"") + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><h3 title="'+esc(track.title)+'">'+esc(track.title)+'</h3><p>'+esc(track.artist||"Independent artist")+'  -  '+musicDuration(track.duration)+'</p><div class="media-actions"><small>'+esc(track.source||track.genre||"Audio track")+(track.previewOnly?" · Preview":"")+'</small><div class="music-card-actions"><button data-audio-play="'+esc(track.id)+'">'+playLabel+'</button>'+download+'<button class="heart-button '+(saved?"saved":"")+'" data-audio-fav="'+esc(track.id)+'" title="Save favourite">'+(saved?"\u{1F496}":"\u{1F90D}")+'</button></div></div></article>';
+  const download=track.source==="Audius"?`<button data-download-track="${esc(track.id)}" data-stream-url="${esc(streamUrl)}" title="Save for offline playback">? Save offline</button>`:"";
+  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.style.display='none'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(track.source||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?"??":"??"}</button></div></div></article>`;
 }
 async function loadAudioMusic(term="afrobeats"){
   const host=$("#audio-music-results");
-  host.innerHTML='<div class="loading-card">Searching Audius and Jamendo…</div>';
+  host.innerHTML='<div class="loading-card">Searching Audius and YouTube Music…</div>';
   const q=(term||"trending").trim()||"trending";
-  const response=await fetch("/api/music-search?q="+encodeURIComponent(q),{signal:AbortSignal.timeout(26000)});
+  const response=await fetch("/api/music-search?q="+encodeURIComponent(q),{cache:"no-store",signal:AbortSignal.timeout(45000)});
   if(!response.ok)throw new Error("Music catalogue unavailable");
   const payload=await response.json();
   musicSearchResults=payload.tracks||[];
   musicSearchResults.forEach(t=>musicTrackCache.set(String(t.id),t));
   const providers=payload.providers||{};
-  const connected=["Audius"];
+  const connected=[];
+  if(providers.audius)connected.push("Audius");
+  if(providers.ytmusic)connected.push("YouTube Music");
   if(providers.jamendo)connected.push("Jamendo");
-  const waiting=["Spotify","SoundCloud","Audiomack"].filter(Boolean);
+  if(!connected.length)connected.push("No providers available");
+  const waiting=["Spotify","SoundCloud","Audiomack"];
   $("#music-provider-status").textContent="Connected: "+connected.join(" · ")+" | Setup needed: "+waiting.join(" · ");
   renderMusicResults();
-  $("#audio-music-status").innerHTML='<span class="music-status-mark">&#9835;</span><div><b>Full-track music search</b><small>'+musicSearchResults.length+' matching tracks from '+connected.join(", ")+'. Preview-only iTunes music has been removed.</small></div>';
+  $("#audio-music-status").innerHTML='<span class="music-status-mark">&#9835;</span><div><b>Audio-only listening</b><small>'+musicSearchResults.length+' matching tracks from '+connected.join(", ")+'. YouTube Music plays through ORBIT’s audio player without a video window.</small></div>';
 }
 function toggleMusicFav(track){
   if(!track)return;
@@ -516,19 +519,57 @@ function toggleMusicFav(track){
   notify(exists?"Removed from favourite music":"Saved to favourite music");
   refreshFavViews();
 }
+let youtubeMusicRecoveryForTrack=null;
+let youtubeMusicRecoveryPromise=null;
+async function refreshYouTubeMusicStream(track,resumeAt=0){
+  if(youtubeMusicRecoveryPromise)return youtubeMusicRecoveryPromise;
+  if(!track||track.source!=="YouTube Music")throw new Error("This is not a YouTube Music track.");
+  youtubeMusicRecoveryForTrack=track.id;
+  youtubeMusicRecoveryPromise=(async()=>{
+    const videoId=track.videoId||track.providerId||String(track.id).replace(/^ytmusic:/,"");
+    if(currentMusicTrack?.id!==track.id)return;
+    audio.pause();audio.src="/api/youtube-music/audio?videoId="+encodeURIComponent(videoId)+"&refresh="+Date.now();audio.load();
+    if(resumeAt>0){
+      await new Promise((resolve,reject)=>{
+        const onMeta=()=>{try{audio.currentTime=Number.isFinite(audio.duration)?Math.min(resumeAt,audio.duration):resumeAt;resolve();}catch(error){reject(error);}};
+        const onError=()=>reject(new Error("The refreshed audio stream could not be loaded."));
+        audio.addEventListener("loadedmetadata",onMeta,{once:true});
+        audio.addEventListener("error",onError,{once:true});
+      });
+    }
+    if(currentMusicTrack?.id===track.id)await audio.play();
+  })();
+  try{return await youtubeMusicRecoveryPromise;}finally{youtubeMusicRecoveryPromise=null;}
+}
 function playAudioTrack(id){
   const track=musicTrackCache.get(String(id))||musicFavs().find(x=>String(x.id)===String(id));
   if(!track){notify("This track is no longer available.");return;}
-  clearYoutubePlayer();currentStation=null;currentOfflineAudioId=null;currentMusicTrack=track;musicQueue=[...musicTrackCache.values()];musicQueueIndex=musicQueue.findIndex(x=>String(x.id)===String(track.id));
+  clearYoutubePlayer();currentStation=null;currentOfflineAudioId=null;currentMusicTrack=track;
   musicQueue=[...musicTrackCache.values()];musicQueueIndex=musicQueue.findIndex(x=>String(x.id)===String(track.id));
-  audio.src=(track.source==="Audius"||!track.source)?"/api/audius-stream?id="+encodeURIComponent(String(track.providerId||track.id).replace(/^audius:/,"")):(track.playbackUrl||"");
-  if(!audio.src){notify("This provider has not enabled playback for this track.");return;}
-  audio.play().then(()=>{
+  youtubeMusicRecoveryForTrack=null;
+  audio.pause();audio.removeAttribute("src");audio.load();
+  const startPlayback=async()=>{
+    if(track.source==="YouTube Music"){
+      const videoId=track.videoId||track.providerId||String(track.id).replace(/^ytmusic:/,"");
+      if(currentMusicTrack?.id!==track.id)return;
+      audio.src="/api/youtube-music/audio?videoId="+encodeURIComponent(videoId)+"&fresh="+Date.now();
+    }else{
+      audio.src=(track.source==="Audius"||!track.source)?"/api/audius-stream?id="+encodeURIComponent(String(track.providerId||track.id).replace(/^audius:/,"")):(track.playbackUrl||"");
+    }
+    if(!audio.src)throw new Error("This provider has not enabled playback for this track.");
+    await audio.play();
+    if(currentMusicTrack?.id!==track.id)return;
     setPlayer(track.title,track.artist+"  -  "+(track.source||"Music"),track.previewOnly?"Preview playback":"Full audio track");
-    setPlayerArtwork(track.artwork,"\u266b");
-    $("#player-fav").textContent=isMusicFav(track.id)?"\u{1F496}":"\u{1F90D}";
+    setPlayerArtwork(track.artwork,"\\u266b");
+    $("#player-fav").textContent=isMusicFav(track.id)?"\\u{1F496}":"\\u{1F90D}";
     $("#player-fav").classList.toggle("saved",isMusicFav(track.id));
-  }).catch(()=>notify("This track could not be streamed. Try another track."));
+  };
+  startPlayback().catch(async error=>{
+    if(track.source==="YouTube Music"&&youtubeMusicRecoveryForTrack!==track.id){
+      try{await refreshYouTubeMusicStream(track,0);return;}catch{}
+    }
+    if(currentMusicTrack?.id===track.id)notify(error.message||"This track could not be streamed. Try another track.");
+  });
 }
 async function refreshOfflineMusicQueue(){offlineMusicQueue=(await getOfflineItems()).filter(x=>String(x.kind||"").toLowerCase()==="audio").sort((a,b)=>a.savedAt-b.savedAt);return offlineMusicQueue;}
 async function playOfflineMusicAt(index){if(!offlineMusicQueue.length){notify("No downloaded music is available.");return;}if(index<0||index>=offlineMusicQueue.length){notify("There are no more downloaded music tracks.");return;}const item=offlineMusicQueue[index];await playOffline(item.id,"audio",item.title);}
@@ -1229,6 +1270,13 @@ function setupEvents(){
   $$("#view-music .pill[data-audio-music]").forEach(b=>b.addEventListener("click",()=>{$$("#view-music .pill[data-audio-music]").forEach(x=>x.classList.toggle("active",x===b));$("#audio-music-results").dataset.loaded="";loadAudioMusic(b.dataset.audioMusic).then(()=>$("#audio-music-results").dataset.loaded="1").catch(()=>notify("Music catalogue unavailable."));}));
   $$("#music-provider-filters [data-music-provider]").forEach(b=>b.addEventListener("click",()=>{$$("#music-provider-filters .pill").forEach(x=>x.classList.toggle("active",x===b));musicProviderFilter=b.dataset.musicProvider;renderMusicResults();}));
   setupOrbitMediaSession();
+  audio.addEventListener("error",()=>{
+    const track=currentMusicTrack;
+    if(track?.source==="YouTube Music"&&youtubeMusicRecoveryForTrack!==track.id){
+      const resumeAt=Number(audio.currentTime)||0;
+      refreshYouTubeMusicStream(track,resumeAt).catch(()=>notify("This YouTube Music stream expired and could not be refreshed. Please select the track again."));
+    }
+  });
   audio.addEventListener("play",()=>{$("#play-button").classList.add("is-playing");$("#player-state").textContent=currentMusicTrack?"Full audio track":"Now playing";syncOrbitMediaPlaybackState();});
   audio.addEventListener("pause",()=>{$("#play-button").classList.remove("is-playing");syncOrbitMediaPlaybackState();});
   audio.addEventListener("timeupdate",syncOrbitMediaPlaybackState);

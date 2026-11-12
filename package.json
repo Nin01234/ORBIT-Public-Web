@@ -5,7 +5,8 @@
   "description": "ORBIT public web deployment staging copy",
   "type": "module",
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "postinstall": "node install-ytmusic-deps.cjs"
   },
   "engines": {
     "node": ">=20"

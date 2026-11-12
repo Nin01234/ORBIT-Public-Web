@@ -4,6 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, WebSocket } from "ws";
 import { randomBytes } from "node:crypto";
+import { spawn } from "node:child_process";
+import { Readable } from "node:stream";
 import { gunzipSync } from "node:zlib";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -11,6 +13,43 @@ const port = Number(process.env.PORT || 3000);
 const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".svg":"image/svg+xml", ".png":"image/png", ".ico":"image/x-icon", ".webmanifest":"application/manifest+json" };
 const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-web-refresh.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
 const cache = new Map();
+let ytmusicBridgeActive = 0;
+function runYoutubeMusicBridge(action, values = {}) {
+  if (ytmusicBridgeActive >= 3) return Promise.reject(new Error("The music service is busy. Please try again in a moment."));
+  const script = path.join(root, "orbit_ytmusic_bridge.py");
+  const python = process.env.ORBIT_PYTHON || (process.platform === "win32" ? "py" : "python3");
+  const actionArgs = action === "search"
+    ? ["search", "--query", String(values.query || "").slice(0, 120)]
+    : ["stream", "--video-id", String(values.videoId || "")];
+  const pythonArgs = process.platform === "win32" && !process.env.ORBIT_PYTHON
+    ? ["-3", script, ...actionArgs]
+    : [script, ...actionArgs];
+  const pythonDeps = path.join(root, ".python-deps");
+  const env = { ...process.env, PYTHONPATH: pythonDeps + path.delimiter + (process.env.PYTHONPATH || ""), PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" };
+  return new Promise((resolve, reject) => {
+    ytmusicBridgeActive++;
+    let stdout = "", stderr = "", settled = false;
+    const child = spawn(python, pythonArgs, { cwd: root, env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    const finish = (error, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      ytmusicBridgeActive = Math.max(0, ytmusicBridgeActive - 1);
+      if (error) reject(error); else resolve(value);
+    };
+    const timer = setTimeout(() => { try { child.kill(); } catch {} finish(new Error("The music service took too long to respond.")); }, 35000);
+    child.stdout.on("data", chunk => { stdout += chunk.toString("utf8"); if (stdout.length > 2 * 1024 * 1024) { try { child.kill(); } catch {} finish(new Error("The music service returned too much data.")); } });
+    child.stderr.on("data", chunk => { if (stderr.length < 12000) stderr += chunk.toString("utf8"); });
+    child.once("error", error => finish(new Error("Could not start the YouTube Music service: " + error.message)));
+    child.once("close", code => {
+      let payload;
+      try { payload = JSON.parse(stdout.trim()); }
+      catch { finish(new Error((stderr.trim() || "The music service returned an invalid response.").slice(0, 500))); return; }
+      if (code !== 0 || payload.error) finish(new Error(String(payload.error || stderr || "The music service failed.").slice(0, 500)));
+      else finish(null, payload);
+    });
+  });
+}
 const rate = new Map();
 const rateCleanup = setInterval(() => {
   const cutoff = Date.now() - 120000;
@@ -78,12 +117,52 @@ async function api(req,res,url) {
   }
   if(p==="/api/audius-search"||p==="/api/music-search") {
     const query=safeText(url.searchParams.get("q")||"trending",100), trending=!query||query.toLowerCase()==="trending";
-    const key="audius:"+query.toLowerCase(),old=cached(key);if(old)return send(res,200,old,"public, max-age=120");
-    const u=new URL("https://api.audius.co/v1/"+(trending?"tracks/trending":"tracks/search"));u.searchParams.set("limit","30");u.searchParams.set("app_name","ORBIT");if(!trending)u.searchParams.set("query",query);
-    const payload=await getJson(u,20000);
-    const tracks=(payload.data||[]).filter(t=>t&&t.track_id&&t.is_streamable===true&&t.is_available!==false&&t.is_stream_gated!==true&&t.is_unlisted!==true&&t.is_delete!==true&&t.access?.stream!==false).map(t=>({id:"audius:"+t.track_id,providerId:String(t.track_id),source:"Audius",title:t.title||"Untitled track",artist:t.user?.name||t.user?.handle||"Independent artist",duration:Number(t.duration)||0,genre:t.genre||"",artwork:t.artwork?.["480x480"]||t.artwork?.["150x150"]||"",permalink:t.permalink||"",playbackUrl:"",previewOnly:false,canDownload:t.is_downloadable===true&&t.access?.download!==false}));
-    const result=p==="/api/music-search"?{tracks,providers:{audius:true,jamendo:false,spotify:false,soundcloud:false,audiomack:false}}:tracks;
-    return send(res,200,store(key,result,TTL.music),"public, max-age=120");
+    const isCombined=p==="/api/music-search";
+    const key=(isCombined?"music:":"audius:")+query.toLowerCase(),old=cached(key);if(old)return send(res,200,old,"public, max-age=90");
+    const loadAudius=async()=>{
+      const u=new URL("https://api.audius.co/v1/"+(trending?"tracks/trending":"tracks/search"));
+      u.searchParams.set("limit","30");u.searchParams.set("app_name","ORBIT");if(!trending)u.searchParams.set("query",query);
+      const payload=await getJson(u,20000);
+      return (payload.data||[]).filter(t=>t&&t.track_id&&t.is_streamable===true&&t.is_available!==false&&t.is_stream_gated!==true&&t.is_unlisted!==true&&t.is_delete!==true&&t.access?.stream!==false).map(t=>({id:"audius:"+t.track_id,providerId:String(t.track_id),source:"Audius",title:t.title||"Untitled track",artist:t.user?.name||t.user?.handle||"Independent artist",duration:Number(t.duration)||0,genre:t.genre||"",artwork:t.artwork?.["480x480"]||t.artwork?.["150x150"]||"",permalink:t.permalink||"",playbackUrl:"",previewOnly:false,canDownload:t.is_downloadable===true&&t.access?.download!==false}));
+    };
+    if(!isCombined){
+      const tracks=await loadAudius();
+      return send(res,200,store(key,tracks,TTL.music),"public, max-age=90");
+    }
+    const [audiusResult,ytmusicResult]=await Promise.allSettled([
+      loadAudius(),
+      runYoutubeMusicBridge("search",{query:trending?"trending music":query})
+    ]);
+    if(audiusResult.status!=="fulfilled"&&ytmusicResult.status!=="fulfilled")throw new Error("All music catalogues are temporarily unavailable");
+    const tracks=[
+      ...(audiusResult.status==="fulfilled"?audiusResult.value:[]),
+      ...(ytmusicResult.status==="fulfilled"&&Array.isArray(ytmusicResult.value.tracks)?ytmusicResult.value.tracks:[])
+    ];
+    const result={tracks,providers:{audius:audiusResult.status==="fulfilled",jamendo:false,ytmusic:ytmusicResult.status==="fulfilled",spotify:false,soundcloud:false,audiomack:false}};
+    return send(res,200,store(key,result,TTL.music),"public, max-age=90");
+  }
+  if(p==="/api/youtube-music/audio") {
+    const videoId=safeText(url.searchParams.get("videoId"),11);
+    if(!/^[A-Za-z0-9_-]{11}$/.test(videoId))return send(res,400,{error:"Invalid YouTube Music track identifier"});
+    const payload=await runYoutubeMusicBridge("stream",{videoId});
+    if(!payload.url||!["m4a","webm"].includes(String(payload.format||"").toLowerCase()))return send(res,502,{error:"No supported audio-only stream was returned"});
+    let target;try{target=new URL(payload.url);}catch{return send(res,502,{error:"The audio provider returned an invalid stream URL"});}
+    if(target.protocol!=="https:"||!target.hostname.toLowerCase().endsWith(".googlevideo.com"))return send(res,502,{error:"The audio provider returned an untrusted stream host"});
+    const upstreamHeaders={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept":"*/*","Accept-Encoding":"identity"};
+    if(req.headers.range)upstreamHeaders.Range=req.headers.range;
+    if(req.headers["if-range"])upstreamHeaders["If-Range"]=req.headers["if-range"];
+    const upstream=await fetch(target,{method:req.method==="HEAD"?"HEAD":"GET",headers:upstreamHeaders,redirect:"follow",signal:AbortSignal.timeout(45000)});
+    if(!upstream.ok&&upstream.status!==206)throw new Error("The audio provider could not deliver this stream");
+    let finalUrl;try{finalUrl=new URL(upstream.url);}catch{throw new Error("The audio provider returned an invalid stream redirect");}
+    if(finalUrl.protocol!=="https:"||!finalUrl.hostname.toLowerCase().endsWith(".googlevideo.com"))throw new Error("The audio provider redirected to an untrusted host");
+    const headers={"Content-Type":upstream.headers.get("content-type")||((String(payload.format).toLowerCase()==="m4a")?"audio/mp4":"audio/webm"),"Cache-Control":"no-store","Accept-Ranges":"bytes","X-Content-Type-Options":"nosniff"};
+    for(const name of ["content-length","content-range","etag","last-modified"]){const value=upstream.headers.get(name);if(value)headers[name]=value;}
+    res.writeHead(upstream.status,headers);
+    if(req.method==="HEAD"){res.end();return;}
+    if(!upstream.body){res.end();return;}
+    const stream=Readable.fromWeb(upstream.body);
+    stream.on("error",error=>{console.error("ORBIT YouTube Music audio proxy:",error.message);if(!res.destroyed)res.destroy();});
+    res.on("close",()=>stream.destroy());stream.pipe(res);return;
   }
   if(p==="/api/audius-download") {
     const id=safeText(url.searchParams.get("id"),16);
