@@ -317,3 +317,20 @@ body:not(.player-hidden) .player-bar{display:grid!important;visibility:visible!i
 .player-bar .player-art{width:48px!important;height:48px!important;flex:0 0 48px!important;min-width:48px!important;min-height:48px!important;border-radius:50%!important;overflow:hidden!important;display:grid!important;place-items:center!important;background-color:#1b3430!important;background-image:none!important;padding:0!important}
 .player-bar .player-art img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;border-radius:inherit!important}
 @media(max-width:760px){.player-bar .player-art{width:40px!important;height:40px!important;flex-basis:40px!important;min-width:40px!important;min-height:40px!important}}
+
+/* Final player interaction fixes: draggable panel + reliable hide/show launcher. */
+.player-bar{position:fixed!important;z-index:1400!important;transition:none!important}
+.player-bar .now-playing{cursor:grab!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
+.player-bar .now-playing:active{cursor:grabbing!important}
+.player-bar .player-extra{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:relative!important;z-index:5!important}
+.player-bar .player-hide{display:grid!important;visibility:visible!important;pointer-events:auto!important;position:relative!important;z-index:6!important;cursor:pointer!important}
+body.player-hidden .player-bar{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+body:not(.player-hidden) .player-bar{display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+.player-reveal{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;position:fixed!important;z-index:1500!important;touch-action:none!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important}
+.player-reveal:active{cursor:grabbing!important}
+@media(max-width:760px){
+ .player-bar,body:not(.player-hidden) .player-bar{position:fixed!important;transform:none!important;bottom:auto!important;right:auto!important;max-width:calc(100vw - 16px)!important}
+ .player-bar .player-extra{display:flex!important;visibility:visible!important}
+ .player-bar .player-hide{display:grid!important;visibility:visible!important;pointer-events:auto!important}
+ .player-reveal{width:48px!important;height:48px!important;min-width:48px!important;padding:0!important}
+}
