@@ -433,8 +433,7 @@ server.on("upgrade",(request,socket,head)=>{
   let pathname;try{pathname=new URL(request.url||"/","http://localhost").pathname;}catch{socket.destroy();return;}
   if(pathname!=="/signal"){socket.destroy();return;}
   const origin=request.headers.origin||"";
-  if(process.env.RENDER&&!origin){socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");socket.destroy();return;}
-  if(origin){try{const u=new URL(origin),local=["localhost","127.0.0.1"].includes(u.hostname);if((process.env.RENDER&&u.protocol!=="https:")||(!local&&u.host!==request.headers.host)){socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");socket.destroy();return;}}catch{socket.destroy();return;}}
+  if(origin){try{const u=new URL(origin),local=["localhost","127.0.0.1"].includes(u.hostname);if(!local&&u.host!==request.headers.host){socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");socket.destroy();return;}}catch{socket.destroy();return;}}
   const ip=String(request.headers["x-forwarded-for"]||request.socket.remoteAddress||"unknown").split(",")[0].trim().slice(0,100);
   const wsLimit=routeRate.consume(ip+"|/signal",20);
   if(!wsLimit.allowed||liveWss.clients.size>=500){socket.write("HTTP/1.1 429 Too Many Requests\r\nRetry-After: "+wsLimit.retryAfter+"\r\n\r\n");socket.destroy();return;}
