@@ -1383,7 +1383,19 @@ function setupEvents(){
   if(!dockPosition||!Number.isFinite(dockPosition.x)||!Number.isFinite(dockPosition.y))dockPosition={x:Math.max(12,window.innerWidth-70),y:Math.max(12,window.innerHeight-(window.innerWidth<=760?260:170))};
   placeDock(dockPosition.x,dockPosition.y);
   if(localStorage.getItem("orbit-player-hidden")==="1")hideDock();else showDock();
-  playerHide.addEventListener("click",hideDock);
+  playerHide.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();hideDock();});
+  // Drag the visible player itself by its artwork/title area; controls remain independently clickable.
+  playerBar.addEventListener("pointerdown",e=>{
+    if(!e.target.closest(".now-playing")||e.target.closest("button"))return;
+    if(e.button!==0&&e.pointerType==="mouse")return;
+    e.preventDefault();
+    const pointerId=e.pointerId,startX=e.clientX,startY=e.clientY,baseX=dockPosition?.x??Math.max(12,window.innerWidth-70),baseY=dockPosition?.y??Math.max(12,window.innerHeight-170);
+    let moved=false;
+    try{playerBar.setPointerCapture(pointerId);}catch{}
+    const move=ev=>{if(ev.pointerId!==pointerId)return;const dx=ev.clientX-startX,dy=ev.clientY-startY;if(Math.hypot(dx,dy)>4)moved=true;if(moved){ev.preventDefault();placeDock(baseX+dx,baseY+dy);}};
+    const finish=ev=>{if(ev.pointerId!==pointerId)return;window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",finish);window.removeEventListener("pointercancel",finish);};
+    window.addEventListener("pointermove",move,{passive:false});window.addEventListener("pointerup",finish);window.addEventListener("pointercancel",finish);
+  });
   window.addEventListener("resize",()=>{if(dockPosition)placeDock(dockPosition.x,dockPosition.y);});
   audio.addEventListener("error",()=>{
     if(currentStation&&radioPlayback&&radioPlayback.token===radioPlayToken&&!radioPlayback.active){
