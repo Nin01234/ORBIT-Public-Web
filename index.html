@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./orbit-feature-additions.css"><link rel="stylesheet" href="./orbit-ui-fixes-20261109.css"><link rel="stylesheet" href="./orbit-mobile.css">
-  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css"><link rel="stylesheet" href="./orbit-web-refresh.css?v=20261111-local-preview">
+  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css"><link rel="stylesheet" href="./spotify-player-frame.css?v=1"><link rel="stylesheet" href="./orbit-web-refresh.css?v=20261111-local-preview">
   <script>(function(){try{var preview=new URLSearchParams(location.search).get("preview-theme");var t=preview==="light"?"light":(localStorage.getItem("orbit-theme")||"light");if(preview==="light")localStorage.setItem("orbit-theme","light");if(t==="system")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
 <body>
@@ -249,6 +249,13 @@
     </main>
   </div>
 
+  <section class="spotify-player-frame" id="spotify-player-frame" aria-label="ORBIT music player">
+    <div class="spotify-frame-top"><span class="spotify-frame-brand"><span class="spotify-frame-mark">O</span> ORBIT <span class="spotify-frame-music">MUSIC</span></span><span class="spotify-frame-live"><span></span> NOW PLAYING</span></div>
+    <div class="spotify-frame-track"><div class="spotify-frame-art" id="spotify-frame-art">M</div><div class="spotify-frame-track-meta"><b id="spotify-frame-title">Nothing playing yet</b><small id="spotify-frame-subtitle">Choose music from the Audius catalogue</small></div><button class="spotify-frame-fav" id="spotify-frame-fav" type="button" aria-label="Save music favourite" title="Save favourite">?</button></div>
+    <div class="spotify-frame-controls"><button id="spotify-frame-previous" type="button" aria-label="Previous track" title="Previous track">Prev</button><button id="spotify-frame-play" type="button" aria-label="Play or pause" title="Play or pause">Play</button><button id="spotify-frame-stop" type="button" aria-label="Stop playback" title="Stop">Stop</button><button id="spotify-frame-next" type="button" aria-label="Next track" title="Next track">Next</button></div>
+    <div class="spotify-frame-progress"><span id="spotify-frame-current">0:00</span><input id="spotify-frame-seek" type="range" min="0" max="1000" value="0" aria-label="Seek music"><span id="spotify-frame-total">0:00</span></div>
+    <div class="spotify-frame-footer"><span id="spotify-frame-status">Ready to play</span><span>AUDIO</span></div>
+  </section>
   <div class="player-bar">
     <div class="now-playing"><div class="player-art" id="player-art">◉</div><div class="track-meta"><b id="player-title">Nothing playing yet</b><small id="player-subtitle">Choose a station or preview</small></div><button class="heart-button" id="player-fav" title="Save favourite">♡</button></div>
     <div class="player-center"><div class="player-controls"><button class="control-button" id="previous-track" title="Previous track" aria-label="Previous track">Prev</button><button class="control-button" id="seek-back" title="Back 15 seconds" aria-label="Back 15 seconds">-15</button><button class="control-button" id="stop-button" title="Stop" aria-label="Stop">Stop</button><button class="play-button" id="play-button" title="Play or pause" aria-label="Play or pause"><span class="play-glyph" aria-hidden="true"></span></button><button class="control-button" id="seek-forward" title="Forward 15 seconds" aria-label="Forward 15 seconds">+15</button><button class="control-button" id="next-track" title="Next track" aria-label="Next track">Next</button><button class="control-button" id="volume-button" title="Mute or unmute" aria-label="Mute or unmute">Mute</button></div><div class="track-progress"><span id="current-time">0:00</span><input id="track-seek" type="range" min="0" max="1000" value="0" aria-label="Seek track"><span id="total-time">0:00</span></div></div>

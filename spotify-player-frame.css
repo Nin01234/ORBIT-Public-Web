@@ -1,0 +1,29 @@
+/* ORBIT Spotify-inspired music player frame (website only) */
+.spotify-player-frame{position:fixed;z-index:12;right:22px;bottom:104px;width:min(310px,calc(100vw - 28px));padding:15px;border:1px solid rgba(145,180,166,.22);border-radius:18px;background:linear-gradient(160deg,#17252a 0%,#10191f 65%,#0b1218 100%);color:#f1f7f4;box-shadow:0 18px 52px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.04);font-family:inherit;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.spotify-frame-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px;font-size:9px;font-weight:750;letter-spacing:1.1px;color:#b6c9bf}
+.spotify-frame-brand{display:flex;align-items:center;gap:6px;color:#f5faf7}.spotify-frame-mark{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#b7f36b;color:#14200c;font-size:13px}.spotify-frame-music{color:#b7f36b}
+.spotify-frame-live{display:flex;align-items:center;gap:5px;font-size:8px;letter-spacing:.65px}.spotify-frame-live span{width:6px;height:6px;border-radius:50%;background:#b7f36b;box-shadow:0 0 8px #b7f36b66}
+.spotify-frame-track{display:grid;grid-template-columns:64px minmax(0,1fr) 30px;align-items:center;gap:10px}
+.spotify-frame-art{width:64px;height:64px;display:grid;place-items:center;border-radius:10px;overflow:hidden;background:linear-gradient(145deg,#31594b,#182f38 58%,#101c27);color:#d9f4e7;font-size:27px;box-shadow:0 6px 16px #0003}
+.spotify-frame-art img{width:100%;height:100%;object-fit:cover;display:block}
+.spotify-frame-track-meta{min-width:0;display:flex;flex-direction:column;gap:5px}.spotify-frame-track-meta b,.spotify-frame-track-meta small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spotify-frame-track-meta b{font-size:12px;font-weight:750;color:#f5faf7}.spotify-frame-track-meta small{font-size:10px;color:#a8bbb1}
+.spotify-frame-fav{width:30px;height:30px;border:0;background:transparent;color:#b8c9c0;font-size:21px;cursor:pointer}.spotify-frame-fav.saved{color:#b7f36b}
+.spotify-frame-controls{display:flex;align-items:center;justify-content:center;gap:22px;margin:15px 0 10px}.spotify-frame-controls button{display:grid;place-items:center;width:30px;height:30px;border:0;background:transparent;color:#c9d8d0;font-size:14px;cursor:pointer}.spotify-frame-controls #spotify-frame-play{width:38px;height:38px;border-radius:50%;background:#b7f36b;color:#102018;font-size:15px;box-shadow:0 3px 14px #b7f36b25}.spotify-frame-controls button:hover{color:#fff}.spotify-frame-controls #spotify-frame-play:hover{transform:scale(1.06);color:#102018}
+.spotify-frame-progress{display:grid;grid-template-columns:32px minmax(0,1fr) 32px;align-items:center;gap:7px}.spotify-frame-progress span{font-size:9px;font-variant-numeric:tabular-nums;color:#91a69b}.spotify-frame-progress input{width:100%;height:4px;margin:0;accent-color:#b7f36b;cursor:pointer}
+.spotify-frame-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:11px;padding-top:9px;border-top:1px solid #ffffff10;font-size:8px;letter-spacing:.55px;color:#81978c}.spotify-frame-footer span:last-child{color:#b7f36b;font-weight:750}
+@media(max-width:760px){.spotify-player-frame{right:10px;bottom:calc(205px + env(safe-area-inset-bottom));width:min(286px,calc(100vw - 20px));padding:12px;border-radius:16px}.spotify-frame-art{width:54px;height:54px}.spotify-frame-track{grid-template-columns:54px minmax(0,1fr) 28px;gap:8px}.spotify-frame-controls{gap:17px;margin:12px 0 8px}}
+@media(max-width:380px){.spotify-player-frame{width:calc(100vw - 20px);right:10px}.spotify-frame-top{font-size:8px}.spotify-frame-controls{gap:14px}}
+html[data-theme="light"] .spotify-player-frame{background:linear-gradient(160deg,#fff 0%,#f3f7f4 100%);color:#1d2a23;border-color:#d9e4dc;box-shadow:0 18px 42px #203b2b1c}
+html[data-theme="light"] .spotify-frame-track-meta b{color:#1d2a23}html[data-theme="light"] .spotify-frame-track-meta small,html[data-theme="light"] .spotify-frame-controls button,html[data-theme="light"] .spotify-frame-fav{color:#52665a}html[data-theme="light"] .spotify-frame-footer{border-color:#1c39220f;color:#65786b}
+
+/* Reliable favourite hearts: render with CSS so card icons never become ?? */
+button[data-audio-fav],.spotify-frame-fav{font-size:0!important;line-height:1;min-width:28px;min-height:28px;display:inline-grid;place-items:center}
+button[data-audio-fav]::before{content:'?';font-size:23px;font-family:Arial,sans-serif;font-weight:400;color:var(--muted,#a8bbb1)}
+button[data-audio-fav].saved::before{content:'?';color:var(--lime,#b7f36b)}
+.spotify-frame-fav::before{content:'?';font-size:23px;font-family:Arial,sans-serif;color:#b8c9c0}
+.spotify-frame-fav.saved::before{content:'?';color:#b7f36b}
+/* Keep the Spotify-style ORBIT frame prominent without covering the audio cards. */
+.spotify-player-frame{width:min(330px,calc(100vw - 28px));border-color:rgba(183,243,107,.28)}
+.spotify-frame-controls button{font-size:12px;font-weight:700;letter-spacing:.2px}
+.spotify-frame-controls #spotify-frame-play{font-size:13px}
+@media(max-width:760px){.spotify-player-frame{width:min(300px,calc(100vw - 20px));bottom:calc(205px + env(safe-area-inset-bottom))}}
