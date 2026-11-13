@@ -603,6 +603,49 @@ function renderFavouriteMusic(){
 }
 let tmdbMovieCatalog=null;
 const tmdbMovieCache=new Map();
+let tmdbMovieCatalogAt=0;
+let tmdbMovieRefreshPromise=null;
+let tmdbMovieCurrentRequest="trending";
+const TMDB_MOVIE_REFRESH_INTERVAL=30*60*1000;
+let tmdbMovieAutoRefreshTimer=null;
+async function fetchTmdbMovieCatalog(forceRefresh=false){
+  if(tmdbMovieRefreshPromise)return tmdbMovieRefreshPromise;
+  tmdbMovieRefreshPromise=(async()=>{
+    const endpoint="/api/spinn-movies"+(forceRefresh?"?refresh=1":"");
+    const response=await fetch(endpoint,{cache:"no-store",signal:AbortSignal.timeout(35000)});
+    if(!response.ok)throw new Error("Spinn Radio TMDB catalogue is unavailable");
+    const data=await response.json();
+    if(!Array.isArray(data.rows))throw new Error("TMDB movie catalogue has an invalid response");
+    tmdbMovieCatalog=data;
+    tmdbMovieCatalogAt=Date.now();
+    tmdbMovieCache.clear();
+    for(const row of data.rows)for(const movie of (row.movies||[]))if(movie&&movie.id)tmdbMovieCache.set(String(movie.id),movie);
+    return data;
+  })();
+  try{return await tmdbMovieRefreshPromise;}
+  finally{tmdbMovieRefreshPromise=null;}
+}
+function setupTmdbMovieAutoRefresh(){
+  const button=$("#movie-catalogue-refresh");
+  if(button&&!button.dataset.ready){
+    button.dataset.ready="1";
+    button.addEventListener("click",async()=>{
+      if(button.disabled)return;
+      button.disabled=true;button.textContent="Refreshing…";
+      try{await loadArchiveFilms(tmdbMovieCurrentRequest||"trending",true);}
+      catch(error){notify("Movie catalogue refresh failed. Your existing movie list is unchanged.");}
+      finally{button.disabled=false;button.textContent="↻ Refresh movies";}
+    });
+  }
+  if(!tmdbMovieAutoRefreshTimer){
+    const refreshIfDue=()=>{
+      if(document.visibilityState!=="visible"||!tmdbMovieCatalog||Date.now()-tmdbMovieCatalogAt<TMDB_MOVIE_REFRESH_INTERVAL)return;
+      loadArchiveFilms(tmdbMovieCurrentRequest||"trending",true).catch(()=>{});
+    };
+    tmdbMovieAutoRefreshTimer=window.setInterval(refreshIfDue,5*60*1000);
+    document.addEventListener("visibilitychange",refreshIfDue);
+  }
+}
 const TMDB_ROWS={
   trending:"trending",popular:"popular","top-rated":"top-rated",upcoming:"upcoming",
   action:"genre-28",comedy:"genre-35",drama:"genre-18",documentary:"genre-99",free:"free"
@@ -702,23 +745,29 @@ async function loadPublicDomainFilms(term="popular"){
     '</article>').join(""):'<div class="empty-state">No matching public-domain films were found. Try another title.</div>';
   $("#film-result-note").textContent=films.length+" films · Internet Archive · In-app playback";
 }
-async function loadArchiveFilms(term="trending"){
+async function loadArchiveFilms(term="trending",forceRefresh=false){
   const host=$("#movie-results");
   const requested=String(term||"trending").trim().toLowerCase();
   if(requested==="public-domain"||requested.startsWith("public-domain:")){
+    tmdbMovieCurrentRequest=requested;
     return loadPublicDomainFilms(requested.includes(":")?requested.slice(requested.indexOf(":")+1).trim():"popular");
   }
-  host.innerHTML='<div class="loading-card">Loading TMDB movie catalogue…</div>';
-  if(!tmdbMovieCatalog){
-    const response=await fetch("/api/spinn-movies",{signal:AbortSignal.timeout(35000)});
-    if(!response.ok)throw new Error("Spinn Radio TMDB catalogue is unavailable");
-    tmdbMovieCatalog=await response.json();
-    if(!Array.isArray(tmdbMovieCatalog.rows))throw new Error("TMDB movie catalogue has an invalid response");
-    for(const row of tmdbMovieCatalog.rows)for(const movie of (row.movies||[]))if(movie&&movie.id)tmdbMovieCache.set(String(movie.id),movie);
+  tmdbMovieCurrentRequest=requested||"trending";
+  const hasCatalogue=!!tmdbMovieCatalog;
+  const refreshDue=!hasCatalogue||Date.now()-tmdbMovieCatalogAt>=TMDB_MOVIE_REFRESH_INTERVAL;
+  const shouldRefresh=forceRefresh||refreshDue;
+  if(!hasCatalogue)host.innerHTML='<div class="loading-card">Loading TMDB movie catalogue…</div>';
+  if(shouldRefresh){
+    try{await fetchTmdbMovieCatalog(forceRefresh||refreshDue&&hasCatalogue);}
+    catch(error){
+      if(!tmdbMovieCatalog)throw error;
+      const note=$("#film-result-note");
+      if(note)note.textContent="Showing saved catalogue · refresh temporarily unavailable";
+    }
   }
   let movies=[];
   if(TMDB_ROWS[requested]){
-    const row=tmdbMovieCatalog.rows.find(x=>x&&x.id===TMDB_ROWS[requested]);
+    const row=tmdbMovieCatalog?.rows?.find(x=>x&&x.id===TMDB_ROWS[requested]);
     movies=row?.movies||[];
   }else{
     const unique=[...tmdbMovieCache.values()];
@@ -729,7 +778,8 @@ async function loadArchiveFilms(term="trending"){
   }
   movies=movies.slice(0,80);
   host.innerHTML=movies.length?movies.map(tmdbMovieCard).join(""):'<div class="empty-state">No matching films were found in this catalogue. Try another title or category.</div>';
-  $("#film-result-note").textContent=movies.length+" films · TMDB";
+  const refreshedAt=tmdbMovieCatalogAt?new Date(tmdbMovieCatalogAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+  $("#film-result-note").textContent=movies.length?movies.length+" films · TMDB"+(refreshedAt?" · Updated "+refreshedAt:""):"No matching films found · TMDB";
 }
 function playArchiveFilm(id,title){
   if(!/^[A-Za-z0-9._-]{1,180}$/.test(id)){notify("This film identifier is not valid.");return;}
@@ -1276,6 +1326,7 @@ function setupEvents(){
   $$("[data-term]").forEach(b=>b.addEventListener("click",()=>{ $$("#view-podcasts .pill").forEach(x=>x.classList.toggle("active",x===b));loadItunes("podcasts",b.dataset.term).catch(()=>notify("Podcast catalogue unavailable."));}));
   $$("[data-music-video]").forEach(b=>b.addEventListener("click",()=>{ $$("#view-music-video .pill").forEach(x=>x.classList.toggle("active",x===b));loadYouTubeMusic(b.dataset.musicVideo).catch(()=>notify("Music search is temporarily unavailable."));}));
   document.querySelectorAll("[data-movie]").forEach(b=>b.addEventListener("click",()=>{ document.querySelectorAll("#view-movies .pill").forEach(x=>x.classList.toggle("active",x===b));loadArchiveFilms(b.dataset.movie).then(()=>document.querySelector("#movie-results").dataset.loaded="1").catch(()=>notify("Movie catalogue unavailable. Please try again."));}));
+  setupTmdbMovieAutoRefresh();
   $$("[data-book]").forEach(b=>b.addEventListener("click",()=>{ $$("#view-audiobooks .pill").forEach(x=>x.classList.toggle("active",x===b));loadBooks(b.dataset.book==="popular"?"":b.dataset.book);}));
   $$("#view-music .pill[data-audio-music]").forEach(b=>b.addEventListener("click",()=>{$$("#view-music .pill[data-audio-music]").forEach(x=>x.classList.toggle("active",x===b));$("#audio-music-results").dataset.loaded="";loadAudioMusic(b.dataset.audioMusic).then(()=>$("#audio-music-results").dataset.loaded="1").catch(()=>notify("Music catalogue unavailable."));}));
   $$("#music-provider-filters [data-music-provider]").forEach(b=>b.addEventListener("click",()=>{$$("#music-provider-filters .pill").forEach(x=>x.classList.toggle("active",x===b));musicProviderFilter=b.dataset.musicProvider;renderMusicResults();}));
