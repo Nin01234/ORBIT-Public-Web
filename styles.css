@@ -138,3 +138,14 @@ body.player-hidden .player-reveal{display:grid}
 .music-fav-icon{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .music-card-actions .heart-button.saved .music-fav-icon{fill:currentColor;}
 
+/* Optional in-player picture zoom: mild crop, anchored slightly upward */
+#youtube-player-panel{position:relative;overflow:hidden;background:#05080c}
+#youtube-player-panel iframe,
+#youtube-player-panel .youtube-embed{
+  transform:scale(1.06) translateY(-1.5%);
+  transform-origin:50% 50%;
+}
+@media(max-width:850px){
+  #youtube-player-panel iframe,
+  #youtube-player-panel .youtube-embed{transform:scale(1.04) translateY(-1%)}
+}
