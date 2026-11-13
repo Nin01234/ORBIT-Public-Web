@@ -1132,10 +1132,10 @@ function renderGlobalLiveChannels(){
  const q=($("#global-tv-search").value||"").trim().toLowerCase(),country=$("#global-tv-country").value,category=$("#global-tv-category").value;
  if(category==="ghana-free"){
   const official=[
-   {name:"TV3 Ghana",network:"Media General",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UC9VSDs4ZXo3sjOoPkmW2iRQ"},
-   {name:"Joy News",network:"The Multimedia Group",desc:"Official YouTube channel player",embed:"https://www.youtube.com/embed/videoseries?list=PLEhaP2Z2iO3qxEM5RbZPZCcV0o0Z9azwh"},
-   {name:"Adom TV",network:"The Multimedia Group",desc:"Official YouTube channel player",embed:"https://www.youtube.com/embed/videoseries?list=PLyie0rQsQVfLBtDNoK_LUa2AqeWNQH6q2"},
-   {name:"Max TV",network:"iMax Media Group",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UCj46FV4TFrJncXCshjBbg3w"},
+   {name:"TV3 Ghana",network:"Media General",desc:"Official live page currently reports the stream unavailable; awaiting a verified video-only feed"},
+   {name:"Joy News",network:"The Multimedia Group",desc:"Official broadcaster YouTube live player",embed:"https://www.youtube.com/embed/videoseries?list=PLEhaP2Z2iO3qxEM5RbZPZCcV0o0Z9azwh"},
+   {name:"Adom TV",network:"The Multimedia Group",desc:"Official broadcaster YouTube live player",embed:"https://www.youtube.com/embed/videoseries?list=PLyie0rQsQVfLBtDNoK_LUa2AqeWNQH6q2"},
+   {name:"Max TV",network:"iMax Media Group",desc:"Official site uses a separate live player; awaiting a verified video-only embed"},
    {name:"UTV Ghana",network:"Despite Media",desc:"Official channel listed; no verified embeddable live feed yet"},
    {name:"GTV Sports+",network:"Ghana Broadcasting Corporation",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UC9wDer2KbLNoasCbdPYBFGw"},
    {name:"Angel TV",network:"Angel Broadcasting Network",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UCbUIPgslZTlsh98KknrNB8Q"},
