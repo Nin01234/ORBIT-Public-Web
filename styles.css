@@ -137,3 +137,21 @@ body.player-hidden .player-reveal{display:grid}
 .music-card-actions .heart-button.saved{color:var(--lime);}
 .music-fav-icon{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .music-card-actions .heart-button.saved .music-fav-icon{fill:currentColor;}
+
+/* YouTube-style related videos beneath ORBIT movie trailers */
+.orbit-trailer-section{min-width:0}
+.movie-related-section{margin:18px 0 30px}
+.movie-related-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
+.movie-related-heading h4{margin:0;font-size:15px;font-weight:700;color:var(--ink)}
+.movie-related-heading span{font-size:10px;color:var(--muted)}
+.movie-related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.movie-related-card{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;align-items:start;min-width:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.movie-related-play{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:0;border-radius:5px;overflow:hidden;background:#080d12}
+.movie-related-play img{display:block;width:100%;height:100%;object-fit:cover}
+.movie-related-play-icon{position:absolute;inset:0;display:grid;place-items:center;background:#0005;color:white;font-size:20px;opacity:0;transition:opacity .18s}
+.movie-related-play:hover .movie-related-play-icon,.movie-related-play:focus-visible .movie-related-play-icon{opacity:1}
+.movie-related-card strong,.movie-related-card small{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.movie-related-card strong{-webkit-line-clamp:2;font-size:11px;line-height:1.45;color:var(--ink)}
+.movie-related-card small{-webkit-line-clamp:2;margin-top:5px;font-size:9px;line-height:1.4;color:var(--muted)}
+@media(max-width:760px){.movie-related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.movie-related-card{grid-template-columns:1fr}.movie-related-card strong{font-size:10px}}
+@media(max-width:430px){.movie-related-grid{grid-template-columns:1fr}.movie-related-card{grid-template-columns:112px minmax(0,1fr)}}
