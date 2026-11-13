@@ -1180,7 +1180,18 @@ async function playGlobalChannel(id){
     if(token!==orbitLivePlayToken)return;
     if(!window.Hls||!Hls.isSupported())throw Error("This device does not support this channel format.");
     await new Promise((resolve,reject)=>{
-     const h=new Hls({enableWorker:true,lowLatencyMode:false,capLevelToPlayerSize:false,startLevel:-1,manifestLoadingTimeOut:25000,levelLoadingTimeOut:25000});
+     const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+     const downlink=Number(connection?.downlink);
+     const saveData=Boolean(connection?.saveData);
+     const initialBandwidth=Number.isFinite(downlink)&&downlink>0
+      ?Math.max(300000,Math.min(8000000,downlink*1000000*(saveData?0.35:0.55)))
+      :(saveData?400000:1500000);
+     const h=new Hls({
+      enableWorker:true,lowLatencyMode:false,capLevelToPlayerSize:false,startLevel:-1,
+      abrEwmaDefaultEstimate:initialBandwidth,abrBandWidthFactor:0.8,abrBandWidthUpFactor:0.7,
+      maxBufferLength:20,maxMaxBufferLength:40,backBufferLength:30,
+      manifestLoadingTimeOut:25000,levelLoadingTimeOut:25000
+     });
      orbitLiveHls=h;let settled=false,timer;
      const done=err=>{if(settled)return;settled=true;clearTimeout(timer);err?reject(err):resolve();};
      h.on(Hls.Events.MEDIA_ATTACHED,()=>{if(token===orbitLivePlayToken)h.loadSource(playbackUrl);});
