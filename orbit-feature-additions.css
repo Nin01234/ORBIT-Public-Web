@@ -474,3 +474,12 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
 html[data-theme="light"] .global-tv-official-card{background:#fff;border-color:var(--line);box-shadow:none}
 html[data-theme="light"] .global-tv-official-mark{background:#eee9df;color:#8b6538}
 @media(max-width:650px){.global-tv-official-grid{grid-template-columns:1fr}.global-tv-official-card{padding:13px}}
+
+/* Free-to-air cards launch their official player in the ORBIT TV frame */
+.global-tv-official-card{appearance:none;text-align:left;width:100%;font:inherit;cursor:pointer}
+.global-tv-official-card:hover{border-color:var(--lime);transform:translateY(-1px)}
+.global-tv-official-copy{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.global-tv-official-copy strong{font-size:15px;color:var(--ink)}
+.global-tv-official-copy small{font-size:12px;color:var(--muted)}
+.global-tv-inapp-play{margin-top:5px;color:var(--lime);font-size:12px;font-weight:700}
+#global-tv-embed{display:block;width:100%;aspect-ratio:16/9;min-height:240px;background:#000}
