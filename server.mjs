@@ -312,56 +312,6 @@ async function api(req,res,url) {
       return send(res,200,{title:"",trailers:[],message:"Trailer search is temporarily unavailable."});
     }
   }
-  if(p==="/api/youtube-related") {
-    try {
-      const videoId=safeText(url.searchParams.get("videoId"),11);
-      if(!/^[A-Za-z0-9_-]{11}$/.test(videoId))return send(res,400,{error:"A valid YouTube video ID is required"});
-      const upstream=await fetch("https://www.youtube.com/watch?v="+encodeURIComponent(videoId),{
-        headers:{"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9"},
-        signal:AbortSignal.timeout(20000)
-      });
-      if(!upstream.ok)return send(res,upstream.status,{error:"YouTube related videos unavailable"});
-      const html=await upstream.text();
-      const marker=html.match(/(?:var\s+)?ytInitialData\s*=\s*/);
-      if(!marker)return send(res,502,{error:"YouTube did not provide related videos"});
-      const dataStart=marker.index+marker[0].length;
-      let depth=0,inString=false,escaped=false,dataEnd=-1;
-      for(let i=dataStart;i<html.length;i++){
-        const ch=html[i];
-        if(inString){
-          if(escaped)escaped=false;
-          else if(ch==="\\")escaped=true;
-          else if(ch==='"')inString=false;
-          continue;
-        }
-        if(ch==='"'){inString=true;continue;}
-        if(ch==="{")depth++;
-        else if(ch==="}"&&--depth===0){dataEnd=i+1;break;}
-      }
-      if(dataEnd<0)return send(res,502,{error:"YouTube related-video data was incomplete"});
-      let data;
-      try{data=JSON.parse(html.slice(dataStart,dataEnd));}
-      catch{return send(res,502,{error:"YouTube related-video data could not be parsed"});}
-      const found=[],seen=new Set([videoId]);
-      const walk=value=>{
-        if(!value||typeof value!=="object"||found.length>=40)return;
-        if(value.videoRenderer){
-          const v=value.videoRenderer,id=v.videoId;
-          const title=v.title?.runs?.map(x=>x.text||"").join("")||v.title?.simpleText||"";
-          const author=v.ownerText?.runs?.map(x=>x.text||"").join("")||v.shortBylineText?.runs?.map(x=>x.text||"").join("")||"YouTube";
-          const thumbnails=v.thumbnail?.thumbnails||[],length=v.lengthText?.simpleText||"";
-          if(id&&/^[A-Za-z0-9_-]{11}$/.test(id)&&title&&!seen.has(id)){seen.add(id);found.push({videoId:id,title:title.slice(0,180),author:author.slice(0,100),length,thumbnail:thumbnails.at(-1)?.url||""});}
-          return;
-        }
-        if(Array.isArray(value))for(const item of value)walk(item);
-        else for(const item of Object.values(value))walk(item);
-      };
-      walk(data);
-      return send(res,200,found.slice(0,12),"public, max-age=120");
-    } catch {
-      return send(res,502,{error:"Could not retrieve YouTube related videos"});
-    }
-  }
   if(p==="/api/youtube-search") {
     try {
       const query=safeText(url.searchParams.get("q"),120);
