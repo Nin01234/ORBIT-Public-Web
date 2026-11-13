@@ -421,15 +421,3 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
   .track-meta b { font-size: 15px; }
   .track-meta small, .player-extra, .track-progress span { font-size: 13px; }
 }
-
-/* Trailer chooser sits below the TMDB search bar, separate from the video player. */
-#view-movies .movie-trailer-controls-slot{width:100%;margin:10px 0 16px;}
-#view-movies .movie-trailer-controls-slot:empty{display:none;}
-#view-movies .movie-trailer-controls-slot .trailer-picker-controls{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:100%;max-width:100%;margin:0;}
-#view-movies .movie-trailer-controls-slot .trailer-picker-toggle{position:static;display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid rgba(255,255,255,.24);border-radius:10px;background:#17231f;color:#fff;font-weight:700;cursor:pointer;}
-#view-movies .movie-trailer-controls-slot .orbit-trailer-picker{position:static;width:100%;max-height:min(42vh,360px);box-sizing:border-box;overflow:auto;padding:12px;border:1px solid rgba(120,150,135,.28);border-radius:12px;background:#0d1513;}
-#view-movies .movie-trailer-controls-slot .orbit-trailer-picker[hidden]{display:none!important;}
-#view-movies .movie-trailer-controls-slot .orbit-trailer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;}
-#view-movies .movie-trailer-controls-slot .orbit-trailer-card{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;align-items:center;min-width:0;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#17211e;}
-#view-movies .movie-trailer-controls-slot .orbit-trailer-card img{width:112px;height:64px;object-fit:cover;border-radius:6px;}
-@media(max-width:760px){#view-movies .movie-trailer-controls-slot .orbit-trailer-grid{display:flex;flex-direction:column;}#view-movies .movie-trailer-controls-slot .orbit-trailer-card{grid-template-columns:96px minmax(0,1fr);}#view-movies .movie-trailer-controls-slot .orbit-trailer-card img{width:96px;height:58px;}}
