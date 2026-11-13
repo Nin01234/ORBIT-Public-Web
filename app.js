@@ -1159,52 +1159,68 @@ async function playGlobalChannel(id){
  if(!streams.length){status.textContent=ch.name+" has no public stream URL listed. Try another channel.";return;}
  if(orbitLiveHls){orbitLiveHls.destroy();orbitLiveHls=null;}
  video.pause();video.removeAttribute("src");video.load();
- const score=x=>{
-  const labels=Array.isArray(x.labels)?x.labels.join(" "):String(x.labels||x.label||"");
-  return (/\.m3u8(?:$|\?)/i.test(x.url)?30:/\.(mp4|webm)(?:$|\?)/i.test(x.url)?20:0)+(x.health?.status==="online"?50:0);
- };
+ const labelsOf=x=>Array.isArray(x.labels)?x.labels.join(" "):String(x.labels||x.label||"");
+ const isHls=x=>/\.m3u8(?:$|[?#])/i.test(x.url||"")||/\b(hls|m3u8)\b/i.test(labelsOf(x));
+ const score=x=>(isHls(x)?40:/\.(mp4|m4v|webm)(?:$|[?#])/i.test(x.url||"")?25:0)+(x.health?.status==="online"?50:0);
  const sorted=streams.slice().sort((a,b)=>score(b)-score(a));
- let lastError=null;
- for(const stream of sorted.slice(0,12)){
+ let lastError=null,attempted=0;
+ const waitForNativePlayback=()=>new Promise((resolve,reject)=>{
+  let settled=false;
+  const clean=()=>{clearTimeout(timer);video.removeEventListener("playing",playing);video.removeEventListener("error",failed);video.removeEventListener("loadedmetadata",metadata);};
+  const done=err=>{if(settled)return;settled=true;clean();err?reject(err):resolve();};
+  const playing=()=>done();
+  const failed=()=>done(Error(video.error?.code===4?"The browser does not support this stream format.":"The broadcaster stream could not be loaded."));
+  const metadata=()=>{if(video.readyState>=3)done();};
+  const timer=setTimeout(()=>done(Error("The broadcaster did not start playback in time.")),22000);
+  video.addEventListener("playing",playing,{once:true});video.addEventListener("error",failed,{once:true});video.addEventListener("loadedmetadata",metadata,{once:true});
+  Promise.resolve(video.play()).catch(done);
+ });
+ for(const stream of sorted.slice(0,15)){
   if(token!==orbitLivePlayToken)return;
+  attempted++;
   try{
    const params=new URLSearchParams({url:stream.url});
    if(stream.referrer)params.set("ref",stream.referrer);
    if(stream.user_agent)params.set("ua",stream.user_agent);
    const playbackUrl=window.orbitDesktop?.isDesktop?"/api/tv-proxy?"+params.toString():stream.url;
-   status.textContent="Connecting to "+ch.name+"…";
+   status.textContent="Trying stream "+attempted+" of "+Math.min(sorted.length,15)+" for "+ch.name+"…";
    if(orbitLiveHls){orbitLiveHls.destroy();orbitLiveHls=null;}
    video.pause();video.removeAttribute("src");video.load();
-   if(/\.m3u8(?:$|\?)/i.test(stream.url)&&!video.canPlayType("application/vnd.apple.mpegurl")){
-    if(!window.Hls)await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js";sc.onload=resolve;sc.onerror=()=>reject(Error("The HLS playback engine could not be loaded. Check your connection."));document.head.appendChild(sc);});
-    if(token!==orbitLivePlayToken)return;
-    if(!window.Hls||!Hls.isSupported())throw Error("This device does not support this channel format.");
-    await new Promise((resolve,reject)=>{
-     const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-     const downlink=Number(connection?.downlink);
-     const saveData=Boolean(connection?.saveData);
-     const initialBandwidth=Number.isFinite(downlink)&&downlink>0
-      ?Math.max(300000,Math.min(8000000,downlink*1000000*(saveData?0.35:0.55)))
-      :(saveData?400000:1500000);
-     const h=new Hls({
-      enableWorker:true,lowLatencyMode:false,capLevelToPlayerSize:false,startLevel:-1,
-      abrEwmaDefaultEstimate:initialBandwidth,abrBandWidthFactor:0.8,abrBandWidthUpFactor:0.7,
-      maxBufferLength:20,maxMaxBufferLength:40,backBufferLength:30,
-      manifestLoadingTimeOut:25000,levelLoadingTimeOut:25000
-     });
-     orbitLiveHls=h;let settled=false,timer;
-     const done=err=>{if(settled)return;settled=true;clearTimeout(timer);err?reject(err):resolve();};
-     h.on(Hls.Events.MEDIA_ATTACHED,()=>{if(token===orbitLivePlayToken)h.loadSource(playbackUrl);});
-     h.on(Hls.Events.MANIFEST_PARSED,()=>{
-      if(token!==orbitLivePlayToken){done(Error("Channel changed"));return;}
-      Promise.resolve(video.play()).then(()=>done()).catch(done);
-     });
-     h.on(Hls.Events.ERROR,(_e,d)=>{if(d.fatal)done(Error("The broadcaster stream could not be decoded."));});
-     h.attachMedia(video);timer=setTimeout(()=>done(Error("The broadcaster did not start playback in time.")),35000);
+   if(isHls(stream)){
+    let hlsStarted=false;
+    if(!window.Hls)await new Promise((resolve,reject)=>{
+     const existing=document.querySelector("#orbit-tv-hls-loader");
+     if(existing){if(window.Hls){resolve();return;}existing.addEventListener("load",resolve,{once:true});existing.addEventListener("error",()=>reject(Error("The HLS playback engine could not be loaded. Check your connection.")),{once:true});return;}
+     const sc=document.createElement("script");sc.id="orbit-tv-hls-loader";sc.src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js";sc.onload=resolve;sc.onerror=()=>reject(Error("The HLS playback engine could not be loaded. Check your connection."));document.head.appendChild(sc);
     });
+    if(token!==orbitLivePlayToken)return;
+    if(window.Hls&&Hls.isSupported()){
+     await new Promise((resolve,reject)=>{
+      const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      const downlink=Number(connection?.downlink),saveData=Boolean(connection?.saveData);
+      const initialBandwidth=Number.isFinite(downlink)&&downlink>0?Math.max(300000,Math.min(8000000,downlink*1000000*(saveData?0.35:0.55))):(saveData?400000:1500000);
+      const h=new Hls({enableWorker:true,lowLatencyMode:false,capLevelToPlayerSize:true,startLevel:-1,abrEwmaDefaultEstimate:initialBandwidth,abrBandWidthFactor:0.8,abrBandWidthUpFactor:0.7,maxBufferLength:20,maxMaxBufferLength:40,backBufferLength:30,manifestLoadingTimeOut:25000,levelLoadingTimeOut:25000,fragLoadingTimeOut:30000});
+      orbitLiveHls=h;let settled=false,timer,networkRecoveries=0,mediaRecoveries=0;
+      const clean=()=>{clearTimeout(timer);};
+      const done=err=>{if(settled)return;settled=true;clean();err?reject(err):resolve();};
+      h.on(Hls.Events.MEDIA_ATTACHED,()=>{if(token===orbitLivePlayToken)h.loadSource(playbackUrl);});
+      h.on(Hls.Events.MANIFEST_PARSED,()=>{
+       if(token!==orbitLivePlayToken){done(Error("Channel changed"));return;}
+       Promise.resolve(video.play()).then(()=>{hlsStarted=true;done();}).catch(done);
+      });
+      h.on(Hls.Events.ERROR,(_e,d)=>{
+       if(!d.fatal)return;
+       if(d.type===Hls.ErrorTypes.NETWORK_ERROR&&networkRecoveries++===0){h.startLoad();return;}
+       if(d.type===Hls.ErrorTypes.MEDIA_ERROR&&mediaRecoveries++===0){h.recoverMediaError();return;}
+       done(Error(d.details==="manifestIncompatibleCodecsError"?"This broadcaster uses a video codec this browser cannot decode.":"The broadcaster's HLS stream failed ("+String(d.details||"playback error") +")."));
+      });
+      h.attachMedia(video);timer=setTimeout(()=>done(Error("The broadcaster did not start playback in time.")),40000);
+     });
+    }else if(video.canPlayType("application/vnd.apple.mpegurl")){
+     video.src=playbackUrl;await waitForNativePlayback();
+    }else throw Error("This device cannot play this broadcaster's HLS format.");
    }else{
-    video.src=playbackUrl;
-    await Promise.resolve(video.play());
+    video.src=playbackUrl;await waitForNativePlayback();
    }
    if(token!==orbitLivePlayToken)return;
    status.textContent="Now playing: "+ch.name+" · "+(orbitLiveCountries.find(c=>c.code===ch.country)?.name||ch.country||"Global");
@@ -1213,10 +1229,12 @@ async function playGlobalChannel(id){
    if(token!==orbitLivePlayToken)return;
    lastError=e;
    if(orbitLiveHls){orbitLiveHls.destroy();orbitLiveHls=null;}
+   video.pause();video.removeAttribute("src");video.load();
   }
  }
  if(token!==orbitLivePlayToken)return;
- status.textContent=(lastError?.message||"No working public stream was found.")+" Try another channel. Some broadcasters may be offline or region-restricted.";
+ const reason=lastError?.message||"No working public stream was found.";
+ status.textContent="ORBIT tried "+attempted+" stream"+(attempted===1?"":"s")+" for "+ch.name+" but none could start. "+reason+" The broadcaster may be offline, blocked in your region, or using an unsupported format. Try another channel.";
 }
 function setupGlobalLive(){
  const nav=$("#global-live-nav");if(nav){nav.hidden=false;localStorage.setItem("orbit-global-live","1");}
