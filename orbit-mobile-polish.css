@@ -164,7 +164,7 @@
   body.mobile-film-detail-open .player-reveal {display:none!important}
   body.mobile-film-detail-open .main-area {display:block!important;grid-column:1/-1!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
   body.mobile-film-detail-open #view-movies {padding:0!important;margin:0!important;overflow:visible!important}
-  body.mobile-film-detail-open #view-movies > *:not(#film-player-panel) {display:none!important}
+  body.mobile-film-detail-open #view-movies > *:not(#film-player-panel):not(#movie-trailer-controls-slot) {display:none!important}
   body.mobile-film-detail-open #film-player-panel {
     display:block!important;position:fixed!important;inset:0!important;z-index:10050!important;
     width:100vw!important;height:100dvh!important;min-height:0!important;max-height:none!important;
@@ -209,7 +209,7 @@
     margin:0!important;border:0!important;border-radius:0!important;background:#0b141c!important;
     -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
   }
-  body.mobile-film-detail-open #view-movies > *:not(#film-player-panel) {display:none!important}
+  body.mobile-film-detail-open #view-movies > *:not(#film-player-panel):not(#movie-trailer-controls-slot) {display:none!important}
   body.mobile-film-detail-open .mobile-film-back {position:sticky!important;top:0!important;z-index:20!important;min-height:48px!important;width:100%!important;justify-content:flex-start!important;cursor:pointer!important;touch-action:manipulation!important}
   body.mobile-film-detail-open .orbit-trailer-player {width:100%!important;aspect-ratio:16/9!important;height:auto!important;min-height:0!important}
   body.mobile-film-detail-open .orbit-trailer-player iframe {width:100%!important;height:100%!important;min-height:0!important;aspect-ratio:16/9!important}
@@ -392,4 +392,20 @@
   .sidebar .nav-link { font-size: 10px !important; }
   .station-card h3, .media-card h3 { font-size: 13px !important; }
   .station-card p, .media-card p { font-size: 12px !important; }
+}
+
+/* Keep the trailer chooser visible above the full-screen mobile movie detail panel. */
+@media screen and (max-width:800px) {
+  body.mobile-film-detail-open #movie-trailer-controls-slot {
+    display:block!important;position:fixed!important;top:calc(env(safe-area-inset-top, 0px) + 62px)!important;
+    left:14px!important;right:14px!important;width:auto!important;max-height:42dvh!important;
+    overflow-y:auto!important;z-index:2147483001!important;margin:0!important;padding:0!important;
+    pointer-events:auto!important;
+  }
+  body.mobile-film-detail-open #movie-trailer-controls-slot .orbit-trailer-picker {
+    display:block!important;max-height:36dvh!important;overflow-y:auto!important;
+    background:#0d1513!important;border:1px solid rgba(120,150,135,.5)!important;
+    box-shadow:0 12px 32px rgba(0,0,0,.65)!important;
+  }
+  body.mobile-film-detail-open #movie-trailer-controls-slot .orbit-trailer-picker[hidden] {display:none!important}
 }
