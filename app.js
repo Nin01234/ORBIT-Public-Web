@@ -1112,13 +1112,10 @@ async function loadGlobalLiveDirectory(countryCode=""){
    const match=orbitLiveCountries.find(c=>(c.name||"").toLowerCase()===q)||orbitLiveCountries.find(c=>(c.name||"").toLowerCase().includes(q));
    if(match)countryCode=match.code;
   }
-  if(!countryCode){
-   host.innerHTML='<div class="empty-state">Choose a country to browse its available TV channels. You can also type a country name such as Ghana in the search box.</div>';
-   return;
-  }
-  $("#global-tv-country").value=countryCode;
-  host.innerHTML='<div class="loading-card">Loading channels for '+esc(orbitLiveCountries.find(c=>c.code===countryCode)?.name||countryCode)+'…</div>';
-  const response=await fetch("/api/global-channels?country="+encodeURIComponent(countryCode),{signal:AbortSignal.timeout(150000),cache:"no-store"});
+  const requestedCountry=countryCode||"all";
+  if(countryCode)$("#global-tv-country").value=countryCode;
+  host.innerHTML='<div class="loading-card">'+(requestedCountry==="all"?"Loading channels from around the world…":"Loading channels for "+esc(orbitLiveCountries.find(c=>c.code===countryCode)?.name||countryCode)+"…")+'</div>';
+  const response=await fetch("/api/global-channels?country="+encodeURIComponent(requestedCountry),{signal:AbortSignal.timeout(150000),cache:"no-store"});
   if(!response.ok)throw Error("Channel list request failed ("+response.status+")");
   const data=await response.json();if(requestToken!==orbitLiveDirectoryToken)return;
   orbitLiveChannels=Array.isArray(data.channels)?data.channels:[];
@@ -1153,7 +1150,7 @@ function renderGlobalLiveChannels(){
   const cn=countryNames.get(ch.country)||"";
   if(q&&![(ch.name||"").toLowerCase(),(ch.alt_names||[]).join(" ").toLowerCase(),cn,ch.network||""].join(" ").includes(q))return false;
   return (streamMap.get(ch.id)||[]).length>0;
- }).sort((a,b)=>(a.name||"").localeCompare(b.name||"")).slice(0,600);
+ }).sort((a,b)=>(a.name||"").localeCompare(b.name||"")).slice(0,1500);
  host.innerHTML=list.length?list.map(ch=>{
   const ss=streamMap.get(ch.id)||[],working=ss.filter(st=>st.health?.status==="online").length;
   const state=working?working+" verified stream"+(working===1?"":"s"):(ss.length?ss.length+" stream"+(ss.length===1?"":"s")+" to try":"No stream listed");
@@ -1254,8 +1251,9 @@ function setupGlobalLive(){
   if(selected){renderGlobalLiveChannels();return;}
   if(q.length>=3){
    const match=orbitLiveCountries.find(c=>(c.name||"").toLowerCase()===q)||orbitLiveCountries.find(c=>(c.name||"").toLowerCase().includes(q));
-   if(match)loadGlobalLiveDirectory(match.code);
+   if(match){loadGlobalLiveDirectory(match.code);return;}
   }
+  renderGlobalLiveChannels();
  });
  $("#global-tv-country").addEventListener("change",e=>loadGlobalLiveDirectory(e.target.value));
  $("#global-tv-category").addEventListener("change",renderGlobalLiveChannels);
