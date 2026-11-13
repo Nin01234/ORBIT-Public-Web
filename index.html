@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -10,45 +10,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./orbit-feature-additions.css"><link rel="stylesheet" href="./orbit-ui-fixes-20261109.css"><link rel="stylesheet" href="./orbit-mobile.css">
-  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=screen-detail-fullscreen2"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css"><link rel="stylesheet" href="./orbit-web-refresh.css?v=20261111-local-preview">
+  <link rel="stylesheet" href="./orbit-mobile-polish.css?v=mobile-trailer-readability-20261113"><link rel="stylesheet" href="./orbit-mobile-landing.css"><link rel="stylesheet" href="./public-web-overrides.css"><link rel="stylesheet" href="./orbit-web-refresh.css?v=20261111-local-preview">
   <script>(function(){try{var preview=new URLSearchParams(location.search).get("preview-theme");var t=preview==="light"?"light":(localStorage.getItem("orbit-theme")||"light");if(preview==="light")localStorage.setItem("orbit-theme","light");if(t==="system")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a class="brand" href="#" aria-label="Orbit home"><span class="brand-mark">◉</span><span>ORBIT</span></a>
+      <a class="brand" href="#" aria-label="Orbit home"><span class="brand-mark">â—‰</span><span>ORBIT</span></a>
       <div class="side-label">Your space</div>
       <nav class="main-nav" aria-label="Main navigation">
         <div class="nav-discover-group" id="nav-discover-group">
-          <button class="nav-link active" data-view="discover" aria-haspopup="true" aria-expanded="false"><span>⌂</span> Discover</button>
-          <button class="discover-submenu-toggle" id="discover-submenu-toggle" type="button" aria-label="Show Discover submenu" aria-expanded="false">⌄</button>
+          <button class="nav-link active" data-view="discover" aria-haspopup="true" aria-expanded="false"><span>âŒ‚</span> Discover</button>
+          <button class="discover-submenu-toggle" id="discover-submenu-toggle" type="button" aria-label="Show Discover submenu" aria-expanded="false">âŒ„</button>
           <div class="discover-submenu" id="discover-submenu" aria-label="Discover pages">
-            <button class="nav-link" data-view="global-live" id="global-live-nav"><span>▣</span> Global Live</button>
-            <button class="nav-link" data-view="audiobooks"><span>▤</span> Audiobooks</button>
+            <button class="nav-link" data-view="global-live" id="global-live-nav"><span>â–£</span> Global Live</button>
+            <button class="nav-link" data-view="audiobooks"><span>â–¤</span> Audiobooks</button>
           </div>
         </div>
-        <button class="nav-link" data-view="globe"><span>◎</span> Radio globe</button>
-        <button class="nav-link" data-view="podcasts"><span>◖</span> Podcasts</button>
-        <button class="nav-link" data-view="music"><span>♫</span> Music</button>
+        <button class="nav-link" data-view="globe"><span>â—Ž</span> Radio globe</button>
+        <button class="nav-link" data-view="podcasts"><span>â—–</span> Podcasts</button>
+        <button class="nav-link" data-view="music"><span>â™«</span> Music</button>
         <button class="nav-link" data-view="music-video"><span>&#9835;</span> Music Video</button>
-        <button class="nav-link" data-view="movies"><span>▣</span> Screen</button>
-        <button class="nav-link" data-view="omnisave"><span>⇩</span> OmniSave</button>
+        <button class="nav-link" data-view="movies"><span>â–£</span> Screen</button>
+        <button class="nav-link" data-view="omnisave"><span>â‡©</span> OmniSave</button>
       </nav>
       <div class="side-label library-label">Your library</div>
-      <button class="nav-link" data-view="favorites"><span>♡</span> Favourites</button>
-      <button class="nav-link" data-view="downloads"><span>⇩</span> Downloads</button>
-      <button class="nav-link" data-view="settings"><span>⚙</span> Settings</button>
+      <button class="nav-link" data-view="favorites"><span>â™¡</span> Favourites</button>
+      <button class="nav-link" data-view="downloads"><span>â‡©</span> Downloads</button>
+      <button class="nav-link" data-view="settings"><span>âš™</span> Settings</button>
       <div class="sidebar-bottom">
-        <div class="status-card"><div><b>Connected to the world</b><small id="connection-status">Checking services…</small></div></div>
+        <div class="status-card"><div><b>Connected to the world</b><small id="connection-status">Checking servicesâ€¦</small></div></div>
         <div class="sidebar-foot">A listening room for everywhere.</div>
       </div>
     </aside>
 
     <main class="main-area">
       <header class="topbar">
-        <div class="topbar-left"><button class="chrome-toggle nav-toggle-left" id="nav-toggle" type="button" aria-label="Hide navigation" title="Hide navigation">☰</button><div class="app-history-controls"><button class="chrome-toggle" id="app-back" type="button" aria-label="Go back" title="Go back" disabled>←</button><button class="chrome-toggle" id="app-forward" type="button" aria-label="Go forward" title="Go forward" disabled>→</button></div><div class="breadcrumb"><span>ORBIT</span><i>/</i><b id="page-label">Discover</b></div></div>
-        <div class="top-actions"><button class="chrome-toggle" id="fullscreen-toggle" type="button" aria-label="Enter full screen" title="Enter full screen">⛶</button>
-          <div class="search-box" role="search"><span aria-hidden="true">⌕</span><input id="global-search" type="search" placeholder="Find a station, show, artist…" autocomplete="off" aria-label="Search ORBIT"><button class="search-submit" id="global-search-submit" type="button" aria-label="Search ORBIT" title="Search">⌕</button><kbd>↵</kbd></div>
+        <div class="topbar-left"><button class="chrome-toggle nav-toggle-left" id="nav-toggle" type="button" aria-label="Hide navigation" title="Hide navigation">â˜°</button><div class="app-history-controls"><button class="chrome-toggle" id="app-back" type="button" aria-label="Go back" title="Go back" disabled>â†</button><button class="chrome-toggle" id="app-forward" type="button" aria-label="Go forward" title="Go forward" disabled>â†’</button></div><div class="breadcrumb"><span>ORBIT</span><i>/</i><b id="page-label">Discover</b></div></div>
+        <div class="top-actions"><button class="chrome-toggle" id="fullscreen-toggle" type="button" aria-label="Enter full screen" title="Enter full screen">â›¶</button>
+          <div class="search-box" role="search"><span aria-hidden="true">âŒ•</span><input id="global-search" type="search" placeholder="Find a station, show, artistâ€¦" autocomplete="off" aria-label="Search ORBIT"><button class="search-submit" id="global-search-submit" type="button" aria-label="Search ORBIT" title="Search">âŒ•</button><kbd>â†µ</kbd></div>
           <a class="orbit-download-top" href="/download" aria-label="Download ORBIT for Windows">Download desktop</a><button class="avatar" id="profile-open" title="Edit profile">G</button>
         </div>
       </header>
@@ -71,17 +71,17 @@
         </div>
 
         <div class="section-heading"><div><h2>On the air now</h2></div></div>
-        <div class="station-grid" id="featured-stations"><div class="loading-card">Finding live stations around the world…</div></div>
+        <div class="station-grid" id="featured-stations"><div class="loading-card">Finding live stations around the worldâ€¦</div></div>
 
         <section class="discover-updates" aria-labelledby="discover-updates-title">
           <div class="discover-updates-heading">
             <div><span class="discover-live-kicker"><i></i> LIVE DISCOVERY</span><h2 id="discover-updates-title">Fresh updates</h2><p>New and popular finds across ORBIT, refreshed from connected catalogues.</p></div>
-            <div class="discover-updates-tools"><span id="discover-updates-status" aria-live="polite">Loading fresh picks…</span><button class="pill" id="discover-updates-refresh" type="button">↻ Refresh</button></div>
+            <div class="discover-updates-tools"><span id="discover-updates-status" aria-live="polite">Loading fresh picksâ€¦</span><button class="pill" id="discover-updates-refresh" type="button">â†» Refresh</button></div>
           </div>
           <div class="discover-updates-toolbar"><div class="discover-update-filters" role="group" aria-label="Filter Discover updates">
             <button class="pill active" type="button" data-discover-filter="all">All</button><button class="pill" type="button" data-discover-filter="music">Music</button><button class="pill" type="button" data-discover-filter="videos">Videos</button><button class="pill" type="button" data-discover-filter="podcasts">Podcasts</button><button class="pill" type="button" data-discover-filter="audiobooks">Audiobooks</button><button class="pill" type="button" data-discover-filter="movies">Movies</button><button class="pill" type="button" data-discover-filter="radio">Radio</button>
-          </div><input id="discover-updates-search" class="inline-search" type="search" placeholder="Search music, videos, podcasts and more (press Enter)…" aria-label="Search Discover updates"></div>
-          <div id="discover-updates-grid" class="discover-updates-grid"><div class="loading-card">Loading new music, videos, podcasts and more…</div></div>
+          </div><input id="discover-updates-search" class="inline-search" type="search" placeholder="Search music, videos, podcasts and more (press Enter)â€¦" aria-label="Search Discover updates"></div>
+          <div id="discover-updates-grid" class="discover-updates-grid"><div class="loading-card">Loading new music, videos, podcasts and moreâ€¦</div></div>
         </section>
 
       </section>
@@ -94,23 +94,23 @@
       <section class="view" id="view-globe">
         <div class="page-intro"><div><h1>Spin the world.</h1><p>Choose a place, discover a station and listen live. Station catalogue powered by Spinn Radio.</p></div><div class="globe-stat"><b id="station-count">0</b><span>stations listed</span></div></div>
         <div class="globe-layout">
-          <div class="globe-stage"><div id="globeViz"><div class="globe-fallback"><div class="globe-core">◎</div><span>Loading the world…</span></div></div></div>
-          <div class="station-panel"><div class="panel-top"><div><h2>Stations to explore</h2></div><select id="country-filter"><option value="">Everywhere</option><option value="GH">Ghana</option><option value="NG">Nigeria</option><option value="GB">United Kingdom</option><option value="US">United States</option><option value="ZA">South Africa</option><option value="JP">Japan</option><option value="FR">France</option><option value="BR">Brazil</option></select></div><div class="station-search"><span>⌕</span><input id="station-search" placeholder="Search stations or genres…"></div><div id="station-results" class="station-results"><div class="loading-card">Loading stations…</div></div></div>
+          <div class="globe-stage"><div id="globeViz"><div class="globe-fallback"><div class="globe-core">â—Ž</div><span>Loading the worldâ€¦</span></div></div></div>
+          <div class="station-panel"><div class="panel-top"><div><h2>Stations to explore</h2></div><select id="country-filter"><option value="">Everywhere</option><option value="GH">Ghana</option><option value="NG">Nigeria</option><option value="GB">United Kingdom</option><option value="US">United States</option><option value="ZA">South Africa</option><option value="JP">Japan</option><option value="FR">France</option><option value="BR">Brazil</option></select></div><div class="station-search"><span>âŒ•</span><input id="station-search" placeholder="Search stations or genresâ€¦"></div><div id="station-results" class="station-results"><div class="loading-card">Loading stationsâ€¦</div></div></div>
         </div>
       </section>
 
-      <section class="view" id="view-podcasts"><div class="page-intro"><div><h1>Listen closer.</h1><p>Find podcasts, play episodes and host live audio broadcasts.</p></div></div><section class="live-podcast-panel"><div class="live-podcast-panel-heading"><div><span class="live-podcast-eyebrow">ORBIT LIVE AUDIO</span><h2>Broadcast a live podcast</h2><p>Go live with your microphone or join a host using a room code.</p></div><span class="live-podcast-free">Peer-to-peer audio</span></div><div class="live-podcast-controls"><button class="button button-light" id="live-podcast-start" type="button">Start a live podcast</button><div class="live-podcast-join"><span>Have a room code?</span><input id="live-podcast-code" maxlength="10" autocomplete="off" placeholder="10-character code" aria-label="Live podcast room code"><button class="pill" id="live-podcast-join" type="button">Join live</button></div><button class="pill" id="live-podcast-stop" type="button" hidden>Leave / end broadcast</button></div><div class="live-podcast-room"><span>ROOM CODE</span><strong id="live-podcast-room-code">—</strong><button class="pill" id="live-podcast-copy" type="button">Copy code</button></div><p id="live-podcast-room-status" class="live-podcast-status" role="status" aria-live="polite">Ready. Starting a broadcast will ask for microphone permission.</p><audio id="live-podcast-audio" controls autoplay playsinline></audio><p class="live-podcast-note">Audio is sent directly between the host and listeners when peer-to-peer networking succeeds. A small signalling service coordinates connections; some networks require a TURN relay, which is not included in this free first version. Use headphones to reduce echo.</p></section><div class="content-toolbar"><div class="filter-pills"><button class="pill active" data-term="top podcasts">Popular</button><button class="pill" data-term="technology">Technology</button><button class="pill" data-term="news">News</button><button class="pill" data-term="comedy">Comedy</button><button class="pill" data-term="business">Business</button></div><input class="inline-search" id="podcast-search" placeholder="Search podcasts…"></div><div class="podcast-player-panel" id="podcast-player-panel"><div class="film-placeholder"><span>◖</span><b>Choose a podcast to explore episodes</b><small>Episodes play inside ORBIT.</small></div></div><div class="media-grid" id="podcast-results"><div class="loading-card">Loading podcasts…</div></div></section>
+      <section class="view" id="view-podcasts"><div class="page-intro"><div><h1>Listen closer.</h1><p>Find podcasts, play episodes and host live audio broadcasts.</p></div></div><section class="live-podcast-panel"><div class="live-podcast-panel-heading"><div><span class="live-podcast-eyebrow">ORBIT LIVE AUDIO</span><h2>Broadcast a live podcast</h2><p>Go live with your microphone or join a host using a room code.</p></div><span class="live-podcast-free">Peer-to-peer audio</span></div><div class="live-podcast-controls"><button class="button button-light" id="live-podcast-start" type="button">Start a live podcast</button><div class="live-podcast-join"><span>Have a room code?</span><input id="live-podcast-code" maxlength="10" autocomplete="off" placeholder="10-character code" aria-label="Live podcast room code"><button class="pill" id="live-podcast-join" type="button">Join live</button></div><button class="pill" id="live-podcast-stop" type="button" hidden>Leave / end broadcast</button></div><div class="live-podcast-room"><span>ROOM CODE</span><strong id="live-podcast-room-code">â€”</strong><button class="pill" id="live-podcast-copy" type="button">Copy code</button></div><p id="live-podcast-room-status" class="live-podcast-status" role="status" aria-live="polite">Ready. Starting a broadcast will ask for microphone permission.</p><audio id="live-podcast-audio" controls autoplay playsinline></audio><p class="live-podcast-note">Audio is sent directly between the host and listeners when peer-to-peer networking succeeds. A small signalling service coordinates connections; some networks require a TURN relay, which is not included in this free first version. Use headphones to reduce echo.</p></section><div class="content-toolbar"><div class="filter-pills"><button class="pill active" data-term="top podcasts">Popular</button><button class="pill" data-term="technology">Technology</button><button class="pill" data-term="news">News</button><button class="pill" data-term="comedy">Comedy</button><button class="pill" data-term="business">Business</button></div><input class="inline-search" id="podcast-search" placeholder="Search podcastsâ€¦"></div><div class="podcast-player-panel" id="podcast-player-panel"><div class="film-placeholder"><span>â—–</span><b>Choose a podcast to explore episodes</b><small>Episodes play inside ORBIT.</small></div></div><div class="media-grid" id="podcast-results"><div class="loading-card">Loading podcastsâ€¦</div></div></section>
 
-      <section class="view" id="view-audiobooks"><div class="page-intro"><div><h1>Stories in motion.</h1><p>Explore free public-domain audiobooks from LibriVox volunteers.</p></div></div><div class="content-toolbar"><div class="filter-pills"><button class="pill active" data-book="popular">Popular</button><button class="pill" data-book="fiction">Fiction</button><button class="pill" data-book="adventure">Adventure</button><button class="pill" data-book="poetry">Poetry</button></div><input class="inline-search" id="book-search" placeholder="Search books or authors…"></div><div class="media-grid" id="book-results"><div class="loading-card">Loading audiobooks…</div></div></section>
+      <section class="view" id="view-audiobooks"><div class="page-intro"><div><h1>Stories in motion.</h1><p>Explore free public-domain audiobooks from LibriVox volunteers.</p></div></div><div class="content-toolbar"><div class="filter-pills"><button class="pill active" data-book="popular">Popular</button><button class="pill" data-book="fiction">Fiction</button><button class="pill" data-book="adventure">Adventure</button><button class="pill" data-book="poetry">Poetry</button></div><input class="inline-search" id="book-search" placeholder="Search books or authorsâ€¦"></div><div class="media-grid" id="book-results"><div class="loading-card">Loading audiobooksâ€¦</div></div></section>
 
       <section class="view" id="view-global-live">
   <div class="page-intro"><div><h1>Global Live.</h1><p>Search live television channels around the world. Available public streams play here inside ORBIT.</p></div></div>
   <div class="global-tv-toolbar">
-    <input id="global-tv-search" type="search" placeholder="Search channels, e.g. GTV, Joy News, Ghana…">
+    <input id="global-tv-search" type="search" placeholder="Search channels, e.g. GTV, Joy News, Ghanaâ€¦">
     <select id="global-tv-country"><option value="">All countries</option></select>
     <select id="global-tv-category"><option value="all">All channels</option><option value="sports">Sports channels</option></select>
   </div>
-  <div class="global-tv-layout"><div id="global-tv-results" class="global-tv-results"><div class="loading-card">Loading global channel directory…</div></div>
+  <div class="global-tv-layout"><div id="global-tv-results" class="global-tv-results"><div class="loading-card">Loading global channel directoryâ€¦</div></div>
     <div class="global-tv-screen"><video id="global-tv-video" controls playsinline></video><div id="global-tv-status" class="global-tv-status">Select a channel to start watching inside ORBIT.</div></div></div>
   <p class="catalogue-disclaimer">Channel availability depends on each broadcaster's public stream and regional rights. Some channels may not provide a working public stream.</p>
 </section>
@@ -121,15 +121,15 @@
       <button class="pill active" data-audio-music="afrobeats">Afrobeats</button><button class="pill" data-audio-music="trending">Trending</button><button class="pill" data-audio-music="gospel">Gospel</button><button class="pill" data-audio-music="hip hop">Hip-hop</button><button class="pill" data-audio-music="jazz">Jazz</button><button class="pill" data-audio-music="electronic">Electronic</button>
     </div><input class="inline-search" id="audio-music-search" placeholder="Search songs or artists..."></div>
     <div class="music-player-status" id="audio-music-status"><span class="music-status-mark">&#9835;</span><div><b>Audio-only listening</b><small>Choose a track below. Full audio plays in ORBIT's player bar.</small></div></div>
-    <div class="section-heading"><div><h2>Discover music</h2><p>Search across connected music catalogues in one place.</p></div><span class="catalogue-note" id="music-provider-status">Connecting music sources…</span></div>
+    <div class="section-heading"><div><h2>Discover music</h2><p>Search across connected music catalogues in one place.</p></div><span class="catalogue-note" id="music-provider-status">Connecting music sourcesâ€¦</span></div>
     <div class="music-provider-row" id="music-provider-filters" aria-label="Filter music providers">
       <button class="pill active" data-music-provider="all">All sources</button>
       <button class="pill" data-music-provider="Audius">Spotify</button>
       <button class="pill" data-music-provider="Jamendo">Apple Music</button>
       <button class="pill" data-music-provider="YouTube Music">Audiomark</button>
     </div>
-    <div class="media-grid" id="audio-music-results"><div class="loading-card">Searching Spotify and Audiomark…</div></div>
-    <p class="catalogue-disclaimer">Audiomark and Spotify play audio-only through ORBIT’s player. Music videos remain in the separate Music Videos section.</p>
+    <div class="media-grid" id="audio-music-results"><div class="loading-card">Searching Spotify and Audiomarkâ€¦</div></div>
+    <p class="catalogue-disclaimer">Audiomark and Spotify play audio-only through ORBITâ€™s player. Music videos remain in the separate Music Videos section.</p>
   </div></section>
 <section class="view" id="view-music-video">
   <div class="page-intro"><div><h1>Music in motion.</h1><p>Search music videos and play them inside ORBIT.</p></div></div>
@@ -160,7 +160,7 @@
     </form>
     <p id="omnisave-status" role="status" style="margin:10px 0 0;color:var(--muted,#9aa8b5)">Browse verified public-domain movie listings. Commercial films require permission or a licensed service.</p>
   </div>
-  <div class="media-grid" id="omnisave-results"><div class="loading-card">Loading free movie catalogue…</div></div>
+  <div class="media-grid" id="omnisave-results"><div class="loading-card">Loading free movie catalogueâ€¦</div></div>
   <div class="omnisave-import-panel" style="margin:20px 0 18px;padding:18px;border:1px solid var(--line,#26333d);border-radius:14px;background:var(--panel,#111a22)">
     <h2 style="margin:0 0 8px">Already have a movie file?</h2>
     <p style="margin:0 0 12px;color:var(--muted,#9aa8b5)">Choose a video from your device to add it to ORBIT Downloads for offline viewing on this device.</p>
@@ -186,26 +186,26 @@
       <span class="orbit-mobile-eyebrow">MEET ORBIT MOBILE</span>
       <h2>Everything you love.<br><em>Now in your pocket.</em></h2>
       <p>Take your world of live radio, music, movies and downloads wherever you go. ORBIT is being shaped for your phone.</p>
-      <div class="orbit-mobile-hero-actions"><a class="orbit-mobile-primary" href="#orbit-mobile-connect">Try ORBIT on your phone <span>↗</span></a><span class="orbit-mobile-availability"><i></i> Mobile preview available now</span></div>
+      <div class="orbit-mobile-hero-actions"><a class="orbit-mobile-primary" href="#orbit-mobile-connect">Try ORBIT on your phone <span>â†—</span></a><span class="orbit-mobile-availability"><i></i> Mobile preview available now</span></div>
     </div>
     <div class="orbit-mobile-hero-visual"><img src="./orbit-mobile-hero.svg" alt="ORBIT mobile app preview showing music, radio and entertainment on a smartphone"></div>
     <div class="orbit-mobile-hero-glow"></div>
   </div>
   <div class="orbit-mobile-feature-strip">
-    <article><span class="orbit-feature-icon">◉</span><div><b>Radio everywhere</b><small>Explore stations from around the world</small></div></article>
-    <article><span class="orbit-feature-icon">♫</span><div><b>Your music library</b><small>Discover, play and save your favourites</small></div></article>
-    <article><span class="orbit-feature-icon">▣</span><div><b>Movies & more</b><small>Your entertainment in one place</small></div></article>
-    <article><span class="orbit-feature-icon">⇩</span><div><b>Offline collection</b><small>Keep your saved media close</small></div></article>
+    <article><span class="orbit-feature-icon">â—‰</span><div><b>Radio everywhere</b><small>Explore stations from around the world</small></div></article>
+    <article><span class="orbit-feature-icon">â™«</span><div><b>Your music library</b><small>Discover, play and save your favourites</small></div></article>
+    <article><span class="orbit-feature-icon">â–£</span><div><b>Movies & more</b><small>Your entertainment in one place</small></div></article>
+    <article><span class="orbit-feature-icon">â‡©</span><div><b>Offline collection</b><small>Keep your saved media close</small></div></article>
   </div>
   <div class="orbit-mobile-connect" id="orbit-mobile-connect">
     <div class="orbit-connect-heading"><span class="orbit-mobile-eyebrow">GET STARTED</span><h3>Bring ORBIT to your phone</h3><p>Try the mobile experience over your local Wi-Fi. No app-store download needed for this preview.</p></div>
     <div class="orbit-connect-methods">
-      <div class="orbit-connect-card orbit-qr-card"><div class="orbit-method-number">01 / SCAN</div><h4>Scan the QR code</h4><p>Connect your phone to the same Wi-Fi or hotspot as your computer, then scan to open ORBIT.</p><div class="orbit-qr-row"><img id="orbit-mobile-qr" alt="QR code to open ORBIT on your phone"><div><b>Your local ORBIT link</b><a id="orbit-mobile-url" href="#">Preparing your address…</a><button class="orbit-mobile-copy" id="mobile-test-copy" type="button">Copy phone link</button><small id="mobile-test-copy-status">Open the link in your phone browser.</small></div></div></div>
-      <div class="orbit-connect-card orbit-platform-card"><div class="orbit-method-number">02 / COMING NEXT</div><h4>Native mobile apps</h4><p>Dedicated app experiences are planned for both major mobile platforms.</p><div class="orbit-platform-choice"><span class="orbit-platform-symbol">◈</span><div><b>Android</b><small>Native APK · In development</small></div><span class="orbit-soon">Coming soon</span></div><div class="orbit-platform-choice"><span class="orbit-platform-symbol">●</span><div><b>iPhone & iPad</b><small>iOS app · In development</small></div><span class="orbit-soon">Coming soon</span></div></div>
+      <div class="orbit-connect-card orbit-qr-card"><div class="orbit-method-number">01 / SCAN</div><h4>Scan the QR code</h4><p>Connect your phone to the same Wi-Fi or hotspot as your computer, then scan to open ORBIT.</p><div class="orbit-qr-row"><img id="orbit-mobile-qr" alt="QR code to open ORBIT on your phone"><div><b>Your local ORBIT link</b><a id="orbit-mobile-url" href="#">Preparing your addressâ€¦</a><button class="orbit-mobile-copy" id="mobile-test-copy" type="button">Copy phone link</button><small id="mobile-test-copy-status">Open the link in your phone browser.</small></div></div></div>
+      <div class="orbit-connect-card orbit-platform-card"><div class="orbit-method-number">02 / COMING NEXT</div><h4>Native mobile apps</h4><p>Dedicated app experiences are planned for both major mobile platforms.</p><div class="orbit-platform-choice"><span class="orbit-platform-symbol">â—ˆ</span><div><b>Android</b><small>Native APK Â· In development</small></div><span class="orbit-soon">Coming soon</span></div><div class="orbit-platform-choice"><span class="orbit-platform-symbol">â—</span><div><b>iPhone & iPad</b><small>iOS app Â· In development</small></div><span class="orbit-soon">Coming soon</span></div></div>
     </div>
     <div class="orbit-mobile-server"><label for="orbit-mobile-backend"><b>Desktop ORBIT server</b><small>Server address for future native app connection</small></label><div><input id="orbit-mobile-backend" placeholder="http://192.168.x.x:51731"><button id="orbit-mobile-backend-save" type="button">Save address</button></div><small id="orbit-mobile-backend-status"></small></div>
   </div>
-  <div class="orbit-mobile-footnote">ORBIT mobile preview · Native Android and iOS releases are not available yet.</div>
+  <div class="orbit-mobile-footnote">ORBIT mobile preview Â· Native Android and iOS releases are not available yet.</div>
 </section><div class="settings-grid">
 <section class="settings-card"><h2>Appearance</h2><label class="setting-row"><span><b>Theme</b><small>Choose the look of ORBIT.</small></span><select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option><option value="system">Follow system</option></select></label><label class="setting-row"><span><b>Reduce motion</b><small>Reduce page and navigation animations.</small></span><input id="setting-motion" type="checkbox"></label></section>
 <section class="settings-card"><h2>Playback</h2><label class="setting-row setting-volume"><span><b>Default volume</b><small>Set the player volume for this device.</small></span><input id="setting-volume" type="range" min="0" max="100" value="80"><output id="setting-volume-value">80%</output></label><label class="setting-row"><span><b>Remember volume</b><small>Keep your volume choice next time you open ORBIT.</small></span><input id="setting-remember-volume" type="checkbox" checked></label></section>
@@ -214,8 +214,8 @@
   <h2>About ORBIT</h2>
   <p class="orbit-legal-intro">Created by <strong>Nino Brown</strong>. Thank you for using ORBIT.</p>
   <div class="orbit-legal-actions">
-    <a href="mailto:innocentgh10@gmail.com" class="orbit-legal-contact"><span aria-hidden="true">✉</span><span><b>Contact support</b><small>innocentgh10@gmail.com</small></span></a>
-    <a href="tel:+233550477759" class="orbit-legal-contact"><span aria-hidden="true">☎</span><span><b>Call support</b><small>+233 55 047 7759</small></span></a>
+    <a href="mailto:innocentgh10@gmail.com" class="orbit-legal-contact"><span aria-hidden="true">âœ‰</span><span><b>Contact support</b><small>innocentgh10@gmail.com</small></span></a>
+    <a href="tel:+233550477759" class="orbit-legal-contact"><span aria-hidden="true">â˜Ž</span><span><b>Call support</b><small>+233 55 047 7759</small></span></a>
   </div>
   <details class="orbit-legal-details">
     <summary>Terms and Conditions</summary>
@@ -227,7 +227,7 @@
       <h3>Third-party content and services</h3>
       <p>Some catalogues, streams, artwork, search results and playback destinations are provided by independent third parties. Those services control their own content, availability, licensing, terms and privacy practices. A listing in ORBIT does not mean that ORBIT owns, endorses or grants rights to that content. You are responsible for checking that your use and any downloads are permitted in your location.</p>
       <h3>Availability and downloads</h3>
-      <p>Features and external streams may change, become unavailable or contain errors. ORBIT is provided on an “as available” basis. Download and offline features depend on the platform and the source's permissions. You must not redistribute downloaded material unless you have the necessary rights.</p>
+      <p>Features and external streams may change, become unavailable or contain errors. ORBIT is provided on an â€œas availableâ€ basis. Download and offline features depend on the platform and the source's permissions. You must not redistribute downloaded material unless you have the necessary rights.</p>
       <h3>Intellectual property</h3>
       <p>ORBIT's name, interface and original app materials belong to their respective rights holders. Third-party names, logos, artwork and media remain the property of their owners.</p>
       <h3>Changes and support</h3>
@@ -261,13 +261,13 @@
   </div>
 
   <div class="player-bar">
-    <div class="now-playing"><div class="player-art" id="player-art">◉</div><div class="track-meta"><b id="player-title">Nothing playing yet</b><small id="player-subtitle">Choose a station or preview</small></div><button class="heart-button" id="player-fav" title="Save favourite">♡</button></div>
+    <div class="now-playing"><div class="player-art" id="player-art">â—‰</div><div class="track-meta"><b id="player-title">Nothing playing yet</b><small id="player-subtitle">Choose a station or preview</small></div><button class="heart-button" id="player-fav" title="Save favourite">â™¡</button></div>
     <div class="player-center"><div class="player-controls"><button class="control-button" id="previous-track" title="Previous track" aria-label="Previous track">Prev</button><button class="control-button" id="seek-back" title="Back 15 seconds" aria-label="Back 15 seconds">-15</button><button class="control-button" id="stop-button" title="Stop" aria-label="Stop">Stop</button><button class="play-button" id="play-button" title="Play or pause" aria-label="Play or pause"><span class="play-glyph" aria-hidden="true"></span></button><button class="control-button" id="seek-forward" title="Forward 15 seconds" aria-label="Forward 15 seconds">+15</button><button class="control-button" id="next-track" title="Next track" aria-label="Next track">Next</button><button class="control-button" id="volume-button" title="Mute or unmute" aria-label="Mute or unmute">Mute</button></div><div class="track-progress"><span id="current-time">0:00</span><input id="track-seek" type="range" min="0" max="1000" value="0" aria-label="Seek track"><span id="total-time">0:00</span></div></div>
     <div class="player-extra"><span id="player-state">Ready to tune in</span><button class="chrome-toggle player-hide" id="player-hide" type="button" title="Hide player" aria-label="Hide player">&#215;</button></div>
   </div>
 <button class="player-reveal" id="player-reveal" type="button" aria-label="Show player" title="Show player">&#9835;</button>
 <audio id="audio-player" preload="none"></audio>
-  <div class="toast" id="toast" role="status"></div><div class="profile-backdrop" id="profile-backdrop"><section class="profile-dialog"><button id="profile-close" class="profile-close">×</button><h2>Your profile</h2><img id="profile-image" class="profile-image" alt="Profile image"><label>Display name<input id="profile-name" maxlength="60"></label><label>About you<textarea id="profile-about" maxlength="240"></textarea></label><label>Upload profile image<input id="profile-image-file" type="file" accept="image/*"></label><button class="button button-light" id="profile-save">Save profile</button></section></div>
+  <div class="toast" id="toast" role="status"></div><div class="profile-backdrop" id="profile-backdrop"><section class="profile-dialog"><button id="profile-close" class="profile-close">Ã—</button><h2>Your profile</h2><img id="profile-image" class="profile-image" alt="Profile image"><label>Display name<input id="profile-name" maxlength="60"></label><label>About you<textarea id="profile-about" maxlength="240"></textarea></label><label>Upload profile image<input id="profile-image-file" type="file" accept="image/*"></label><button class="button button-light" id="profile-save">Save profile</button></section></div>
   <script defer src="./mobile-bridge.js"></script><script defer src="./live-podcast.js"></script><script defer src="./app.js"></script>
 </body>
 </html>
