@@ -1132,10 +1132,10 @@ function renderGlobalLiveChannels(){
  const q=($("#global-tv-search").value||"").trim().toLowerCase(),country=$("#global-tv-country").value,category=$("#global-tv-category").value;
  if(category==="ghana-free"){
   const official=[
-   {name:"TV3 Ghana",network:"Media General",desc:"Official live player",embed:"https://3news.com/live/tv3"},
-   {name:"Joy News",network:"The Multimedia Group",desc:"Official live stream",embed:"https://www.myjoyonline.com/media/joy-news-live/"},
-   {name:"Adom TV",network:"The Multimedia Group",desc:"Official live stream",embed:"https://www.adomonline.com/adom-tv-live/"},
-   {name:"Max TV",network:"iMax Media Group",desc:"Official live page",embed:"https://max.com.gh/tv"}
+   {name:"TV3 Ghana",network:"Media General",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UC9VSDs4ZXo3sjOoPkmW2iRQ"},
+   {name:"Joy News",network:"The Multimedia Group",desc:"Official YouTube channel player",embed:"https://www.youtube.com/embed/videoseries?list=PLEhaP2Z2iO3qxEM5RbZPZCcV0o0Z9azwh"},
+   {name:"Adom TV",network:"The Multimedia Group",desc:"Official YouTube channel player",embed:"https://www.youtube.com/embed/videoseries?list=PLyie0rQsQVfLBtDNoK_LUa2AqeWNQH6q2"},
+   {name:"Max TV",network:"iMax Media Group",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UCj46FV4TFrJncXCshjBbg3w"}
   ].filter(ch=>!q||[ch.name,ch.network].join(" ").toLowerCase().includes(q));
   host.innerHTML=official.length?'<div class="global-tv-official-grid">'+official.map(ch=>'<button type="button" class="global-tv-official-card" data-orbit-official-tv="'+esc(ch.embed)+'" data-orbit-tv-name="'+esc(ch.name)+'"><span class="global-tv-official-mark">GH</span><span class="global-tv-official-copy"><span class="global-tv-free-label">FREE-TO-AIR</span><strong>'+esc(ch.name)+'</strong><small>'+esc(ch.network)+' · '+esc(ch.desc)+'</small><span class="global-tv-inapp-play">▶ Play inside ORBIT</span></span></button>').join("")+'</div>':'<div class="empty-state">No official Ghana channels match that search.</div>';
   $("#global-tv-status").textContent="Select a channel to play its official live player inside ORBIT.";
