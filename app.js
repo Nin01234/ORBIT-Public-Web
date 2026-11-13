@@ -17,7 +17,7 @@ let globeResizeObserver = null;
 let toastTimer;
 const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 // Catalogue-only stale-while-revalidate cache. Never use this for media streams or signed playback URLs.
-const ORBIT_CATALOGUE_CACHE_KEY="orbit-catalogue-cache-v1";
+const ORBIT_CATALOGUE_CACHE_KEY="orbit-catalogue-cache-v2";
 function orbitReadCatalogueCache(){try{return JSON.parse(localStorage.getItem(ORBIT_CATALOGUE_CACHE_KEY)||"{}");}catch{return{};}}
 function orbitWriteCatalogueCache(key,data){
   try{
@@ -618,7 +618,7 @@ function playAudioTrack(id){
     if(!audio.src)throw new Error("This provider has not enabled playback for this track.");
     await audio.play();
     if(currentMusicTrack?.id!==track.id)return;
-    setPlayer(track.title,track.artist+"  -  "+(track.source||"Music"),track.previewOnly?"Preview playback":"Full audio track");
+    setPlayer(track.title,track.artist+"  -  "+musicProviderDisplayName(track.source),track.previewOnly?"Preview playback":"Full audio track");
     setPlayerArtwork(track.artwork,"\\u266b");
     $("#player-fav").textContent=isMusicFav(track.id)?"\\u{1F496}":"\\u{1F90D}";
     $("#player-fav").classList.toggle("saved",isMusicFav(track.id));
@@ -706,8 +706,7 @@ async function openTmdbMovie(id){
     if(token!==tmdbMovieOpenToken)return;
     const trailers=(Array.isArray(trailerData.trailers)?trailerData.trailers:[]).filter(v=>/^[A-Za-z0-9_-]{11}$/.test(v.youtubeId||"")).slice(0,6);
     const trailerHtml='<section class="orbit-trailer-section"><h3 class="section-title">Watch the trailer</h3><p class="section-description">Preview this film here in ORBIT. Choose another trailer below if you prefer.</p>'+
-      (trailers.length?'<div class="orbit-trailer-layout"><div id="movie-trailer-player" class="orbit-trailer-player" aria-live="polite"><iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(trailers[0].youtubeId)+'?autoplay=1&playsinline=1&rel=0&modestbranding=1" title="'+esc(trailers[0].title||movie.title+" trailer")+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe></div>'+
-        '<div class="trailer-picker-controls"><button type="button" class="trailer-picker-toggle" data-trailer-toggle aria-expanded="false">Choose trailer <span>⌄</span></button>'+
+      (trailers.length?'<div class="orbit-trailer-layout"><div id="movie-trailer-player" class="orbit-trailer-player" aria-live="polite"><iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(trailers[0].youtubeId)+'?autoplay=1&playsinline=1&rel=0&modestbranding=1" title="'+esc(trailers[0].title||movie.title+" trailer")+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe></div><div class="trailer-picker-controls"><button type="button" class="trailer-picker-toggle" data-trailer-toggle aria-expanded="false">Choose trailer <span>⌄</span></button>'+
         '<div class="orbit-trailer-picker" hidden><div class="orbit-trailer-picker-head"><strong>Select a trailer</strong><button type="button" data-trailer-toggle-close aria-label="Close trailer list">×</button></div>'+
         '<div class="orbit-trailer-grid">'+trailers.map((v,i)=>'<article class="orbit-trailer-card">'+
         '<img src="'+esc(v.thumbnail||("https://img.youtube.com/vi/"+v.youtubeId+"/hqdefault.jpg"))+'" alt="" loading="lazy">'+
