@@ -145,16 +145,30 @@ async function api(req,res,url) {
       const tracks=await loadAudius();
       return send(res,200,store(key,tracks,TTL.music),"public, max-age=90");
     }
-    const [audiusResult,ytmusicResult]=await Promise.allSettled([
-      loadAudius(),
+    const loadJamendo=async()=>{
+      const u=new URL("https://api.jamendo.com/v3.0/tracks/");
+      u.searchParams.set("client_id","6e98aa54");u.searchParams.set("format","json");
+      u.searchParams.set("limit","24");u.searchParams.set("audioformat","mp31");
+      if(trending)u.searchParams.set("order","popularity_total");else u.searchParams.set("search",query);
+      const payload=await getJson(u,18000,{"User-Agent":"ORBIT Public Web/1.0","Accept":"application/json"});
+      return (payload.results||[]).filter(t=>t&&t.id&&t.audio).map(t=>({
+        id:"jamendo:"+t.id,providerId:String(t.id),source:"Jamendo",title:t.name||"Untitled track",
+        artist:t.artist_name||"Independent artist",duration:Number(t.duration)||0,
+        genre:(t.musicinfo?.tags?.genres||[])[0]||"",artwork:t.album_image||"",
+        permalink:t.shareurl||"",playbackUrl:t.audio,previewOnly:false,canDownload:false
+      }));
+    };
+    const [audiusResult,jamendoResult,ytmusicResult]=await Promise.allSettled([
+      loadAudius(),loadJamendo(),
       runYoutubeMusicBridge("search",{query:trending?"trending music":query})
     ]);
-    if(audiusResult.status!=="fulfilled"&&ytmusicResult.status!=="fulfilled")throw new Error("All music catalogues are temporarily unavailable");
+    if(audiusResult.status!=="fulfilled"&&jamendoResult.status!=="fulfilled"&&ytmusicResult.status!=="fulfilled")throw new Error("All music catalogues are temporarily unavailable");
     const tracks=[
       ...(audiusResult.status==="fulfilled"?audiusResult.value:[]),
+      ...(jamendoResult.status==="fulfilled"?jamendoResult.value:[]),
       ...(ytmusicResult.status==="fulfilled"&&Array.isArray(ytmusicResult.value.tracks)?ytmusicResult.value.tracks:[])
     ];
-    const result={tracks,providers:{audius:audiusResult.status==="fulfilled",jamendo:false,ytmusic:ytmusicResult.status==="fulfilled",spotify:false,soundcloud:false,audiomack:false}};
+    const result={tracks,providers:{audius:audiusResult.status==="fulfilled",jamendo:jamendoResult.status==="fulfilled",ytmusic:ytmusicResult.status==="fulfilled",spotify:false,soundcloud:false,audiomack:false}};
     return send(res,200,store(key,result,TTL.music),"public, max-age=90");
   }
   if(p==="/api/youtube-music/audio") {

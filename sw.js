@@ -1,5 +1,5 @@
-const CACHE="orbit-mobile-v30";
-const API_CACHE="orbit-api-catalogues-v1";
+const CACHE="orbit-mobile-v31";
+const API_CACHE="orbit-api-catalogues-v2";
 const ASSETS=["/","/styles.css","/orbit-feature-additions.css","/orbit-ui-fixes-20261109.css","/orbit-mobile.css","/orbit-mobile-polish.css","/orbit-mobile-landing.css","/public-web-overrides.css","/orbit-web-refresh.css","/orbit-mobile-hero.svg","/mobile-bridge.js","/live-podcast.js","/app.js","/manifest.webmanifest","/icons/orbit-192.png","/icons/orbit-512.png","/icons/apple-touch-icon.png"];
 const CACHEABLE_API=/^\/api\/(?:radio-stations|music-search|audius-search|youtube-search|itunes-search|global-search|librivox|spinn-movies|global-countries|global-channels|films|podcast-episodes|movie-trailers)(?:\/|$)/;
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
