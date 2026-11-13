@@ -1145,7 +1145,7 @@ function renderGlobalLiveChannels(){
  for(const st of orbitLiveStreams){if(!streamMap.has(st.channel))streamMap.set(st.channel,[]);streamMap.get(st.channel).push(st);}
  const countryNames=new Map(orbitLiveCountries.map(c=>[c.code,(c.name||"").toLowerCase()]));
  const list=orbitLiveChannels.filter(ch=>{
-  if(country&&ch.country!==country)return false;
+  if(country&&country!=="all"&&ch.country!==country)return false;
   if(category==="sports"&&!(ch.categories||[]).includes("sports"))return false;
   const cn=countryNames.get(ch.country)||"";
   if(q&&![(ch.name||"").toLowerCase(),(ch.alt_names||[]).join(" ").toLowerCase(),cn,ch.network||""].join(" ").includes(q))return false;
