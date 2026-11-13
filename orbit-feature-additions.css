@@ -406,21 +406,6 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
   #view-omnisave #omnisave-browser-frame, #view-omnisave .omnisave-browser-help { display:none !important; }
 }
 
-
-
-/* Trailer choices stay below the video frame, never over YouTube controls. */
-#view-movies .orbit-trailer-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;width:100%!important;max-width:820px!important;margin:12px 0 20px!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-player{position:relative!important;display:block!important;width:100%!important;max-width:none!important;aspect-ratio:16/9!important;height:auto!important;min-height:0!important;margin:0!important;overflow:hidden!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-player iframe{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-controls{position:static!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important;width:100%!important;max-width:none!important;margin:0!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-toggle{position:static!important;inset:auto!important;display:inline-flex!important;width:auto!important;max-width:100%!important;margin:0!important;padding:10px 14px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:10px!important;background:#17231f!important;color:#fff!important;font-weight:700!important;cursor:pointer!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker{position:static!important;width:100%!important;max-height:min(62vh,520px)!important;box-sizing:border-box!important;overflow-y:auto!important;padding:14px!important;border:1px solid rgba(120,150,135,.28)!important;border-radius:12px!important;background:#0d1513!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker[hidden]{display:none!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important;gap:10px!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-card{display:grid!important;grid-template-columns:96px minmax(0,1fr)!important;gap:9px!important;align-items:center!important;min-width:0!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-card img{width:96px!important;height:60px!important;aspect-ratio:16/9!important;object-fit:cover!important;}
-@media(max-width:760px){#view-movies .orbit-trailer-layout{width:100%!important;max-width:none!important;}#view-movies .orbit-trailer-layout .orbit-trailer-grid{display:flex!important;flex-direction:column!important;}}
-
 /* ORBIT web readability: consistent public-facing type scale on desktop browsers. */
 @media (min-width: 801px) {
   body, button, input, select, textarea { font-family: "Figtree", "Instrument Sans", Arial, sans-serif !important; }
@@ -436,48 +421,3 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
   .track-meta b { font-size: 15px; }
   .track-meta small, .player-extra, .track-progress span { font-size: 13px; }
 }
-
-
-/* Trailer choices live below the video frame, never over the YouTube controls. */
-#view-movies .trailer-picker-controls{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important;width:min(100%,760px)!important;max-width:760px!important;margin:12px 0 18px!important;}
-#view-movies .trailer-picker-controls .trailer-picker-toggle{position:static!important;inset:auto!important;z-index:auto!important;display:inline-flex!important;align-items:center!important;gap:10px!important;width:auto!important;max-width:100%!important;margin:0!important;padding:10px 14px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:10px!important;background:#17231f!important;color:#fff!important;font-weight:700!important;cursor:pointer!important;backdrop-filter:none!important;}
-#view-movies .trailer-picker-controls .orbit-trailer-picker{position:static!important;inset:auto!important;z-index:auto!important;width:100%!important;max-height:none!important;box-sizing:border-box!important;padding:14px!important;border:1px solid rgba(120,150,135,.28)!important;border-radius:12px!important;background:#0d1513!important;overflow:visible!important;}
-#view-movies .trailer-picker-controls .orbit-trailer-picker[hidden]{display:none!important;}
-#view-movies .trailer-picker-controls .orbit-trailer-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important;gap:12px!important;}
-#view-movies .trailer-picker-controls .orbit-trailer-card{min-width:0!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:10px!important;background:#17211e!important;}
-#view-movies .trailer-picker-controls .orbit-trailer-card img{display:block!important;width:100%!important;aspect-ratio:16/9!important;object-fit:cover!important;}
-@media(max-width:760px){#view-movies .trailer-picker-controls{width:100%!important;max-width:none!important;}#view-movies .trailer-picker-controls .orbit-trailer-grid{display:flex!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;}#view-movies .trailer-picker-controls .orbit-trailer-card{flex:0 0 min(82vw,330px)!important;scroll-snap-align:start!important;}}
-/* Restore the default trailer chooser overlay inside the YouTube player frame. */
-#view-movies .orbit-trailer-layout .orbit-trailer-player{position:relative!important;isolation:isolate!important;overflow:hidden!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-controls{position:absolute!important;z-index:5!important;inset:0!important;display:block!important;width:auto!important;max-width:none!important;margin:0!important;pointer-events:none!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-toggle{position:absolute!important;top:12px!important;right:12px!important;z-index:7!important;pointer-events:auto!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker{position:absolute!important;left:0!important;right:0!important;bottom:0!important;z-index:6!important;width:100%!important;max-height:62%!important;box-sizing:border-box!important;overflow:auto!important;margin:0!important;border-radius:0!important;background:linear-gradient(180deg,rgba(5,8,12,.88),rgba(5,8,12,.98))!important;pointer-events:auto!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker[hidden]{display:none!important;}
-/* Keep Choose trailer at the current top edge of the player, moved to the opposite (right) side. */
-#view-movies .orbit-trailer-layout .trailer-picker-toggle{top:12px!important;right:12px!important;left:auto!important;bottom:auto!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker{top:52px!important;bottom:auto!important;left:auto!important;right:12px!important;width:min(420px,calc(100% - 24px))!important;max-height:calc(100% - 64px)!important;border-radius:12px!important;}
-
-/* Keep trailer selection completely outside the YouTube video frame. */
-#view-movies .orbit-trailer-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;width:100%!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-player{position:relative!important;order:0!important;width:100%!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-controls{position:static!important;inset:auto!important;order:1!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:10px!important;width:100%!important;max-width:760px!important;margin:0!important;pointer-events:auto!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-toggle{position:static!important;inset:auto!important;display:inline-flex!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker{position:static!important;inset:auto!important;width:100%!important;max-height:min(55vh,480px)!important;overflow:auto!important;border-radius:12px!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker[hidden]{display:none!important;}
-
-/* Place trailer chooser beside the video at its upper-right, outside the frame. */
-#view-movies .orbit-trailer-layout{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,30%)!important;align-items:start!important;column-gap:16px!important;row-gap:0!important;width:100%!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-player{grid-column:1!important;grid-row:1!important;position:relative!important;width:100%!important;min-width:0!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-controls{grid-column:2!important;grid-row:1!important;position:static!important;inset:auto!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:10px!important;width:100%!important;max-width:none!important;margin:0!important;pointer-events:auto!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-toggle{position:static!important;inset:auto!important;display:inline-flex!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker{position:static!important;inset:auto!important;width:100%!important;max-height:min(55vh,480px)!important;overflow:auto!important;border-radius:12px!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker[hidden]{display:none!important;}
-@media(max-width:680px){#view-movies .orbit-trailer-layout{grid-template-columns:minmax(0,1fr) minmax(125px,34%)!important;column-gap:10px!important;}#view-movies .orbit-trailer-layout .trailer-picker-controls{gap:8px!important;}#view-movies .orbit-trailer-layout .trailer-picker-toggle{white-space:normal!important;padding:8px 10px!important;}}
-
-
-/* Refine trailer split: keep the chooser compact so the video uses the available width. */
-#view-movies .orbit-trailer-layout{grid-template-columns:minmax(0,1fr) 190px!important;column-gap:12px!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-controls{min-width:0!important;}
-#view-movies .orbit-trailer-layout .trailer-picker-toggle{max-width:100%!important;white-space:normal!important;}
-#view-movies .orbit-trailer-layout .orbit-trailer-picker{max-width:190px!important;}
-@media(max-width:680px){#view-movies .orbit-trailer-layout{grid-template-columns:minmax(0,1fr) 132px!important;column-gap:8px!important;}#view-movies .orbit-trailer-layout .orbit-trailer-picker{max-width:132px!important;}}
