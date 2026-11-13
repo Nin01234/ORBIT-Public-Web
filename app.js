@@ -1146,8 +1146,16 @@ function renderGlobalLiveChannels(){
    {name:"Onua TV",network:"Media General",desc:"Official channel listed; no verified embeddable live feed yet"},
    {name:"Joy Prime",network:"The Multimedia Group",desc:"Official channel listed; no verified embeddable live feed yet"}
   ].filter(ch=>!q||[ch.name,ch.network].join(" ").toLowerCase().includes(q));
-  host.innerHTML=official.length?'<div class="global-tv-official-grid">'+official.map(ch=>'<button type="button" class="global-tv-official-card" data-orbit-official-tv="'+esc(ch.embed||"")+'" data-orbit-tv-name="'+esc(ch.name)+'"><span class="global-tv-official-mark">GH</span><span class="global-tv-official-copy"><span class="global-tv-free-label">GHANA TV</span><strong>'+esc(ch.name)+'</strong><small>'+esc(ch.network)+' · '+esc(ch.desc)+'</small><span class="global-tv-inapp-play">'+(ch.embed?"▶ Play inside ORBIT":"Channel listed · stream not verified")+'</span></span></button>').join("")+'</div>':'<div class="empty-state">No official Ghana channels match that search.</div>';
-  $("#global-tv-status").textContent="Ghana channel directory: verified official in-app players are available where broadcasters provide an embeddable feed.";
+  const officialPages={
+   "TV3 Ghana":"https://3news.com/live/tv3",
+   "Joy News":"https://www.myjoyonline.com/media/joy-news-live/",
+   "Adom TV":"https://www.adomonline.com/adom-tv-live/",
+   "Max TV":"https://max.com.gh/tv",
+   "GTV Sports+":"https://www.youtube.com/channel/UC9wDer2KbLNoasCbdPYBFGw",
+   "Angel TV":"https://www.youtube.com/channel/UCbUIPgslZTlsh98KknrNB8Q"
+  };
+  host.innerHTML=official.length?'<div class="global-tv-official-grid">'+official.map(ch=>{const url=officialPages[ch.name]||"";return '<article class="global-tv-official-card"><div class="global-tv-official-mark">GH</div><div class="global-tv-official-copy"><span class="global-tv-free-label">GHANA TV</span><h3>'+esc(ch.name)+'</h3><p>'+esc(ch.network)+' · '+esc(ch.desc)+'</p>'+(url?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open official channel ↗</a>':'<span class="global-tv-inapp-play">Official viewing link not verified yet</span>')+'</div></article>';}).join("")+'</div>':'<div class="empty-state">No official Ghana channels match that search.</div>';
+  $("#global-tv-status").textContent="Choose a channel card to open its official broadcaster page. ORBIT does not host or rebroadcast these streams.";
   return;
  }
  const streamMap=new Map();
@@ -1267,15 +1275,6 @@ function setupGlobalLive(){
  $("#global-tv-country").addEventListener("change",e=>loadGlobalLiveDirectory(e.target.value));
  $("#global-tv-category").addEventListener("change",renderGlobalLiveChannels);
  $("#global-tv-results").addEventListener("click",e=>{
-  const official=e.target.closest("[data-orbit-official-tv]");
-  if(official){
-   const name=official.dataset.orbitTvName||"Ghana TV",video=$("#global-tv-video"),screen=video.parentElement;
-   if(!official.dataset.orbitOfficialTv){$("#global-tv-status").textContent=name+" is now listed in ORBIT, but its broadcaster has not provided a verified public embeddable live stream. ORBIT will not substitute an unofficial or unauthorized feed.";return;}
-   let frame=$("#global-tv-embed");
-   if(!frame){video.hidden=true;frame=document.createElement("iframe");frame.id="global-tv-embed";frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";frame.allowFullscreen=true;frame.referrerPolicy="strict-origin-when-cross-origin";frame.style.cssText="width:100%;aspect-ratio:16/9;border:0;background:#000;border-radius:12px";screen.insertBefore(frame,video);}
-   frame.title=name+" live";frame.src=official.dataset.orbitOfficialTv;
-   $("#global-tv-status").textContent="Loading "+name+" official live player inside ORBIT…";setPlayer(name,"Global television","Live channel");return;
-  }
   if(e.target.closest("#global-tv-retry")){loadGlobalLiveDirectory($("#global-tv-country").value);return;}
   const b=e.target.closest("[data-global-channel]");if(b){$$("[data-global-channel]").forEach(x=>x.classList.toggle("active",x===b));playGlobalChannel(b.dataset.globalChannel);}
  });
