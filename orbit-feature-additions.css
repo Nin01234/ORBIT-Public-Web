@@ -459,3 +459,18 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
   #view-movies .orbit-trailer-controls .orbit-trailer-picker {position:static;max-height:360px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
   #view-movies .orbit-trailer-controls .orbit-trailer-picker[hidden] {display:none!important}
 }
+
+
+/* Ghana free-to-air official broadcaster directory */
+.global-tv-official-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-content:start}
+.global-tv-official-card{display:flex;gap:13px;align-items:flex-start;min-width:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink)}
+.global-tv-official-mark{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:10px;background:var(--panel2);color:var(--lime);font-weight:800;letter-spacing:.04em}
+.global-tv-official-copy{min-width:0}
+.global-tv-free-label{display:inline-block;margin-bottom:5px;color:var(--lime);font-size:10px;font-weight:800;letter-spacing:.09em}
+.global-tv-official-copy h3{margin:0 0 4px;font-size:15px;color:var(--ink)}
+.global-tv-official-copy p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.45}
+.global-tv-official-copy a{display:inline-flex;align-items:center;gap:5px;color:var(--lime);font-size:12px;font-weight:700;text-decoration:none}
+.global-tv-official-copy a:hover{text-decoration:underline}
+html[data-theme="light"] .global-tv-official-card{background:#fff;border-color:var(--line);box-shadow:none}
+html[data-theme="light"] .global-tv-official-mark{background:#eee9df;color:#8b6538}
+@media(max-width:650px){.global-tv-official-grid{grid-template-columns:1fr}.global-tv-official-card{padding:13px}}
