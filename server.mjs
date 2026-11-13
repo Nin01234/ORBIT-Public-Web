@@ -262,7 +262,7 @@ async function api(req,res,url) {
     const key="spinn-movies",forceRefresh=url.searchParams.get("refresh")==="1",old=forceRefresh?null:cached(key);
     if(old)return send(res,200,old,"public, max-age=1800");
     const data=await getJson("https://spinnradio.com/api/movies",30000);if(!data||!Array.isArray(data.rows))throw new Error("Movie catalogue invalid");
-    return send(res,200,store(key,data,TTL.movies),"public, max-age=1800");
+    return send(res,200,store(key,data,TTL.movies),forceRefresh?"no-store":"public, max-age=1800");
   }
   if(p==="/api/movie-trailers") {
     try {
