@@ -1105,7 +1105,7 @@ async function loadGlobalLiveDirectory(countryCode=""){
    const countryData=await cr.json();if(requestToken!==orbitLiveDirectoryToken)return;
    orbitLiveCountries=countryData;
    const select=$("#global-tv-country");
-   select.innerHTML='<option value="">Choose a country…</option>'+orbitLiveCountries.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(c=>'<option value="'+esc(c.code)+'">'+esc(c.name)+'</option>').join("");
+   select.innerHTML='<option value="">All countries</option>'+orbitLiveCountries.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(c=>'<option value="'+esc(c.code)+'">'+esc(c.name)+'</option>').join("");
   }
   const q=($("#global-tv-search").value||"").trim().toLowerCase();
   if(!countryCode&&q.length>=3){
