@@ -1133,6 +1133,17 @@ async function loadGlobalLiveDirectory(countryCode=""){
 function renderGlobalLiveChannels(){
  const host=$("#global-tv-results");if(!host)return;
  const q=($("#global-tv-search").value||"").trim().toLowerCase(),country=$("#global-tv-country").value,category=$("#global-tv-category").value;
+ if(category==="ghana-free"){
+  const official=[
+   {name:"TV3 Ghana",network:"Media General",description:"Official live TV3 player",url:"https://3news.com/live/tv3"},
+   {name:"Joy News",network:"The Multimedia Group",description:"Official live channel page",url:"https://www.myjoyonline.com/media/joy-news-live/"},
+   {name:"Adom TV",network:"The Multimedia Group",description:"Official live channel page",url:"https://www.myjoyonline.com/media/adom-tv-live/"},
+   {name:"Max TV",network:"iMax Media Group",description:"Official live TV page",url:"https://max.com.gh/tv"}
+  ].filter(ch=>!q||[ch.name,ch.network].join(" ").toLowerCase().includes(q));
+  host.innerHTML=official.length?'<div class="global-tv-official-grid">'+official.map(ch=>'<article class="global-tv-official-card"><div class="global-tv-official-mark">GH</div><div class="global-tv-official-copy"><span class="global-tv-free-label">FREE-TO-AIR</span><h3>'+esc(ch.name)+'</h3><p>'+esc(ch.network)+' · '+esc(ch.description)+'</p><a href="'+esc(ch.url)+'" target="_blank" rel="noopener noreferrer">Watch on official site ↗</a></div></article>').join("")+'</div>':'<div class="empty-state">No official Ghana channels match that search.</div>';
+  $("#global-tv-status").textContent="Choose a channel card to open its broadcaster's official live player. ORBIT does not host or rebroadcast these streams.";
+  return;
+ }
  const streamMap=new Map();
  for(const st of orbitLiveStreams){if(!streamMap.has(st.channel))streamMap.set(st.channel,[]);streamMap.get(st.channel).push(st);}
  const countryNames=new Map(orbitLiveCountries.map(c=>[c.code,(c.name||"").toLowerCase()]));
