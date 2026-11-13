@@ -267,11 +267,15 @@ async function api(req,res,url) {
     return send(res,200,store(key,data,TTL.movies),"public, max-age=1800");
   }
   if(p==="/api/movie-trailers") {
+    let cacheKey="",staleEntry=null;
     try {
       const title=safeText(url.searchParams.get("title"),100);
       const year=safeText(url.searchParams.get("year"),4).replace(/[^0-9]/g,"");
       if(title.length<2)return send(res,400,{error:"A movie title is required"});
       const cleanTitle=title.replace(/[<>]/g," ").replace(/\s+/g," ").trim();
+      cacheKey="trailers:"+cleanTitle.toLowerCase()+":"+year;
+      const fresh=cached(cacheKey);if(fresh)return send(res,200,fresh,"public, max-age=21600");
+      staleEntry=cache.get(cacheKey)||null;
       const headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9"};
       const parseSearch=async query=>{
         const upstream=await fetch("https://www.youtube.com/results?search_query="+encodeURIComponent(query),{headers,signal:AbortSignal.timeout(18000)});
@@ -309,23 +313,30 @@ async function api(req,res,url) {
           const lower=v.title.toLowerCase(),clean=cleanTitle.toLowerCase();
           return lower.includes(clean)||clean.split(/\s+/).filter(w=>w.length>3).some(w=>lower.includes(w));
         }).slice(0,8).map(v=>({youtubeId:v.videoId,title:v.title,thumbnail:v.thumbnail,channel:v.author,source:v.source}));
-      return send(res,200,{title:cleanTitle,trailers},"public, max-age=1800");
+      const result={title:cleanTitle,trailers};
+      return send(res,200,store(cacheKey,result,6*60*60*1000),"public, max-age=21600");
     } catch {
+      if(staleEntry&&Date.now()-staleEntry.at<30*24*60*60*1000)return send(res,200,staleEntry.data,"public, max-age=300");
       return send(res,200,{title:"",trailers:[],message:"Trailer search is temporarily unavailable."});
     }
   }
   if(p==="/api/youtube-search") {
+    let cacheKey="",staleEntry=null;
     try {
       const query=safeText(url.searchParams.get("q"),120);
       if(!query)return send(res,400,{error:"A search term is required"});
+      cacheKey="youtube-search:"+query.toLowerCase();
+      const fresh=cached(cacheKey);
+      if(fresh)return send(res,200,fresh,"public, max-age=600");
+      staleEntry=cache.get(cacheKey)||null;
       const upstream=await fetch("https://www.youtube.com/results?search_query="+encodeURIComponent(query),{
         headers:{"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9"},
         signal:AbortSignal.timeout(20000)
       });
-      if(!upstream.ok)return send(res,upstream.status,{error:"YouTube search unavailable"});
+      if(!upstream.ok)throw new Error("YouTube search unavailable");
       const html=await upstream.text();
       const match=html.match(/ytInitialData\s*=\s*(\{.*?\})\s*;\s*<\/script>/s);
-      if(!match)return send(res,502,{error:"YouTube did not return searchable results"});
+      if(!match)throw new Error("YouTube did not return searchable results");
       const data=JSON.parse(match[1]),found=[];
       const walk=value=>{
         if(!value||typeof value!=="object"||found.length>=30)return;
@@ -342,8 +353,10 @@ async function api(req,res,url) {
         else for(const item of Object.values(value))walk(item);
       };
       walk(data);
-      return send(res,200,found.slice(0,24),"public, max-age=120");
+      const results=found.slice(0,24);
+      return send(res,200,store(cacheKey,results,10*60*1000),"public, max-age=600");
     } catch {
+      if(staleEntry&&Date.now()-staleEntry.at<7*24*60*60*1000)return send(res,200,staleEntry.data,"public, max-age=60");
       return send(res,502,{error:"Could not retrieve YouTube search results"});
     }
   }

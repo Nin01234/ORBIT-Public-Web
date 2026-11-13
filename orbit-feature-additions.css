@@ -421,3 +421,14 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
   .track-meta b { font-size: 15px; }
   .track-meta small, .player-extra, .track-progress span { font-size: 13px; }
 }
+
+
+/* Trailer choices live below the video frame, never over the YouTube controls. */
+#view-movies .trailer-picker-controls{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important;width:min(100%,760px)!important;max-width:760px!important;margin:12px 0 18px!important;}
+#view-movies .trailer-picker-controls .trailer-picker-toggle{position:static!important;inset:auto!important;z-index:auto!important;display:inline-flex!important;align-items:center!important;gap:10px!important;width:auto!important;max-width:100%!important;margin:0!important;padding:10px 14px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:10px!important;background:#17231f!important;color:#fff!important;font-weight:700!important;cursor:pointer!important;backdrop-filter:none!important;}
+#view-movies .trailer-picker-controls .orbit-trailer-picker{position:static!important;inset:auto!important;z-index:auto!important;width:100%!important;max-height:none!important;box-sizing:border-box!important;padding:14px!important;border:1px solid rgba(120,150,135,.28)!important;border-radius:12px!important;background:#0d1513!important;overflow:visible!important;}
+#view-movies .trailer-picker-controls .orbit-trailer-picker[hidden]{display:none!important;}
+#view-movies .trailer-picker-controls .orbit-trailer-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important;gap:12px!important;}
+#view-movies .trailer-picker-controls .orbit-trailer-card{min-width:0!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:10px!important;background:#17211e!important;}
+#view-movies .trailer-picker-controls .orbit-trailer-card img{display:block!important;width:100%!important;aspect-ratio:16/9!important;object-fit:cover!important;}
+@media(max-width:760px){#view-movies .trailer-picker-controls{width:100%!important;max-width:none!important;}#view-movies .trailer-picker-controls .orbit-trailer-grid{display:flex!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;}#view-movies .trailer-picker-controls .orbit-trailer-card{flex:0 0 min(82vw,330px)!important;scroll-snap-align:start!important;}}
