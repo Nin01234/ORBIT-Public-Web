@@ -478,6 +478,9 @@ function spotifySaveCurrent(){
 }
 function spotifyPlaySaved(i){const v=spotifySavedItems()[i];if(v){window.orbitCurrentSpotifyItem=v;spotifyEmbed(v);$("#spotify-orbit-link").value=v.url;}}
 function spotifyRemoveSaved(i){const list=spotifySavedItems();list.splice(i,1);localStorage.setItem("orbit-spotify-saved",JSON.stringify(list));spotifyRenderSaved();notify("Removed from saved Spotify music.");}
+function musicProviderDisplayName(source){
+  return ({"Audius":"Spotify","Jamendo":"Apple Music","YouTube Music":"Audiomark"})[source] || source || "Audio track";
+}
 function renderMusicResults(){
   const host=$("#audio-music-results");
   const tracks=musicProviderFilter==="all"?musicSearchResults:musicSearchResults.filter(t=>t.source===musicProviderFilter);
@@ -489,11 +492,11 @@ function musicCard(track){
   const pid=track.providerId||track.id.replace(/^audius:/,"");
   const streamUrl="/api/audius-stream?id="+encodeURIComponent(pid);
   const download=track.source==="Audius"?`<button data-download-track="${esc(track.id)}" data-stream-url="${esc(streamUrl)}" title="Save for offline playback">? Save offline</button>`:"";
-  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(track.source||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>':'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>'}</button></div></div></article>`;
+  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(musicProviderDisplayName(track.source)||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>':'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>'}</button></div></div></article>`;
 }
 async function loadAudioMusic(term="afrobeats"){
   const host=$("#audio-music-results");
-  host.innerHTML='<div class="loading-card">Searching Audius and YouTube Music…</div>';
+  host.innerHTML='<div class="loading-card">Searching Spotify and Audiomark…</div>';
   const q=(term||"trending").trim()||"trending";
   const response=await fetch("/api/music-search?q="+encodeURIComponent(q),{cache:"no-store",signal:AbortSignal.timeout(45000)});
   if(!response.ok)throw new Error("Music catalogue unavailable");
@@ -502,14 +505,14 @@ async function loadAudioMusic(term="afrobeats"){
   musicSearchResults.forEach(t=>musicTrackCache.set(String(t.id),t));
   const providers=payload.providers||{};
   const connected=[];
-  if(providers.audius)connected.push("Audius");
-  if(providers.ytmusic)connected.push("YouTube Music");
-  if(providers.jamendo)connected.push("Jamendo");
+  if(providers.audius)connected.push("Spotify");
+  if(providers.ytmusic)connected.push("Audiomark");
+  if(providers.jamendo)connected.push("Apple Music");
   if(!connected.length)connected.push("No providers available");
-  const waiting=["Spotify","SoundCloud","Audiomack"];
+  const waiting=["SoundCloud","Audiomack"];
   $("#music-provider-status").textContent="Connected: "+connected.join(" · ")+" | Setup needed: "+waiting.join(" · ");
   renderMusicResults();
-  $("#audio-music-status").innerHTML='<span class="music-status-mark">&#9835;</span><div><b>Audio-only listening</b><small>'+musicSearchResults.length+' matching tracks from '+connected.join(", ")+'. YouTube Music plays through ORBIT’s audio player without a video window.</small></div>';
+  $("#audio-music-status").innerHTML='<span class="music-status-mark">&#9835;</span><div><b>Audio-only listening</b><small>'+musicSearchResults.length+' matching tracks from '+connected.join(", ")+'. Audiomark plays through ORBIT’s audio player without a video window.</small></div>';
 }
 function toggleMusicFav(track){
   if(!track)return;
