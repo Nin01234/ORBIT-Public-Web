@@ -226,9 +226,21 @@ async function api(req,res,url) {
     countryList=(data||[]).filter(x=>x&&x.code&&x.name);countryListAt=Date.now();return send(res,200,countryList,"public, max-age=3600");
   }
   if(p==="/api/global-channels") {
-    const code=safeText(url.searchParams.get("country"),2).toLowerCase();if(!/^[a-z]{2}$/.test(code))return send(res,400,{error:"Choose a valid country code"});
+    const code=safeText(url.searchParams.get("country"),5).toLowerCase();
+    if(code!=="all"&&!/^[a-z]{2}$/.test(code))return send(res,400,{error:"Choose a valid country code"});
     const key="tv:"+code,old=cached(key);if(old)return send(res,200,old,"public, max-age=1800");
-    const data=await loadTvCatalog();const ids=new Set(data.channels.filter(c=>c&&c.id&&String(c.country||"").toLowerCase()===code).map(c=>c.id));
+    const data=await loadTvCatalog();
+    if(code==="all"){
+      const availableStreams=data.streams.filter(s=>s&&s.channel&&s.url&&/^https?:\/\//i.test(s.url));
+      const streamIds=new Set(availableStreams.map(s=>s.channel));
+      const channels=data.channels.filter(c=>c&&c.id&&streamIds.has(c.id))
+        .sort((a,b)=>(a.country||"").localeCompare(b.country||"")||(a.name||"").localeCompare(b.name||""))
+        .slice(0,1500);
+      const ids=new Set(channels.map(c=>c.id));
+      const streams=availableStreams.filter(s=>ids.has(s.channel));
+      const result={channels,streams};return send(res,200,store(key,result,TTL.channels),"public, max-age=1800");
+    }
+    const ids=new Set(data.channels.filter(c=>c&&c.id&&String(c.country||"").toLowerCase()===code).map(c=>c.id));
     const streams=data.streams.filter(s=>s&&s.url&&ids.has(s.channel)&&/^https?:\/\//i.test(s.url));
     const channels=data.channels.filter(c=>c&&ids.has(c.id)).map(c=>({...c,streams:streams.filter(s=>s.channel===c.id)}));
     const result={channels,streams};return send(res,200,store(key,result,TTL.channels),"public, max-age=1800");
