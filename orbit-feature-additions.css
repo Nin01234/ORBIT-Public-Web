@@ -406,6 +406,21 @@ html[data-theme="light"] .live-dot{background:#b8874b!important;box-shadow:none!
   #view-omnisave #omnisave-browser-frame, #view-omnisave .omnisave-browser-help { display:none !important; }
 }
 
+
+
+/* Trailer choices stay below the video frame, never over YouTube controls. */
+#view-movies .orbit-trailer-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;width:100%!important;max-width:820px!important;margin:12px 0 20px!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-player{position:relative!important;display:block!important;width:100%!important;max-width:none!important;aspect-ratio:16/9!important;height:auto!important;min-height:0!important;margin:0!important;overflow:hidden!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-player iframe{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;}
+#view-movies .orbit-trailer-layout .trailer-picker-controls{position:static!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important;width:100%!important;max-width:none!important;margin:0!important;}
+#view-movies .orbit-trailer-layout .trailer-picker-toggle{position:static!important;inset:auto!important;display:inline-flex!important;width:auto!important;max-width:100%!important;margin:0!important;padding:10px 14px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:10px!important;background:#17231f!important;color:#fff!important;font-weight:700!important;cursor:pointer!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-picker{position:static!important;width:100%!important;max-height:min(62vh,520px)!important;box-sizing:border-box!important;overflow-y:auto!important;padding:14px!important;border:1px solid rgba(120,150,135,.28)!important;border-radius:12px!important;background:#0d1513!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-picker[hidden]{display:none!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important;gap:10px!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-card{display:grid!important;grid-template-columns:96px minmax(0,1fr)!important;gap:9px!important;align-items:center!important;min-width:0!important;}
+#view-movies .orbit-trailer-layout .orbit-trailer-card img{width:96px!important;height:60px!important;aspect-ratio:16/9!important;object-fit:cover!important;}
+@media(max-width:760px){#view-movies .orbit-trailer-layout{width:100%!important;max-width:none!important;}#view-movies .orbit-trailer-layout .orbit-trailer-grid{display:flex!important;flex-direction:column!important;}}
+
 /* ORBIT web readability: consistent public-facing type scale on desktop browsers. */
 @media (min-width: 801px) {
   body, button, input, select, textarea { font-family: "Figtree", "Instrument Sans", Arial, sans-serif !important; }
