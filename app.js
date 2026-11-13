@@ -702,7 +702,7 @@ async function openTmdbMovie(id){
         '<div class="orbit-trailer-picker" hidden><div class="orbit-trailer-picker-head"><strong>Select a trailer</strong><button type="button" data-trailer-toggle-close aria-label="Close trailer list">×</button></div>'+
         '<div class="orbit-trailer-grid">'+trailers.map((v,i)=>'<article class="orbit-trailer-card">'+
         '<img src="'+esc(v.thumbnail||("https://img.youtube.com/vi/"+v.youtubeId+"/hqdefault.jpg"))+'" alt="" loading="lazy">'+
-        '<div><strong>'+esc(v.title||"Movie trailer")+'</strong><small>'+esc(v.source==="Netflix channel"?"Netflix · "+(v.channel||""):"YouTube · "+(v.channel||""))+'</small><button data-trailer-play="'+esc(v.youtubeId)+'" data-title="'+esc(v.title||movie.title+" trailer")+'">'+(i===0?'Replay trailer':'Play this trailer')+'</button></div></article>').join("")+'</div></div></div></section><section class="movie-related-section" aria-label="More YouTube videos"><div class="movie-related-heading"><h4>More videos</h4><span>From YouTube</span></div><div id="movie-related-videos" class="movie-related-grid"><div class="loading-card">Finding more videos on YouTube…</div></div></section>':
+        '<div><strong>'+esc(v.title||"Movie trailer")+'</strong><small>'+esc(v.source==="Netflix channel"?"Netflix · "+(v.channel||""):"YouTube · "+(v.channel||""))+'</small><button data-trailer-play="'+esc(v.youtubeId)+'" data-title="'+esc(v.title||movie.title+" trailer")+'">'+(i===0?'Replay trailer':'Play this trailer')+'</button></div></article>').join("")+'</div></div></div></section>':
         '<div class="empty-state">No matching trailer was found right now. Try again later or search another movie.</div>')+'</section>'
     const titleKey=String(movie.title||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
     const matches=(Array.isArray(films)?films:[]).map(f=>{
@@ -726,27 +726,10 @@ async function openTmdbMovie(id){
       (matches.length?'<h3 class="section-title">Available to watch inside ORBIT</h3><div class="media-grid">'+matchHtml+'</div>':
       '<div class="empty-state">A verified full-length free stream or downloadable copy was not found for this title. You can still watch the trailer above. Browse ORBIT’s free public-domain movie collection below. Commercial movies require a separate streaming licence.<div class="music-card-actions" style="margin-top:12px"><button data-browse-free-movies>Browse free full movies</button></div></div>');
     $("#film-result-note").textContent=matches.length?matches.length+" authorized free match(es) · In-app playback and download":"No authorized full-film source found for this title";
-    if(trailers.length)loadMovieRelatedVideos(trailers[0].youtubeId,movie.title||"");
   }catch(error){
     if(token!==tmdbMovieOpenToken)return;
     panel.innerHTML='<button type="button" class="mobile-film-back" data-film-detail-back><span aria-hidden="true">←</span> Back to films</button><div class="film-detail-copy"><h2>'+esc(movie.title||"Untitled")+'</h2><p>Could not check full-film sources right now. Please try again.</p></div>';
     $("#film-result-note").textContent="Movie source check failed";
-  }
-}
-async function loadMovieRelatedVideos(videoId, movieTitle){
-  const host=$("#movie-related-videos");
-  if(!host||!/^[A-Za-z0-9_-]{11}$/.test(videoId||""))return;
-  host.dataset.videoId=videoId;
-  host.innerHTML='<div class="loading-card">Finding more videos on YouTube…</div>';
-  try{
-    const response=await fetch("/api/youtube-related?videoId="+encodeURIComponent(videoId),{signal:AbortSignal.timeout(25000),cache:"no-store"});
-    if(!response.ok)throw new Error("Related videos unavailable");
-    const videos=await response.json();
-    if(host.dataset.videoId!==videoId)return;
-    const safeVideos=(Array.isArray(videos)?videos:[]).filter(v=>/^[A-Za-z0-9_-]{11}$/.test(v.videoId||"")&&v.videoId!==videoId).slice(0,12);
-    host.innerHTML=safeVideos.length?safeVideos.map(v=>'<article class="movie-related-card"><button type="button" class="movie-related-play" data-movie-related-play="'+esc(v.videoId)+'" data-title="'+esc(v.title||"YouTube video")+'" aria-label="Play '+esc(v.title||"YouTube video")+'"><img src="'+esc(v.thumbnail||("https://img.youtube.com/vi/"+v.videoId+"/hqdefault.jpg"))+'" alt="" loading="lazy"><span class="movie-related-play-icon" aria-hidden="true">▶</span></button><div><strong>'+esc(v.title||"YouTube video")+'</strong><small>'+esc(v.author||"YouTube")+(v.length?' · '+esc(v.length):'')+'</small></div></article>').join(""):'<div class="empty-state">YouTube has no related videos to show right now.</div>';
-  }catch{
-    if(host.dataset.videoId===videoId)host.innerHTML='<div class="empty-state">More videos are temporarily unavailable. The trailer can still play above.</div>';
   }
 }
 async function loadPublicDomainFilms(term="popular"){
@@ -1304,8 +1287,7 @@ function setupEvents(){
     const audioFav=e.target.closest("[data-audio-fav]");if(audioFav){toggleMusicFav(musicTrackCache.get(String(audioFav.dataset.audioFav))||musicFavs().find(x=>String(x.id)===String(audioFav.dataset.audioFav)));return;}
     const film=e.target.closest("[data-film-play]");if(film){playArchiveFilm(film.dataset.filmPlay,film.dataset.title);return;}
     const trailerToggle=e.target.closest("[data-trailer-toggle],[data-trailer-toggle-close]");if(trailerToggle){const host=$("#movie-trailer-player"),picker=host?.querySelector(".orbit-trailer-picker");const open=picker?.hidden!==false;if(picker){picker.hidden=!open;const btn=host.querySelector("[data-trailer-toggle]");if(btn){btn.setAttribute("aria-expanded",String(open));btn.innerHTML=open?'Hide trailers <span>⌃</span>':'Choose trailer <span>⌄</span>';}}return;}
-    const trailer=e.target.closest("[data-trailer-play]");if(trailer){const host=$("#movie-trailer-player");if(host){const picker=host.querySelector(".orbit-trailer-picker");if(picker)picker.hidden=true;const toggle=host.querySelector("[data-trailer-toggle]");if(toggle){toggle.setAttribute("aria-expanded","false");toggle.innerHTML='Choose trailer <span>⌄</span>';}const frame=host.querySelector("iframe");if(frame)frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(trailer.dataset.trailerPlay)+"?autoplay=1&playsinline=1&rel=0&modestbranding=1";loadMovieRelatedVideos(trailer.dataset.trailerPlay,trailer.dataset.title||"");host.scrollIntoView({behavior:"smooth",block:"nearest"});$("#film-result-note").textContent="Playing trailer inside ORBIT";}return;}
-    const relatedVideo=e.target.closest("[data-movie-related-play]");if(relatedVideo){const host=$("#movie-trailer-player"),frame=host?.querySelector("iframe");if(frame){frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(relatedVideo.dataset.movieRelatedPlay)+"?autoplay=1&playsinline=1&rel=0&modestbranding=1";loadMovieRelatedVideos(relatedVideo.dataset.movieRelatedPlay,relatedVideo.dataset.title||"");$("#film-result-note").textContent="Playing YouTube video inside ORBIT";host.scrollIntoView({behavior:"smooth",block:"nearest"});}return;}
+    const trailer=e.target.closest("[data-trailer-play]");if(trailer){const host=$("#movie-trailer-player");if(host){const picker=host.querySelector(".orbit-trailer-picker");if(picker)picker.hidden=true;const toggle=host.querySelector("[data-trailer-toggle]");if(toggle){toggle.setAttribute("aria-expanded","false");toggle.innerHTML='Choose trailer <span>⌄</span>';}const frame=host.querySelector("iframe");if(frame)frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(trailer.dataset.trailerPlay)+"?autoplay=1&playsinline=1&rel=0&modestbranding=1";host.scrollIntoView({behavior:"smooth",block:"nearest"});$("#film-result-note").textContent="Playing trailer inside ORBIT";}return;}
      const browseFree=e.target.closest("[data-browse-free-movies]");if(browseFree){loadPublicDomainFilms("popular").then(()=>{$("#movie-results").scrollIntoView({behavior:"smooth",block:"start"});}).catch(()=>notify("Free movie catalogue is temporarily unavailable."));return;}
     const filmDetailBack=e.target.closest("[data-film-detail-back]");if(filmDetailBack){closeMobileMovieDetail();return;}
     const tmdbOpen=e.target.closest("[data-tmdb-open]");if(tmdbOpen){openTmdbMovie(tmdbOpen.dataset.tmdbOpen);return;}
