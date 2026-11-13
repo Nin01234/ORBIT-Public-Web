@@ -322,9 +322,27 @@ async function api(req,res,url) {
       });
       if(!upstream.ok)return send(res,upstream.status,{error:"YouTube related videos unavailable"});
       const html=await upstream.text();
-      const match=html.match(/ytInitialData\s*=\s*(\{.*?\})\s*;\s*<\/script>/s);
-      if(!match)return send(res,502,{error:"YouTube did not provide related videos"});
-      const data=JSON.parse(match[1]),found=[],seen=new Set([videoId]);
+      const marker=html.match(/(?:var\s+)?ytInitialData\s*=\s*/);
+      if(!marker)return send(res,502,{error:"YouTube did not provide related videos"});
+      const dataStart=marker.index+marker[0].length;
+      let depth=0,inString=false,escaped=false,dataEnd=-1;
+      for(let i=dataStart;i<html.length;i++){
+        const ch=html[i];
+        if(inString){
+          if(escaped)escaped=false;
+          else if(ch==="\\")escaped=true;
+          else if(ch==='"')inString=false;
+          continue;
+        }
+        if(ch==='"'){inString=true;continue;}
+        if(ch==="{")depth++;
+        else if(ch==="}"&&--depth===0){dataEnd=i+1;break;}
+      }
+      if(dataEnd<0)return send(res,502,{error:"YouTube related-video data was incomplete"});
+      let data;
+      try{data=JSON.parse(html.slice(dataStart,dataEnd));}
+      catch{return send(res,502,{error:"YouTube related-video data could not be parsed"});}
+      const found=[],seen=new Set([videoId]);
       const walk=value=>{
         if(!value||typeof value!=="object"||found.length>=40)return;
         if(value.videoRenderer){
