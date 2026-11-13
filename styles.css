@@ -155,3 +155,18 @@ body.player-hidden .player-reveal{display:grid}
 .movie-related-card small{-webkit-line-clamp:2;margin-top:5px;font-size:9px;line-height:1.4;color:var(--muted)}
 @media(max-width:760px){.movie-related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.movie-related-card{grid-template-columns:1fr}.movie-related-card strong{font-size:10px}}
 @media(max-width:430px){.movie-related-grid{grid-template-columns:1fr}.movie-related-card{grid-template-columns:112px minmax(0,1fr)}}
+
+/* More videos opens as a selectable pop-up list */
+.movie-related-heading{margin-bottom:10px}
+.movie-related-toggle{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.movie-related-toggle:hover,.movie-related-toggle[aria-expanded=true]{border-color:var(--lime);color:var(--lime)}
+.movie-related-toggle span{font-size:16px;transition:transform .18s}
+.movie-related-toggle[aria-expanded=true] span{transform:rotate(180deg)}
+.movie-related-heading small{font-size:10px;color:var(--muted)}
+.movie-related-popover{position:relative;margin:10px 0 24px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:0 16px 42px #0005;animation:movieRelatedPop .18s ease-out}
+.movie-related-popover[hidden]{display:none}
+.movie-related-popover-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.movie-related-popover-head strong{font-size:13px;color:var(--ink)}
+.movie-related-popover-head button{width:30px;height:30px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+@keyframes movieRelatedPop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.movie-related-popover{animation:none}}
