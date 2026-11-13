@@ -1135,10 +1135,19 @@ function renderGlobalLiveChannels(){
    {name:"TV3 Ghana",network:"Media General",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UC9VSDs4ZXo3sjOoPkmW2iRQ"},
    {name:"Joy News",network:"The Multimedia Group",desc:"Official YouTube channel player",embed:"https://www.youtube.com/embed/videoseries?list=PLEhaP2Z2iO3qxEM5RbZPZCcV0o0Z9azwh"},
    {name:"Adom TV",network:"The Multimedia Group",desc:"Official YouTube channel player",embed:"https://www.youtube.com/embed/videoseries?list=PLyie0rQsQVfLBtDNoK_LUa2AqeWNQH6q2"},
-   {name:"Max TV",network:"iMax Media Group",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UCj46FV4TFrJncXCshjBbg3w"}
+   {name:"Max TV",network:"iMax Media Group",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UCj46FV4TFrJncXCshjBbg3w"},
+   {name:"UTV Ghana",network:"Despite Media",desc:"Official channel listed; no verified embeddable live feed yet"},
+   {name:"GTV Sports+",network:"Ghana Broadcasting Corporation",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UC9wDer2KbLNoasCbdPYBFGw"},
+   {name:"Angel TV",network:"Angel Broadcasting Network",desc:"Official YouTube live player",embed:"https://www.youtube.com/embed/live_stream?channel=UCbUIPgslZTlsh98KknrNB8Q"},
+   {name:"SportyTV",network:"Sporty Group",desc:"Official channel listed; live matches may be region- or event-restricted"},
+   {name:"GTV Ghana",network:"Ghana Broadcasting Corporation",desc:"Official channel listed; no verified embeddable live feed yet"},
+   {name:"Metro TV Ghana",network:"Ignite Media",desc:"Official channel listed; no verified embeddable live feed yet"},
+   {name:"GHOne TV",network:"EIB Network",desc:"Official channel listed; no verified embeddable live feed yet"},
+   {name:"Onua TV",network:"Media General",desc:"Official channel listed; no verified embeddable live feed yet"},
+   {name:"Joy Prime",network:"The Multimedia Group",desc:"Official channel listed; no verified embeddable live feed yet"}
   ].filter(ch=>!q||[ch.name,ch.network].join(" ").toLowerCase().includes(q));
-  host.innerHTML=official.length?'<div class="global-tv-official-grid">'+official.map(ch=>'<button type="button" class="global-tv-official-card" data-orbit-official-tv="'+esc(ch.embed)+'" data-orbit-tv-name="'+esc(ch.name)+'"><span class="global-tv-official-mark">GH</span><span class="global-tv-official-copy"><span class="global-tv-free-label">FREE-TO-AIR</span><strong>'+esc(ch.name)+'</strong><small>'+esc(ch.network)+' · '+esc(ch.desc)+'</small><span class="global-tv-inapp-play">▶ Play inside ORBIT</span></span></button>').join("")+'</div>':'<div class="empty-state">No official Ghana channels match that search.</div>';
-  $("#global-tv-status").textContent="Select a channel to play its official live player inside ORBIT.";
+  host.innerHTML=official.length?'<div class="global-tv-official-grid">'+official.map(ch=>'<button type="button" class="global-tv-official-card" data-orbit-official-tv="'+esc(ch.embed||"")+'" data-orbit-tv-name="'+esc(ch.name)+'"><span class="global-tv-official-mark">GH</span><span class="global-tv-official-copy"><span class="global-tv-free-label">GHANA TV</span><strong>'+esc(ch.name)+'</strong><small>'+esc(ch.network)+' · '+esc(ch.desc)+'</small><span class="global-tv-inapp-play">'+(ch.embed?"▶ Play inside ORBIT":"Channel listed · stream not verified")+'</span></span></button>').join("")+'</div>':'<div class="empty-state">No official Ghana channels match that search.</div>';
+  $("#global-tv-status").textContent="Ghana channel directory: verified official in-app players are available where broadcasters provide an embeddable feed.";
   return;
  }
  const streamMap=new Map();
@@ -1261,6 +1270,7 @@ function setupGlobalLive(){
   const official=e.target.closest("[data-orbit-official-tv]");
   if(official){
    const name=official.dataset.orbitTvName||"Ghana TV",video=$("#global-tv-video"),screen=video.parentElement;
+   if(!official.dataset.orbitOfficialTv){$("#global-tv-status").textContent=name+" is now listed in ORBIT, but its broadcaster has not provided a verified public embeddable live stream. ORBIT will not substitute an unofficial or unauthorized feed.";return;}
    let frame=$("#global-tv-embed");
    if(!frame){video.hidden=true;frame=document.createElement("iframe");frame.id="global-tv-embed";frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";frame.allowFullscreen=true;frame.referrerPolicy="strict-origin-when-cross-origin";frame.style.cssText="width:100%;aspect-ratio:16/9;border:0;background:#000;border-radius:12px";screen.insertBefore(frame,video);}
    frame.title=name+" live";frame.src=official.dataset.orbitOfficialTv;
