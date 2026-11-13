@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "postinstall": "node install-ytmusic-deps.cjs"
+    "postinstall": "node install-ytmusic-deps.cjs",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20"
