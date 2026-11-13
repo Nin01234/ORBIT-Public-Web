@@ -7,6 +7,7 @@ import { randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
 import { Readable } from "node:stream";
 import { gunzipSync } from "node:zlib";
+import { createFixedWindowLimiter, getClientIp, isSameOriginWebSocket, securityHeaderValues } from "./security.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
@@ -63,25 +64,27 @@ function runYoutubeMusicBridge(action, values = {}) {
     });
   });
 }
-const rate = new Map();
+const globalRate = createFixedWindowLimiter();
+const routeRate = createFixedWindowLimiter();
 const rateCleanup = setInterval(() => {
-  const cutoff = Date.now() - 120000;
-  for (const [ip, entry] of rate) if ((entry.lastSeen || entry.start || 0) < cutoff) rate.delete(ip);
-  while (rate.size > 50000) rate.delete(rate.keys().next().value);
+  globalRate.cleanup();
+  routeRate.cleanup();
 }, 60000);
 rateCleanup.unref?.();
+function endpointLimit(pathname) {
+  if (pathname === "/api/audius-download") return 8;
+  if (pathname === "/api/youtube-music/audio") return 30;
+  if (pathname === "/api/audius-stream") return 60;
+  if (pathname === "/api/film-download-url") return 15;
+  if (pathname === "/api/movie-trailers" || pathname === "/api/youtube-search") return 15;
+  if (pathname === "/api/global-search" || pathname === "/api/global-channels") return 30;
+  return 90;
+}
 const TTL = { radio: 120000, music: 180000, podcast: 300000, countries: 86400000, channels: 21600000, films: 3600000, movies: 3600000 };
 let tvCatalog = null, tvCatalogAt = 0, countryList = null, countryListAt = 0;
 
 function securityHeaders(res) {
-  res.setHeader("X-Content-Type-Options","nosniff");
-  res.setHeader("X-Frame-Options","SAMEORIGIN");
-  res.setHeader("Referrer-Policy","strict-origin-when-cross-origin");
-  res.setHeader("Permissions-Policy","camera=(self), microphone=(self), geolocation=()");
-  res.setHeader("X-DNS-Prefetch-Control","off");
-  res.setHeader("X-Permitted-Cross-Domain-Policies","none");
-  res.setHeader("Cross-Origin-Opener-Policy","same-origin");
-  if(process.env.RENDER) res.setHeader("Strict-Transport-Security","max-age=31536000; includeSubDomains");
+  for (const [name, value] of Object.entries(securityHeaderValues(Boolean(process.env.RENDER)))) res.setHeader(name, value);
 }
 function send(res,status,data,cacheControl="no-store") {
   securityHeaders(res);
@@ -362,16 +365,16 @@ const server=http.createServer(async(req,res)=>{
     return;
   }
   if(url.pathname.startsWith("/api/")){
-    const ip=(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").toString().split(",")[0].trim();
-    const now=Date.now(),entry=rate.get(ip)||{start:now,count:0,lastSeen:now};
-    if(now-entry.start>60000){entry.start=now;entry.count=0;}entry.count++;entry.lastSeen=now;rate.set(ip,entry);
-    if(rate.size>50000){for(let i=0;i<10000;i++){const first=rate.keys().next().value;if(first===undefined)break;rate.delete(first);}}
-    if(entry.count>150){res.writeHead(429,{"Retry-After":"60","Content-Type":"application/json"}).end('{"error":"Too many requests. Please wait a minute."}');return;}
-    if(req.method!=="GET"&&req.method!=="HEAD"){res.writeHead(405,{"Allow":"GET, HEAD"}).end("Method not allowed");return;}
+    if(req.method!=="GET"&&req.method!=="HEAD"){res.writeHead(405,{"Allow":"GET, HEAD","Cache-Control":"no-store"}).end("Method not allowed");return;}
+    if(Number(req.headers["content-length"]||0)>0||req.headers["transfer-encoding"]){res.writeHead(400,{"Cache-Control":"no-store"}).end("Request body not accepted");return;}
+    const ip=getClientIp(req,Boolean(process.env.RENDER));
+    const globalCheck=globalRate.consume(ip,150);
+    if(!globalCheck.allowed){res.writeHead(429,{"Retry-After":String(globalCheck.retryAfter),"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"error":"Too many requests. Please wait before trying again."}');return;}
+    const routeCheck=routeRate.consume(ip+"|"+url.pathname,endpointLimit(url.pathname));
+    if(!routeCheck.allowed){res.writeHead(429,{"Retry-After":String(routeCheck.retryAfter),"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"error":"This service is receiving too many requests. Please wait before trying again."}');return;}
     try{return await api(req,res,url);}catch(error){
-      console.error("ORBIT public API:",url.pathname,error?.stack||error?.message||String(error));
-      const isYoutubeAudio=url.pathname==="/api/youtube-music/audio";
-      if(!res.headersSent)send(res,502,{error:isYoutubeAudio?(error?.message||"YouTube Music audio is temporarily unavailable."):"The requested service is temporarily unavailable."});
+      console.error("ORBIT public API request failed:",url.pathname,error?.name||"Error");
+      if(!res.headersSent)send(res,502,{error:"The requested service is temporarily unavailable. Please try again."});
       else res.destroy();return;
     }
   }
@@ -394,7 +397,7 @@ liveWss.on("connection",(socket,request)=>{
     if(!message||typeof message.type!=="string")return;
     if(message.type==="create"){
       if(socket.role)return wsSend(socket,{type:"error",message:"This connection already has a role."});
-      const ip=String(request.headers["x-forwarded-for"]||request.socket.remoteAddress||"unknown").split(",")[0].trim();
+      const ip=getClientIp(request,Boolean(process.env.RENDER));
       if(liveRooms.size>=150||[...liveRooms.values()].filter(room=>room.ip===ip).length>=2)return wsSend(socket,{type:"error",message:"The free live-room limit has been reached for now. Try again later."});
       let roomId;do{roomId=randomBytes(5).toString("hex").toUpperCase();}while(liveRooms.has(roomId));
       socket.role="host";socket.roomId=roomId;liveRooms.set(roomId,{host:socket,listeners:new Map(),createdAt:Date.now(),ip});return wsSend(socket,{type:"created",room:roomId});
@@ -428,7 +431,10 @@ server.on("upgrade",(request,socket,head)=>{
   let pathname;try{pathname=new URL(request.url||"/","http://localhost").pathname;}catch{socket.destroy();return;}
   if(pathname!=="/signal"){socket.destroy();return;}
   const origin=request.headers.origin||"";
-  if(origin){try{const u=new URL(origin),local=["localhost","127.0.0.1"].includes(u.hostname);if(!local&&u.host!==request.headers.host){socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");socket.destroy();return;}}catch{socket.destroy();return;}}
+  if(!isSameOriginWebSocket(origin,request.headers.host)){socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");socket.destroy();return;}
+  const ip=getClientIp(request,Boolean(process.env.RENDER));
+  const wsLimit=routeRate.consume(ip+"|/signal",20);
+  if(!wsLimit.allowed||liveWss.clients.size>=500){socket.write("HTTP/1.1 429 Too Many Requests\r\nRetry-After: "+wsLimit.retryAfter+"\r\n\r\n");socket.destroy();return;}
   liveWss.handleUpgrade(request,socket,head,ws=>liveWss.emit("connection",ws,request));
 });
 const host=process.env.RENDER?"0.0.0.0":"127.0.0.1";
