@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -145,7 +145,8 @@
   <div class="page-intro"><div><h1>Find your next film.</h1><p>Browse trending, popular, upcoming and highly rated films with TMDB-powered information, plus public-domain films you can play inside ORBIT.</p></div></div>
   <div class="content-toolbar"><div class="filter-pills">
     <button class="pill active" data-movie="trending">Trending</button><button class="pill" data-movie="popular">Popular</button><button class="pill" data-movie="top-rated">Top rated</button><button class="pill" data-movie="upcoming">Upcoming</button><button class="pill" data-movie="action">Action</button><button class="pill" data-movie="drama">Drama</button><button class="pill" data-movie="comedy">Comedy</button><button class="pill" data-movie="documentary">Documentary</button><button class="pill" data-movie="free">Free to watch</button><button class="pill" data-movie="public-domain">Public domain</button>
-  </div><input class="inline-search" id="movie-search" placeholder="Search TMDB film titles..."></div>  <div class="film-player-panel" id="film-player-panel"><div class="film-placeholder"><span>&#9635;</span><b>Choose a film to see details</b><small>Movie information is provided by TMDB. Full-film playback depends on the streaming rights holder.</small></div></div>
+  </div><input class="inline-search" id="movie-search" placeholder="Search TMDB film titles..."></div>
+  <div class="film-player-panel" id="film-player-panel"><div class="film-placeholder"><span>&#9635;</span><b>Choose a film to see details</b><small>Movie information is provided by TMDB. Full-film playback depends on the streaming rights holder.</small></div></div>
   <div class="film-results-heading"><h2>Films to explore</h2><span id="film-result-note">TMDB movie catalogue</span></div>
   <div class="media-grid" id="movie-results"><div class="loading-card">Loading TMDB films...</div></div>
   <p class="catalogue-disclaimer">This product uses the TMDB API but is not endorsed or certified by TMDB. Movie posters and details are from TMDB. TMDB metadata does not include full-film streams. Films marked free are listed by Spinn Radio; availability and playback are controlled by the rights holder.</p>
@@ -268,7 +269,26 @@
 <button class="player-reveal" id="player-reveal" type="button" aria-label="Show player" title="Show player">&#9835;</button>
 <audio id="audio-player" preload="none"></audio>
   <div class="toast" id="toast" role="status"></div><div class="profile-backdrop" id="profile-backdrop"><section class="profile-dialog"><button id="profile-close" class="profile-close">&times;</button><h2>Your profile</h2><img id="profile-image" class="profile-image" alt="Profile image"><label>Display name<input id="profile-name" maxlength="60"></label><label>About you<textarea id="profile-about" maxlength="240"></textarea></label><label>Upload profile image<input id="profile-image-file" type="file" accept="image/*"></label><button class="button button-light" id="profile-save">Save profile</button></section></div>
-  <script defer src="./mobile-bridge.js"></script><script defer src="./live-podcast.js"></script><script defer src="./app.js"></script>
+  <script defer src="./mobile-bridge.min.js"></script><script defer src="./live-podcast.min.js"></script><script defer src="./app.min.js"></script>
+<script>
+(() => {
+  const editable = target => target instanceof Element && !!target.closest('input, textarea, select, [contenteditable="true"]');
+  document.addEventListener('contextmenu', event => {
+    if (!editable(event.target)) event.preventDefault();
+  }, true);
+  document.addEventListener('keydown', event => {
+    const key = String(event.key || '').toLowerCase();
+    const modifier = event.ctrlKey || event.metaKey;
+    const devToolsShortcut = key === 'f12' ||
+      (modifier && event.shiftKey && ['i', 'j', 'c', 'k'].includes(key)) ||
+      (modifier && key === 'u');
+    if (devToolsShortcut) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+})();
+</script>
 </body>
 </html>
 

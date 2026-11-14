@@ -6,13 +6,17 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "postinstall": "node install-ytmusic-deps.cjs",
-    "test": "node --test"
+    "postinstall": "node install-ytmusic-deps.cjs && npm run build:frontend",
+    "test": "node --test",
+    "build:frontend": "node build-frontend.cjs"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "ws": "^8.22.2"
+  },
+  "devDependencies": {
+    "terser": "^5.51.2"
   }
 }
