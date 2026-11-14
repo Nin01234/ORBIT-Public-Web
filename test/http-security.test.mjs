@@ -47,4 +47,15 @@ test("all ordinary HTTP response paths include security headers",async t=>{
     assert.equal(response.headers.get("x-content-type-options"),"nosniff",method+" "+path+" security header");
     assert.ok(response.headers.get("content-security-policy"),method+" "+path+" CSP header");
   }
+
+  const compressed=await fetch("http://127.0.0.1:"+port+"/app.js",{headers:{"Accept-Encoding":"gzip"}});
+  assert.equal(compressed.status,200);
+  assert.equal(compressed.headers.get("content-encoding"),"gzip");
+  assert.equal(compressed.headers.get("vary"),"Accept-Encoding");
+  const decoded=await compressed.text();
+  assert.match(decoded,/const \$ =/);
+
+  const identity=await fetch("http://127.0.0.1:"+port+"/app.js",{headers:{"Accept-Encoding":"identity"}});
+  assert.equal(identity.headers.get("content-encoding"),null);
+  assert.equal(identity.headers.get("vary"),"Accept-Encoding");
 });

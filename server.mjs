@@ -6,7 +6,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
 import { Readable } from "node:stream";
-import { gunzipSync } from "node:zlib";
+import { gzipSync } from "node:zlib";
 import { createFixedWindowLimiter, getClientIp, isSameOriginWebSocket, securityHeaderValues } from "./security.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -14,6 +14,7 @@ const port = Number(process.env.PORT || 3000);
 const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".svg":"image/svg+xml", ".png":"image/png", ".ico":"image/x-icon", ".webmanifest":"application/manifest+json" };
 const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-web-refresh.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
 const cache = new Map();
+const gzipCache = new Map();
 let ytmusicBridgeActive = 0;
 function runYoutubeMusicBridge(action, values = {}) {
   if (ytmusicBridgeActive >= 3) return Promise.reject(new Error("The music service is busy. Please try again in a moment."));
@@ -413,7 +414,33 @@ const server=http.createServer(async(req,res)=>{
   const icon=/^icons\/[A-Za-z0-9._-]+\.png$/i.test(name);
   if(!allowed.has(name)&&!icon){res.writeHead(404).end("Not found");return;}
   const target=path.resolve(root,name);if(!target.startsWith(root+path.sep)){res.writeHead(403).end("Forbidden");return;}
-  fs.readFile(target,(err,data)=>{if(err){securityHeaders(res);res.writeHead(404).end("Not found");return;}securityHeaders(res);res.writeHead(200,{"Content-Type":mime[path.extname(target)]||"application/octet-stream","Cache-Control":name==="index.html"||name==="sw.js"||/\.(js|css)$/.test(name)?"no-cache":"public, max-age=3600"});if(req.method==="HEAD")res.end();else res.end(data);});
+  fs.readFile(target,(err,data)=>{
+    if(err){securityHeaders(res);res.writeHead(404).end("Not found");return;}
+    securityHeaders(res);
+    const ext=path.extname(target).toLowerCase();
+    const contentType=mime[ext]||"application/octet-stream";
+    const headers={
+      "Content-Type":contentType,
+      "Cache-Control":name==="index.html"||name==="sw.js"||/\.(js|css)$/.test(name)?"no-cache":"public, max-age=3600"
+    };
+    const compressible=[".html",".css",".js",".svg",".webmanifest"].includes(ext);
+    let body=data;
+    if(compressible){
+      headers.Vary="Accept-Encoding";
+      if(/\bgzip\b/i.test(req.headers["accept-encoding"]||"")){
+        body=gzipCache.get(name);
+        if(!body){
+          body=gzipSync(data,{level:6});
+          gzipCache.set(name,body);
+          if(gzipCache.size>40)gzipCache.delete(gzipCache.keys().next().value);
+        }
+        headers["Content-Encoding"]="gzip";
+      }
+    }
+    headers["Content-Length"]=String(body.length);
+    res.writeHead(200,headers);
+    if(req.method==="HEAD")res.end();else res.end(body);
+  });
 });
 const liveRooms=new Map();
 const liveWss=new WebSocketServer({noServer:true,maxPayload:8192});
