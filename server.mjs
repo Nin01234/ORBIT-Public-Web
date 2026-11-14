@@ -344,7 +344,9 @@ async function api(req,res,url) {
     if(youtubeDownloadActive>=2)return send(res,503,{error:"ORBIT downloads are busy. Please try again shortly."});
     youtubeDownloadActive++;
     let result;
-    try { result=await downloadYouTubeVideo(videoId); }
+    const downloadAbort=new AbortController();
+    res.once("close",()=>downloadAbort.abort());
+    try { result=await downloadYouTubeVideo(videoId,{signal:downloadAbort.signal}); }
     catch(error) {
       console.error("[ORBIT YouTube download]",error?.message||"Download failed");
       return send(res,502,{error:error?.publicMessage||"This video could not be downloaded. It may be unavailable or the source may not permit downloading."});
