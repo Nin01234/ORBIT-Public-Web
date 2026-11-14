@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { WebSocketServer, WebSocket } from "ws";
 import { randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
+import { downloadYouTubeVideo, cleanupYouTubeDownload } from "./youtube-download.mjs";
 import { Readable } from "node:stream";
 import { gunzipSync } from "node:zlib";
 import { createFixedWindowLimiter, getClientIp, isSameOriginWebSocket, securityHeaderValues } from "./security.mjs";
@@ -15,6 +16,7 @@ const mime = { ".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf
 const allowed = new Set(["index.html","app.js","styles.css","orbit-feature-additions.css","orbit-ui-fixes-20261109.css","orbit-mobile.css","orbit-mobile-polish.css","orbit-mobile-landing.css","public-web-overrides.css","orbit-web-refresh.css","orbit-mobile-hero.svg","orbit-mobile-radio.svg","orbit-mobile-music.svg","orbit-mobile-movies.svg","orbit-mobile-offline.svg","orbit-mobile-podcasts.svg","mobile-bridge.js","manifest.webmanifest","sw.js","live-podcast.js"]);
 const cache = new Map();
 let ytmusicBridgeActive = 0;
+let youtubeDownloadActive = 0;
 function runYoutubeMusicBridge(action, values = {}) {
   if (ytmusicBridgeActive >= 3) return Promise.reject(new Error("The music service is busy. Please try again in a moment."));
   const script = path.join(root, "orbit_ytmusic_bridge.py");
@@ -72,6 +74,7 @@ const rateCleanup = setInterval(() => {
 }, 60000);
 rateCleanup.unref?.();
 function endpointLimit(pathname) {
+  if (pathname === "/api/youtube-download") return 2;
   if (pathname === "/api/audius-download") return 8;
   if (pathname === "/api/youtube-music/audio") return 30;
   if (pathname === "/api/audius-stream") return 60;
@@ -333,6 +336,29 @@ async function api(req,res,url) {
       if(staleEntry&&Date.now()-staleEntry.at<30*24*60*60*1000)return send(res,200,staleEntry.data,"public, max-age=300");
       return send(res,200,{title:"",trailers:[],message:"Trailer search is temporarily unavailable."});
     }
+  }
+  if(p==="/api/youtube-download") {
+    const videoId=safeText(url.searchParams.get("videoId"),11);
+    if(!/^[A-Za-z0-9_-]{11}$/.test(videoId))return send(res,400,{error:"Invalid YouTube video identifier."});
+    if(url.searchParams.get("rightsConfirmed")!=="1")return send(res,400,{error:"Please confirm you own this content or have permission to download it, and that the download is permitted by the source's terms."});
+    if(youtubeDownloadActive>=2)return send(res,503,{error:"ORBIT downloads are busy. Please try again shortly."});
+    youtubeDownloadActive++;
+    let result;
+    try { result=await downloadYouTubeVideo(videoId); }
+    catch(error) {
+      console.error("[ORBIT YouTube download]",error?.message||"Download failed");
+      return send(res,502,{error:error?.publicMessage||"This video could not be downloaded. It may be unavailable or the source may not permit downloading."});
+    } finally { youtubeDownloadActive=Math.max(0,youtubeDownloadActive-1); }
+    const ext=path.extname(result.filePath).toLowerCase();
+    const mimeType=ext===".mp4"?"video/mp4":ext===".webm"?"video/webm":ext===".mkv"?"video/x-matroska":"application/octet-stream";
+    const filename=path.basename(result.filePath).replace(/[\r\n"]/g,"_").slice(0,180)||("ORBIT-"+videoId+ext);
+    securityHeaders(res);
+    res.writeHead(200,{"Content-Type":mimeType,"Content-Length":String(result.size),"Content-Disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(filename),"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"});
+    const stream=fs.createReadStream(result.filePath);
+    let cleaned=false;
+    const cleanup=()=>{if(cleaned)return;cleaned=true;stream.destroy();cleanupYouTubeDownload(result.directory).catch(()=>{});};
+    stream.once("error",error=>{console.error("[ORBIT YouTube download stream]",error.message);if(!res.destroyed)res.destroy();cleanup();});
+    stream.once("close",cleanup);res.once("close",cleanup);stream.pipe(res);return;
   }
   if(p==="/api/youtube-search") {
     let cacheKey="",staleEntry=null;
