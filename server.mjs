@@ -358,9 +358,11 @@ async function api(req,res,url) {
     res.writeHead(200,{"Content-Type":mimeType,"Content-Length":String(result.size),"Content-Disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(filename),"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"});
     const stream=fs.createReadStream(result.filePath);
     let cleaned=false;
-    const cleanup=()=>{if(cleaned)return;cleaned=true;stream.destroy();cleanupYouTubeDownload(result.directory).catch(()=>{});};
-    stream.once("error",error=>{console.error("[ORBIT YouTube download stream]",error.message);if(!res.destroyed)res.destroy();cleanup();});
-    stream.once("close",cleanup);res.once("close",cleanup);stream.pipe(res);return;
+    const cleanup=()=>{if(cleaned)return;cleaned=true;cleanupYouTubeDownload(result.directory).catch(error=>console.error("[ORBIT YouTube temp cleanup]",error.message));};
+    stream.once("error",error=>{console.error("[ORBIT YouTube download stream]",error.message);if(!res.destroyed)res.destroy();});
+    stream.once("close",cleanup);
+    res.once("close",()=>{if(!res.writableFinished&&!stream.destroyed)stream.destroy();});
+    stream.pipe(res);return;
   }
   if(p==="/api/youtube-search") {
     let cacheKey="",staleEntry=null;
