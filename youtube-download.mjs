@@ -12,7 +12,7 @@ export function isValidYouTubeVideoId(value) {
 
 export async function cleanupYouTubeDownload(directory) {
   if (typeof directory !== "string" || !directory.startsWith(path.join(os.tmpdir(), "orbit-ytdlp-"))) return;
-  await fs.rm(directory, { recursive: true, force: true });
+  await fs.rm(directory, { recursive: true, force: true, maxRetries: 6, retryDelay: 250 });
 }
 
 export async function downloadYouTubeVideo(videoId, { signal } = {}) {
