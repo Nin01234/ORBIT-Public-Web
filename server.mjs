@@ -381,6 +381,8 @@ async function api(req,res,url) {
 }
 
 const server=http.createServer(async(req,res)=>{
+  // Apply baseline security headers before routing so success, error, static, and proxy responses share them.
+  securityHeaders(res);
   const url=new URL(req.url||"/","http://localhost");
   if(url.pathname==="/healthz"){securityHeaders(res);res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"}).end('{"status":"ok"}');return;}
   if(url.pathname==="/favicon.ico"){
