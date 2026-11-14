@@ -15,11 +15,12 @@ export async function cleanupYouTubeDownload(directory) {
   await fs.rm(directory, { recursive: true, force: true });
 }
 
-export async function downloadYouTubeVideo(videoId) {
+export async function downloadYouTubeVideo(videoId, { signal } = {}) {
   if (!isValidYouTubeVideoId(videoId)) throw new Error("Invalid YouTube video identifier.");
+  if (signal?.aborted) throw new Error("Download cancelled.");
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "orbit-ytdlp-"));
   const outputTemplate = path.join(directory, "%(title).140B [%(id)s].%(ext)s");
-  const command = process.env.ORBIT_PYTHON || (process.platform === "win32" ? "py" : "python3");
+  const command = process.env.ORBIT_PYTHON ? path.resolve(process.cwd(), process.env.ORBIT_PYTHON) : (process.platform === "win32" ? "py" : "python3");
   const args = [
     ...(process.platform === "win32" && !process.env.ORBIT_PYTHON ? ["-3"] : []),
     "-m", "yt_dlp", "--no-playlist", "--max-downloads", "1",
@@ -40,8 +41,11 @@ export async function downloadYouTubeVideo(videoId) {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
         if (error) reject(error); else resolve(value);
       };
+      const abort = () => { try { child.kill(); } catch {} finish(new Error("Download cancelled.")); };
+      signal?.addEventListener("abort", abort, { once: true });
       const timer = setTimeout(() => {
         try { child.kill(); } catch {}
         finish(new Error("Download timed out."));
