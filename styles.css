@@ -137,22 +137,3 @@ body.player-hidden .player-reveal{display:grid}
 .music-card-actions .heart-button.saved{color:var(--lime);}
 .music-fav-icon{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .music-card-actions .heart-button.saved .music-fav-icon{fill:currentColor;}
-
-
-/* ORBIT audio Music playlists */
-.audio-playlist-tools{display:grid;gap:12px;padding:16px;margin:18px 0;background:var(--panel);border:1px solid var(--line);border-radius:10px}
-.audio-playlist-create,.audio-playlist-select-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.audio-playlist-create label{font-size:12px;font-weight:700;color:var(--ink);margin-right:4px}
-.audio-playlist-create input,.audio-playlist-select-row select{min-width:180px;max-width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;font-size:12px}
-.audio-playlist-create button,.audio-playlist-select-row button{border:1px solid var(--tone-879d62);border-radius:6px;background:var(--tone-263b34);color:var(--lime);padding:9px 12px;font-size:11px;font-weight:700}
-.audio-playlist-select-row select{flex:1}
-.audio-playlist-select-row span,.audio-playlist-items small{font-size:10px;color:var(--muted)}
-.audio-playlist-items{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:7px}
-.audio-playlist-items-head{display:flex;justify-content:space-between;gap:10px;font-size:11px}
-.audio-playlist-items-head span{color:var(--muted);font-size:10px}
-.audio-playlist-item{display:flex;align-items:center;gap:8px;min-width:0}
-.audio-playlist-track{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:transparent;color:var(--ink);padding:7px 8px;border-radius:5px;font-size:11px}
-.audio-playlist-track:hover{background:var(--panel2);color:var(--lime)}
-.audio-playlist-remove{border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--muted);width:28px;height:28px}
-.music-card-actions button[data-add-audio-playlist]{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:5px;padding:7px 9px;font-size:10px}
-@media(max-width:600px){.audio-playlist-create,.audio-playlist-select-row{align-items:stretch}.audio-playlist-create input{flex:1;min-width:130px}.audio-playlist-create label{width:100%}.audio-playlist-select-row{display:grid;grid-template-columns:1fr auto}.audio-playlist-select-row span{grid-column:1/-1}}
