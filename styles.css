@@ -137,3 +137,12 @@ body.player-hidden .player-reveal{display:grid}
 .music-card-actions .heart-button.saved{color:var(--lime);}
 .music-fav-icon{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .music-card-actions .heart-button.saved .music-fav-icon{fill:currentColor;}
+
+/* ORBIT Music Video playlist controls */
+.music-playlist-tools{margin:16px 0 22px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.playlist-create,.playlist-select-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}.playlist-create label{width:100%;font-size:12px;font-weight:700;color:var(--ink)}
+.music-playlist-tools input,.music-playlist-tools select{min-width:0;flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink)}
+.music-playlist-tools button,.playlist-playback-controls button{padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink);cursor:pointer}.music-playlist-tools button:hover,.playlist-playback-controls button:hover{border-color:var(--lime);color:var(--lime)}.music-playlist-tools button:disabled{opacity:.45;cursor:not-allowed}
+#music-playlist-count,.music-playlist-items-head span{font-size:11px;color:var(--muted)}.music-playlist-items{display:grid;gap:6px}.music-playlist-items-head{display:flex;justify-content:space-between;align-items:center;padding:8px 0}.music-playlist-item{display:flex;align-items:center;gap:8px;padding:4px;border:1px solid var(--line);border-radius:6px}.playlist-video-play{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0!important;background:transparent!important}.playlist-video-remove{font-size:10px;padding:6px 8px!important}
+.youtube-player-subbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 14px;background:rgba(13,21,30,.92);font-size:12px;border:1px solid rgba(255,255,255,.06);border-top:none}.youtube-player-subbar>span:first-child{min-width:0;flex:1}.playlist-playback-position{color:var(--muted);white-space:nowrap}.playlist-playback-controls{display:flex;gap:6px}
+@media(max-width:600px){.playlist-create,.playlist-select-row{align-items:stretch}.playlist-create input,.playlist-select-row select{width:100%;flex-basis:100%}.youtube-player-subbar{align-items:flex-start}.playlist-playback-controls{width:100%}.playlist-playback-controls button{flex:1}}

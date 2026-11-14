@@ -54,6 +54,7 @@ test("security headers include a restrictive CSP and HSTS only in production", (
   assert.match(local["Content-Security-Policy"], /default-src 'self'/);
   assert.match(local["Content-Security-Policy"], /object-src 'none'/);
   assert.match(local["Content-Security-Policy"], /frame-ancestors 'self'/);
+  assert.match(local["Content-Security-Policy"], /script-src[^;]*https:\/\/www\.youtube\.com/);
   assert.doesNotMatch(local["Content-Security-Policy"], /unsafe-eval/);
   assert.equal("Strict-Transport-Security" in local, false);
   assert.equal(production["Strict-Transport-Security"], "max-age=31536000; includeSubDomains");

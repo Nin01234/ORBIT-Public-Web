@@ -6,7 +6,7 @@ const CONTENT_SECURITY_POLICY = [
   "object-src 'none'",
   "frame-ancestors 'self'",
   "form-action 'self' https://accounts.spotify.com",
-  "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net",
+  "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://www.youtube.com",
   "script-src-attr 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
