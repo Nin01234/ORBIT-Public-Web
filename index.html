@@ -120,6 +120,11 @@
     <div class="content-toolbar"><div class="filter-pills">
       <button class="pill active" data-audio-music="afrobeats">Afrobeats</button><button class="pill" data-audio-music="trending">Trending</button><button class="pill" data-audio-music="gospel">Gospel</button><button class="pill" data-audio-music="hip hop">Hip-hop</button><button class="pill" data-audio-music="jazz">Jazz</button><button class="pill" data-audio-music="electronic">Electronic</button>
     </div><input class="inline-search" id="audio-music-search" placeholder="Search songs or artists..."></div>
+    <section class="audio-playlist-tools" aria-label="Music playlists">
+      <div class="audio-playlist-create"><label for="audio-playlist-name">Your music playlists</label><input id="audio-playlist-name" type="text" maxlength="60" placeholder="New playlist name"><button type="button" id="audio-playlist-create">Create playlist</button></div>
+      <div class="audio-playlist-select-row"><select id="audio-playlist-select" aria-label="Select music playlist"><option value="">Select a playlist</option></select><button type="button" id="audio-playlist-play" disabled>Play playlist</button><span id="audio-playlist-count">0 playlists</span></div>
+      <div id="audio-playlist-items" class="audio-playlist-items"><small>Create a playlist, then add tracks from the music results.</small></div>
+    </section>
     <div class="music-player-status" id="audio-music-status"><span class="music-status-mark">&#9835;</span><div><b>Audio-only listening</b><small>Choose a track below. Full audio plays in ORBIT's player bar.</small></div></div>
     <div class="section-heading"><div><h2>Discover music</h2><p>Search across connected music catalogues in one place.</p></div><span class="catalogue-note" id="music-provider-status">Connecting music sources&hellip;</span></div>
     <div class="music-provider-row" id="music-provider-filters" aria-label="Filter music providers">
