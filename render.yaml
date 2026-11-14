@@ -3,9 +3,11 @@ services:
     name: orbit-public-web
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: python3 -m venv .venv && .venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -r requirements-download.txt && npm install
     startCommand: npm start
     healthCheckPath: /healthz
     envVars:
       - key: NODE_VERSION
         value: 22
+      - key: ORBIT_PYTHON
+        value: .venv/bin/python
