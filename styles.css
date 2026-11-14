@@ -146,3 +146,19 @@ body.player-hidden .player-reveal{display:grid}
 #music-playlist-count,.music-playlist-items-head span{font-size:11px;color:var(--muted)}.music-playlist-items{display:grid;gap:6px}.music-playlist-items-head{display:flex;justify-content:space-between;align-items:center;padding:8px 0}.music-playlist-item{display:flex;align-items:center;gap:8px;padding:4px;border:1px solid var(--line);border-radius:6px}.playlist-video-play{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0!important;background:transparent!important}.playlist-video-remove{font-size:10px;padding:6px 8px!important}
 .youtube-player-subbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 14px;background:rgba(13,21,30,.92);font-size:12px;border:1px solid rgba(255,255,255,.06);border-top:none}.youtube-player-subbar>span:first-child{min-width:0;flex:1}.playlist-playback-position{color:var(--muted);white-space:nowrap}.playlist-playback-controls{display:flex;gap:6px}
 @media(max-width:600px){.playlist-create,.playlist-select-row{align-items:stretch}.playlist-create input,.playlist-select-row select{width:100%;flex-basis:100%}.youtube-player-subbar{align-items:flex-start}.playlist-playback-controls{width:100%}.playlist-playback-controls button{flex:1}}
+
+
+/* ORBIT audio Music playlists */
+.audio-playlist-tools{display:grid;gap:12px;padding:16px;margin:18px 0;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.audio-playlist-create,.audio-playlist-select-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.audio-playlist-create label{font-size:12px;font-weight:700;color:var(--ink);margin-right:4px}
+.audio-playlist-create input,.audio-playlist-select-row select{min-width:180px;max-width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;font-size:12px}
+.audio-playlist-create button,.audio-playlist-select-row button,.audio-playlist-items-head button{border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink);padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.audio-playlist-select-row button:disabled{opacity:.45;cursor:not-allowed}.audio-playlist-select-row select{flex:1}
+.audio-playlist-select-row span,.audio-playlist-items small{font-size:10px;color:var(--muted)}
+.audio-playlist-items{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:7px}
+.audio-playlist-items-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px}.audio-playlist-items-head span{color:var(--muted);font-size:10px}
+.audio-playlist-item{display:flex;align-items:center;gap:8px;min-width:0}.audio-playlist-track{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:transparent;color:var(--ink);padding:7px 8px;border-radius:5px;font-size:11px}
+.audio-playlist-track:hover{background:var(--panel2);color:var(--lime)}.audio-playlist-remove{border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--muted);width:28px;height:28px;cursor:pointer}
+.music-card-actions button[data-add-audio-playlist]{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:5px;padding:7px 9px;font-size:10px}
+@media(max-width:600px){.audio-playlist-create,.audio-playlist-select-row{align-items:stretch}.audio-playlist-create input{flex:1;min-width:130px}.audio-playlist-create label{width:100%}.audio-playlist-select-row{display:grid;grid-template-columns:1fr auto}.audio-playlist-select-row span{grid-column:1/-1}}

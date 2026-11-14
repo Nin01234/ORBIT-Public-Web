@@ -543,6 +543,23 @@ function spotifySaveCurrent(){
 }
 function spotifyPlaySaved(i){const v=spotifySavedItems()[i];if(v){window.orbitCurrentSpotifyItem=v;spotifyEmbed(v);$("#spotify-orbit-link").value=v.url;}}
 function spotifyRemoveSaved(i){const list=spotifySavedItems();list.splice(i,1);localStorage.setItem("orbit-spotify-saved",JSON.stringify(list));spotifyRenderSaved();notify("Removed from saved Spotify music.");}
+const AUDIO_PLAYLIST_KEY="orbit-audio-music-playlists-v1";
+let audioMusicPlaylists=(()=>{try{const saved=JSON.parse(localStorage.getItem(AUDIO_PLAYLIST_KEY)||"[]");return Array.isArray(saved)?saved.filter(p=>p&&typeof p.id==="string"&&typeof p.name==="string"&&Array.isArray(p.tracks)):[];}catch{return [];}})();
+let selectedAudioPlaylistId="",activeAudioPlaylistId="";
+function saveAudioMusicPlaylists(){try{localStorage.setItem(AUDIO_PLAYLIST_KEY,JSON.stringify(audioMusicPlaylists));}catch{notify("Could not save music playlists in this browser.");}}
+function selectedAudioPlaylist(){return audioMusicPlaylists.find(p=>p.id===selectedAudioPlaylistId)||null;}
+function renderAudioMusicPlaylists(){
+ const select=$("#audio-playlist-select"),items=$("#audio-playlist-items"),play=$("#audio-playlist-play"),count=$("#audio-playlist-count");if(!select||!items)return;
+ if(!audioMusicPlaylists.some(p=>p.id===selectedAudioPlaylistId))selectedAudioPlaylistId=audioMusicPlaylists[0]?.id||"";
+ select.innerHTML='<option value="">Select a playlist</option>'+audioMusicPlaylists.map(p=>'<option value="'+esc(p.id)+'" '+(p.id===selectedAudioPlaylistId?'selected':'')+'>'+esc(p.name)+' ('+p.tracks.length+')</option>').join("");
+ const playlist=selectedAudioPlaylist();if(play)play.disabled=!playlist?.tracks.length;if(count)count.textContent=audioMusicPlaylists.length+" playlist"+(audioMusicPlaylists.length===1?"":"s");
+ if(!playlist){items.innerHTML='<small>Create a playlist, then add tracks from the music results.</small>';return;}
+ items.innerHTML='<div class="audio-playlist-items-head"><b>'+esc(playlist.name)+'</b><span>'+playlist.tracks.length+' tracks</span><button type="button" data-audio-playlist-delete>Delete playlist</button></div>'+(playlist.tracks.length?playlist.tracks.map((t,i)=>'<div class="audio-playlist-item"><button type="button" class="audio-playlist-track" data-audio-playlist-index="'+i+'">'+(i+1)+'. '+esc(t.title)+' — '+esc(t.artist||"Artist")+'</button><button type="button" class="audio-playlist-remove" data-audio-playlist-remove="'+i+'" aria-label="Remove '+esc(t.title)+'">×</button></div>').join(""):'<small>No tracks yet. Add tracks from the results below.</small>');
+}
+function createAudioMusicPlaylist(){const input=$("#audio-playlist-name"),name=input?.value.trim();if(!name){notify("Enter a playlist name first.");input?.focus();return;}const p={id:"amp-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7),name:name.slice(0,60),tracks:[]};audioMusicPlaylists.push(p);selectedAudioPlaylistId=p.id;saveAudioMusicPlaylists();renderAudioMusicPlaylists();input.value="";notify("Music playlist created.");}
+function deleteAudioMusicPlaylist(){const p=selectedAudioPlaylist();if(!p)return;if(!window.confirm('Delete playlist "'+p.name+'"?'))return;audioMusicPlaylists=audioMusicPlaylists.filter(x=>x.id!==p.id);selectedAudioPlaylistId="";saveAudioMusicPlaylists();renderAudioMusicPlaylists();if(activeAudioPlaylistId===p.id){activeAudioPlaylistId="";musicQueue=[];musicQueueIndex=-1;}notify("Music playlist deleted.");}
+function addAudioTrackToPlaylist(id){const track=musicTrackCache.get(String(id))||musicFavs().find(x=>String(x.id)===String(id)),p=selectedAudioPlaylist();if(!track){notify("This track is no longer available. Search for it again.");return;}if(!p){notify("Create or select a music playlist first.");return;}if(p.tracks.some(t=>String(t.id)===String(track.id))){notify("That track is already in this playlist.");return;}p.tracks.push(track);saveAudioMusicPlaylists();renderAudioMusicPlaylists();notify("Added to "+p.name+".");}
+function playAudioMusicPlaylist(index=0){const p=selectedAudioPlaylist();if(!p?.tracks.length){notify("This playlist has no tracks yet.");return;}activeAudioPlaylistId=p.id;musicQueue=[...p.tracks];musicQueue.forEach(t=>musicTrackCache.set(String(t.id),t));musicQueueIndex=Math.max(0,Math.min(index,musicQueue.length-1));playAudioTrack(musicQueue[musicQueueIndex].id,true);}
 function musicProviderDisplayName(source){
   return ({"Audius":"Spotify","Jamendo":"Apple Music","YouTube Music":"Audiomark"})[source] || source || "Audio track";
 }
@@ -557,7 +574,7 @@ function musicCard(track){
   const pid=track.providerId||track.id.replace(/^audius:/,"");
   const streamUrl="/api/audius-stream?id="+encodeURIComponent(pid);
   const download=track.source==="Audius"?`<button data-download-track="${esc(track.id)}" data-stream-url="${esc(streamUrl)}" title="Save for offline playback">? Save offline</button>`:"";
-  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(musicProviderDisplayName(track.source)||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>':'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>'}</button></div></div></article>`;
+  return `<article class="media-card music-audio-card"><img class="media-cover" src="${esc(track.artwork||"")}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/icons/orbit-192.png'"><h3 title="${esc(track.title)}">${esc(track.title)}</h3><p>${esc(track.artist||"Independent artist")}  -  ${musicDuration(track.duration)}</p><div class="media-actions"><small>${esc(musicProviderDisplayName(track.source)||track.genre||"Audio track")}${track.previewOnly?" ? Preview":""}</small><div class="music-card-actions"><button data-audio-play="${esc(track.id)}">${playLabel}</button><button data-add-audio-playlist="${esc(track.id)}">+ Playlist</button>${download}<button class="heart-button ${saved?"saved":""}" data-audio-fav="${esc(track.id)}" title="Save favourite">${saved?'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>':'<svg class="music-fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>'}</button></div></div></article>`;
 }
 async function loadAudioMusic(term="afrobeats"){
   const host=$("#audio-music-results");
@@ -576,7 +593,7 @@ async function loadAudioMusic(term="afrobeats"){
   if(!connected.length)connected.push("No providers available");
   const waiting=["SoundCloud","Audiomack"];
   $("#music-provider-status").textContent="Connected: "+connected.join(" · ")+" | Setup needed: "+waiting.join(" · ");
-  renderMusicResults();
+  renderMusicResults();renderAudioMusicPlaylists();
   $("#audio-music-status").innerHTML='<span class="music-status-mark">&#9835;</span><div><b>Audio-only listening</b><small>'+musicSearchResults.length+' matching tracks from '+connected.join(", ")+'. Audiomark plays through ORBIT’s audio player without a video window.</small></div>';
 }
 function toggleMusicFav(track){
@@ -611,13 +628,13 @@ async function refreshYouTubeMusicStream(track,resumeAt=0){
   })();
   try{return await youtubeMusicRecoveryPromise;}finally{youtubeMusicRecoveryPromise=null;}
 }
-function playAudioTrack(id){
+function playAudioTrack(id,preserveQueue=false){
   const track=musicTrackCache.get(String(id))||musicFavs().find(x=>String(x.id)===String(id));
   if(!track){notify("This track is no longer available.");return;}
   const failedUntil=youtubeMusicFailureUntil.get(String(track.id))||0;
   if(track.source==="YouTube Music"&&failedUntil>Date.now()){const seconds=Math.ceil((failedUntil-Date.now())/1000);$("#player-state").textContent="YouTube Music is temporarily unavailable. Try again in "+seconds+" seconds, or choose an Audius track.";notify("YouTube Music is temporarily unavailable. Please try again shortly.");return;}
   clearYoutubePlayer();currentStation=null;currentOfflineAudioId=null;currentMusicTrack=track;
-  musicQueue=[...musicTrackCache.values()];musicQueueIndex=musicQueue.findIndex(x=>String(x.id)===String(track.id));
+  if(!preserveQueue){activeAudioPlaylistId="";musicQueue=[...musicTrackCache.values()];musicQueueIndex=musicQueue.findIndex(x=>String(x.id)===String(track.id));}
   youtubeMusicRecoveryForTrack=null;
   audio.pause();audio.removeAttribute("src");audio.load();
   const startPlayback=async()=>{
@@ -662,7 +679,7 @@ async function stepMusic(direction){
     notify("No downloaded music is available.");return;
   }
   if(!musicQueue.length||musicQueueIndex<0){notify("No downloaded music or queued music is available.");return;}
-  const n=musicQueueIndex+direction;if(n<0||n>=musicQueue.length){notify("No more tracks in this list.");return;}playAudioTrack(musicQueue[n].id);
+  const n=musicQueueIndex+direction;if(n<0||n>=musicQueue.length){notify("No more tracks in this list.");return;}playAudioTrack(musicQueue[n].id,true);
 }
 function renderFavouriteMusic(){
   const host=$("#favorite-music-results");if(!host)return;
@@ -1316,6 +1333,10 @@ function setupEvents(){
   document.addEventListener("click",e=>{
     const play=e.target.closest("[data-play]");if(play){playStation(play.dataset.play);return;}
     const fav=e.target.closest("[data-fav]");if(fav){toggleFav(fav.dataset.fav);return;}
+    const addAudioPlaylist=e.target.closest("[data-add-audio-playlist]");if(addAudioPlaylist){addAudioTrackToPlaylist(addAudioPlaylist.dataset.addAudioPlaylist);return;}
+    const audioPlaylistDelete=e.target.closest("[data-audio-playlist-delete]");if(audioPlaylistDelete){deleteAudioMusicPlaylist();return;}
+    const audioPlaylistRemove=e.target.closest("[data-audio-playlist-remove]");if(audioPlaylistRemove){const p=selectedAudioPlaylist();if(p){p.tracks.splice(Number(audioPlaylistRemove.dataset.audioPlaylistRemove),1);saveAudioMusicPlaylists();renderAudioMusicPlaylists();}return;}
+    const audioPlaylistTrack=e.target.closest("[data-audio-playlist-index]");if(audioPlaylistTrack){playAudioMusicPlaylist(Number(audioPlaylistTrack.dataset.audioPlaylistIndex));return;}
     const audioPlay=e.target.closest("[data-audio-play]");if(audioPlay){playAudioTrack(audioPlay.dataset.audioPlay);return;}
     const audioFav=e.target.closest("[data-audio-fav]");if(audioFav){toggleMusicFav(musicTrackCache.get(String(audioFav.dataset.audioFav))||musicFavs().find(x=>String(x.id)===String(audioFav.dataset.audioFav)));return;}
     const film=e.target.closest("[data-film-play]");if(film){playArchiveFilm(film.dataset.filmPlay,film.dataset.title);return;}
@@ -1360,6 +1381,10 @@ function setupEvents(){
   $("#podcast-search").addEventListener("keydown",e=>{if(e.key==="Enter")loadItunes("podcasts",e.target.value.trim()).catch(()=>notify("Podcast search unavailable."));});
   $("#music-video-search").addEventListener("keydown",e=>{if(e.key==="Enter")loadYouTubeMusic(e.target.value.trim()).catch(()=>notify("Music video search unavailable."));});
   $("#music-playlist-create")?.addEventListener("click",createMusicVideoPlaylist);$("#music-playlist-name")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();createMusicVideoPlaylist();}});$("#music-playlist-select")?.addEventListener("change",e=>{selectedMusicPlaylistId=e.target.value;renderMusicVideoPlaylists();});$("#music-playlist-play")?.addEventListener("click",()=>playMusicVideoPlaylist(0));renderMusicVideoPlaylists();
+  $("#audio-playlist-create")?.addEventListener("click",createAudioMusicPlaylist);
+  $("#audio-playlist-name")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();createAudioMusicPlaylist();}});
+  $("#audio-playlist-select")?.addEventListener("change",e=>{selectedAudioPlaylistId=e.target.value;renderAudioMusicPlaylists();});
+  $("#audio-playlist-play")?.addEventListener("click",()=>playAudioMusicPlaylist(0));
   $("#audio-music-search").addEventListener("keydown",e=>{if(e.key==="Enter"){$("#audio-music-results").dataset.loaded="";loadAudioMusic(e.target.value.trim()).then(()=>$("#audio-music-results").dataset.loaded="1").catch(()=>notify("Music search unavailable."));}});
   $("#movie-search").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();const active=document.querySelector("#view-movies .pill.active")?.dataset.movie;loadArchiveFilms(active==="public-domain"?"public-domain:"+q:q).then(()=>$("#movie-results").dataset.loaded="1").catch(()=>notify("Movie search is temporarily unavailable."));}});
   $("#book-search").addEventListener("keydown",e=>{if(e.key==="Enter")loadBooks(e.target.value.trim());});
