@@ -789,6 +789,24 @@ function playArchiveFilm(id,title){
   panel.scrollIntoView({behavior:"smooth",block:"nearest"});
   $("#film-result-note").textContent="Now watching  -  "+title;
 }
+async function downloadYouTubeVideoFromWeb(videoId,title,button){
+  if(!/^[A-Za-z0-9_-]{11}$/.test(String(videoId||""))){notify("This video identifier is not valid.");return;}
+  const approved=window.confirm("Only continue if you own this video or have permission to download it, and the source's terms allow the download. ORBIT cannot authorize copyrighted downloads. Continue?");
+  if(!approved)return;
+  const original=button?.textContent||"Download";
+  if(button){button.disabled=true;button.textContent="Preparing…";}
+  try{
+    const response=await fetch("/api/youtube-download?videoId="+encodeURIComponent(videoId)+"&rightsConfirmed=1",{signal:AbortSignal.timeout(8*60*1000)});
+    if(!response.ok){let message="Download unavailable.";try{message=(await response.json()).error||message;}catch{}throw new Error(message);}
+    const blob=await response.blob();if(!blob.size)throw new Error("The download returned an empty file.");
+    const disposition=response.headers.get("content-disposition")||"",encoded=disposition.match(/filename\*=UTF-8''([^;]+)/i);
+    let filename="ORBIT-"+videoId+".mp4";if(encoded){try{filename=decodeURIComponent(encoded[1]);}catch{}}
+    const objectUrl=URL.createObjectURL(blob),anchor=document.createElement("a");
+    anchor.href=objectUrl;anchor.download=filename;document.body.appendChild(anchor);anchor.click();anchor.remove();
+    setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);notify("Download ready: "+filename);
+  }catch(error){notify(error?.message||"Could not download this video.");}
+  finally{if(button){button.disabled=false;button.textContent=original;}}
+}
 async function loadYouTubeMusic(term="trending music"){
   const host=$("#music-video-results");host.innerHTML='<div class="loading-card">Finding music videos...</div>';
   const query=term.trim()||"trending music";
@@ -800,7 +818,7 @@ async function loadYouTubeMusic(term="trending music"){
   host.innerHTML=results.map(x=>{
     const title=x.title||"Untitled track",artist=x.author||"Artist";
     const thumb=x.thumbnail||"";
-    return '<article class="media-card music-video-card"><img class="media-cover" src="'+esc(thumb)+'" alt="" loading="lazy"><h3 title="'+esc(title)+'">'+esc(title)+'</h3><p>'+esc(artist)+' - '+esc(x.length||"")+'</p><div class="media-actions"><small>Music video</small><button data-youtube="'+esc(x.videoId)+'" data-title="'+esc(title)+'" data-artist="'+esc(artist)+'">Play video</button></div></article>';
+    return '<article class="media-card music-video-card"><img class="media-cover" src="'+esc(thumb)+'" alt="" loading="lazy"><h3 title="'+esc(title)+'">'+esc(title)+'</h3><p>'+esc(artist)+' - '+esc(x.length||"")+'</p><div class="media-actions"><small>Music video</small><button data-youtube="'+esc(x.videoId)+'" data-title="'+esc(title)+'" data-artist="'+esc(artist)+'">Play video</button><button data-youtube-download="'+esc(x.videoId)+'" data-title="'+esc(title)+'" type="button">Download</button></div></article>';
   }).join("");
 }
 function playYouTubeAlternate(id,title){if(!/^[A-Za-z0-9_-]{11}$/.test(id))return;audio.pause();currentYoutubeId=null;const panel=$("#youtube-player-panel");panel.innerHTML='<iframe class="youtube-embed" src="https://inv.nadeko.net/embed/'+encodeURIComponent(id)+'?autoplay=1" title="'+esc(title)+' alternate player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';setPlayer(title,"Alternate community video player","Trying alternate source");panel.scrollIntoView({behavior:"smooth",block:"nearest"});}
@@ -1318,6 +1336,7 @@ function setupEvents(){
     const filmDetailBack=e.target.closest("[data-film-detail-back]");if(filmDetailBack){closeMobileMovieDetail();return;}
     const tmdbOpen=e.target.closest("[data-tmdb-open]");if(tmdbOpen){openTmdbMovie(tmdbOpen.dataset.tmdbOpen);return;}
     const ytAlt=e.target.closest("[data-youtube-alt]");if(ytAlt){playYouTubeAlternate(ytAlt.dataset.youtubeAlt,ytAlt.dataset.title);return;}
+    const ytDownload=e.target.closest("[data-youtube-download]");if(ytDownload){downloadYouTubeVideoFromWeb(ytDownload.dataset.youtubeDownload,ytDownload.dataset.title,ytDownload);return;}
     const yt=e.target.closest("[data-youtube]");if(yt){playYouTubeVideo(yt.dataset.youtube,yt.dataset.title,yt.dataset.artist);return;}
     const podcast=e.target.closest("[data-podcast]");if(podcast){loadPodcastEpisodes(podcast.dataset.podcast,podcast.dataset.title);return;}
     const podcastPlay=e.target.closest("[data-podcast-play]");if(podcastPlay){playPodcastEpisode(podcastPlay.dataset.podcastPlay);return;}
