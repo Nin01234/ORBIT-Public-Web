@@ -29,3 +29,10 @@ Browser radio and TV playback uses provider stream URLs directly. Some third-par
 - Third-party service terms, licensing, attribution and quotas still need review.
 
 Do not expose the original desktop server or its offline-file endpoints to the internet. Do not put API secrets in frontend JavaScript or commit .env files.
+
+
+## YouTube video downloads (test branch)
+
+The public web test adds a server-side download endpoint to the Music Videos section. Visitors do not install yt-dlp or FFmpeg: the Render service installs yt-dlp into a private Python virtual environment and installs FFmpeg from `apt.txt`. Downloads are streamed to the visitor's browser and temporary server files are deleted after transfer.
+
+The endpoint accepts only an 11-character YouTube video ID (not arbitrary URLs), limits concurrent jobs to two, applies the existing per-IP API rate limiter, caps requested media size to 250 MB, and times out stalled downloads. It does not use browser cookies or attempt to access private, paid, DRM-protected or otherwise restricted content. Users must confirm that they own the video or have permission and that downloading is allowed by the source terms. Hosting providers may impose disk, CPU, bandwidth and execution limits; production capacity and platform terms must be reviewed before enabling this publicly.
